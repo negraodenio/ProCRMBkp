@@ -1,42 +1,52 @@
-# Next.js Template with Shadcn/UI
+# ProCRM - Sistema de Gestão de Relacionamento com Clientes
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app), pre-configured with:
+Este é um projeto [Next.js](https://nextjs.org) desenvolvido com [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app), pré-configurado com:
 
 - TypeScript
 - Tailwind CSS
 - Shadcn/UI components
 - Lucide React icons
-- React Hook Form with Zod validation
+- React Hook Form com Zod validation
 - Sonner toast notifications
-- Recharts for data visualization
+- Recharts para visualização de dados
 
-## Getting Started
+## Funcionalidades do CRM
 
-First, run the development server:
+- Dashboard com métricas de desempenho
+- Gerenciamento de clientes
+- Gerenciamento de leads
+- Controle de contatos
+- Registro de atividades
+- Relatórios e análises
+- Configurações personalizadas
+
+## Primeiros Passos
+
+Primeiro, execute o servidor de desenvolvimento:
 
 ```bash
 npm run dev
-# or
+# ou
 yarn dev
-# or
+# ou
 pnpm dev
-# or
+# ou
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra [http://localhost:3000](http://localhost:3000) com seu navegador para ver o resultado.
 
-You can start editing the page by modifying `src/app/page.tsx`. The page auto-updates as you edit the file.
+Você pode começar editando `src/app/page.tsx`. A página é atualizada automaticamente conforme você edita o arquivo.
 
-## Learn More
+## Aprenda Mais
 
-To learn more about Next.js, take a look at the following resources:
+Para aprender mais sobre Next.js, dê uma olhada nos seguintes recursos:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Documentação do Next.js](https://nextjs.org/docs) - aprenda sobre as funcionalidades e API do Next.js.
+- [Aprenda Next.js](https://nextjs.org/learn) - um tutorial interativo do Next.js.
 
-## Deploy on Vercel
+## Deploy no Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+A maneira mais fácil de fazer o deploy do seu aplicativo Next.js é usar a [Plataforma Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) dos criadores do Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Confira nossa [documentação de deploy do Next.js](https://nextjs.org/docs/app/building-your-application/deploying) para mais detalhes.
