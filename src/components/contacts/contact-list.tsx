@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search, MoreHorizontal, Phone, Mail, Building } from "lucide-react";
+import { Plus, Search, MoreHorizontal, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,62 +20,35 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-const contacts = [
-  {
-    id: "1",
-    name: "João Silva",
-    company: "Empresa ABC Ltda",
-    position: "Diretor de Vendas",
-    email: "joao@empresaabc.com.br",
-    phone: "(11) 99999-9999",
-    avatar: "",
-  },
-  {
-    id: "2",
-    name: "Maria Oliveira",
-    company: "Tech Solutions SA",
-    position: "Gerente de Marketing",
-    email: "maria@techsolutions.com.br",
-    phone: "(21) 98888-8888",
-    avatar: "",
-  },
-  {
-    id: "3",
-    name: "Carlos Santos",
-    company: "Inovação Digital",
-    position: "CEO",
-    email: "carlos@inovacaodigital.com.br",
-    phone: "(31) 97777-7777",
-    avatar: "",
-  },
-  {
-    id: "4",
-    name: "Ana Costa",
-    company: "Global Services",
-    position: "Coordenadora Comercial",
-    email: "ana@globalservices.com.br",
-    phone: "(51) 96666-6666",
-    avatar: "",
-  },
-];
+export interface Contact {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  company: string | null;
+  avatar_url: string | null; // Changed from avatar to avatar_url
+  type: string | null;      // lead, client
+  status: string | null;    // new, contacted
+}
 
-export function ContactList() {
+interface ContactListProps {
+  contacts: Contact[];
+}
+
+export function ContactList({ contacts }: ContactListProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredContacts = contacts.filter(contact =>
     contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contact.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contact.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (contact.company && contact.company.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (contact.email && contact.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Contatos</h1>
-          <p className="text-muted-foreground">
-            Gerencie seus contatos e relacionamentos
-          </p>
+          {/* Header Content */}
         </div>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
@@ -101,7 +74,7 @@ export function ContactList() {
             <TableRow>
               <TableHead>Contato</TableHead>
               <TableHead>Empresa</TableHead>
-              <TableHead>Cargo</TableHead>
+              {/* Removed Cargo/Position Column */}
               <TableHead>Email</TableHead>
               <TableHead>Telefone</TableHead>
               <TableHead className="text-right">Ações</TableHead>
@@ -113,28 +86,28 @@ export function ContactList() {
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      <AvatarImage src={contact.avatar} alt={contact.name} />
+                      <AvatarImage src={contact.avatar_url || ''} alt={contact.name} />
                       <AvatarFallback>
-                        {contact.name.split(" ").map(n => n[0]).join("")}
+                        {contact.name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <div className="font-medium">{contact.name}</div>
+                      <div className="text-xs text-muted-foreground">{contact.type}</div>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>{contact.company}</TableCell>
-                <TableCell>{contact.position}</TableCell>
+                <TableCell>{contact.company || '-'}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-muted-foreground" />
-                    {contact.email}
+                    {contact.email || '-'}
                   </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-muted-foreground" />
-                    {contact.phone}
+                    {contact.phone || '-'}
                   </div>
                 </TableCell>
                 <TableCell className="text-right">

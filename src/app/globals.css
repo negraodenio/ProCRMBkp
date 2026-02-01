@@ -55,8 +55,15 @@
 
     --chart-5: 27 87% 67%;
 
-    --radius: 0.5rem
-  ;
+    --radius: 0.5rem;
+    
+    /* Semantic Colors - UI/UX Improvement */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 0%;
+    --info: 220 90% 56%;
+    --info-foreground: 0 0% 100%;
 
     --sidebar-background: 0 0% 98%;
 
