@@ -10,6 +10,9 @@ import {
     ArrowRight,
     Loader2,
     Sparkles,
+    ShieldAlert,
+    Mic,
+    Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,6 +38,7 @@ import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { generateAIContent } from "@/app/actions/ai-actions";
 
 interface AITool {
     id: string;
@@ -108,6 +112,36 @@ const AI_TOOLS: AITool[] = [
         color: "text-orange-500",
         borderColor: "border-t-orange-400",
     },
+    {
+        id: "objection-handler",
+        title: "Quebra de Objeção",
+        subtitle: "Superar objeções do cliente",
+        description: "Gera respostas persuasivas para objeções comuns",
+        buttonText: "Resolver Objeção",
+        icon: ShieldAlert,
+        color: "text-red-600",
+        borderColor: "border-t-red-500",
+    },
+    {
+        id: "sales-script",
+        title: "Script de Vendas",
+        subtitle: "Roteiro para ligação/reunião",
+        description: "Cria scripts personalizados para abordagem",
+        buttonText: "Gerar Script",
+        icon: Mic,
+        color: "text-indigo-600",
+        borderColor: "border-t-indigo-500",
+    },
+    {
+        id: "meeting-prep",
+        title: "Preparar Reunião",
+        subtitle: "Briefing completo",
+        description: "Prepara pauta, riscos e objetivos para reunião",
+        buttonText: "Criar Briefing",
+        icon: Briefcase,
+        color: "text-emerald-600",
+        borderColor: "border-t-emerald-500",
+    },
 ];
 
 export default function AIToolsPage() {
@@ -137,155 +171,30 @@ export default function AIToolsPage() {
     }
 
     async function executeAI(toolId: string) {
+        if (!selectedLead) {
+            toast.error("Selecione um lead primeiro");
+            return;
+        }
+
         setLoading(true);
         setResult("");
 
-        // Simulate AI processing
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-
-        const leadName = leads.find((l) => l.id === selectedLead)?.name || "Cliente";
-
-        switch (toolId) {
-            case "generate-proposal":
-                setResult(`
-# Proposta Comercial para ${leadName}
-
-## Escopo do Projeto
-- Desenvolvimento de sistema personalizado
-- Integração com APIs existentes
-- Suporte técnico por 12 meses
-
-## Investimento
-**R$ 45.000,00** em até 6x
-
-## Prazo de Entrega
-90 dias úteis
-
-## Garantia
-12 meses de garantia completa
-        `);
-                break;
-            case "predictive-analysis":
-                setResult(`
-## Análise de Probabilidade de Fechamento
-
-**Lead:** ${leadName}
-**Score de Conversão:** 78%
-
-### Fatores Positivos
-✅ Engajamento alto nas últimas interações
-✅ Perfil compatível com clientes convertidos
-✅ Orçamento adequado ao ticket médio
-
-### Fatores de Atenção
-⚠️ Tempo médio de decisão: 15 dias
-⚠️ Concorrência identificada
-
-### Recomendação
-O lead está pronto para receber uma proposta comercial!
-        `);
-                break;
-            case "categorize-lead":
-                setResult(`
-## Categorização Automática
-
-**Lead:** ${leadName}
-
-### Classificação: 🔥 HOT LEAD
-
-**Potencial:** Alto
-**Prioridade:** Urgente
-**Ticket Estimado:** R$ 25.000 - R$ 50.000
-
-### Próximos Passos
-1. Agendar reunião de apresentação
-2. Preparar proposta personalizada
-3. Follow-up em 48h
-        `);
-                break;
-            case "generate-email":
-                setResult(`
-**Assunto:** Próximos passos - ${leadName}
-
-Olá ${leadName},
-
-Espero que esteja bem!
-
-Gostaria de acompanhar nosso último contato e verificar se há algo mais que possamos esclarecer sobre nossa proposta.
-
-Estou à disposição para uma reunião rápida esta semana, caso prefira discutir os detalhes pessoalmente.
-
-Aguardo seu retorno!
-
-Atenciosamente,
-Equipe CRM IA
-        `);
-                break;
-            case "sentiment-analysis":
-                setResult(`
-## Análise de Sentimento - ${leadName}
-
-### Sentimento Geral: 😊 Positivo (82%)
-
-**Última Interação:** Entusiasmo demonstrado
-**Tendência:** Crescente nas últimas 3 conversas
-
-### Indicadores
-- Tempo de resposta: Rápido (< 2h)
-- Tom das mensagens: Cordial e interessado
-- Palavras-chave positivas: "interessante", "gostei", "quando podemos"
-
-### Recomendação
-Momento ideal para avançar na negociação!
-        `);
-                break;
-            case "next-action":
-                setResult(`
-## Próxima Ação Sugerida para ${leadName}
-
-### ⚡ Ação Recomendada: Enviar Proposta
-
-**Por quê?**
-- Lead qualificado há mais de 7 dias
-- Demonstrou interesse em reunião anterior
-- Score de conversão acima de 75%
-
-### Passos Sugeridos
-1. ✍️ Preparar proposta personalizada
-2. 📞 Ligar para confirmar recebimento
-3. 📅 Agendar follow-up em 3 dias
-
-### Urgência: 🔴 Alta
-        `);
-                break;
-        }
-
-        setLoading(false);
-
-        // Log to AI operations table
         try {
-            const { data: profile } = await supabase
-                .from("profiles")
-                .select("id, organization_id")
-                .single();
+            const response = await generateAIContent(toolId, selectedLead);
 
-            if (profile) {
-                await supabase.from("ai_operations").insert({
-                    organization_id: profile.organization_id,
-                    user_id: profile.id,
-                    tool_used: toolId,
-                    target_entity_id: selectedLead || null,
-                    input_params: { leadId: selectedLead },
-                    output_result: { result: result.substring(0, 500) },
-                    model_used: "gpt-4o",
-                    tokens_used: Math.floor(Math.random() * 1000) + 500,
-                });
+            if (response.success && response.result) {
+                setResult(response.result);
+                toast.success("Análise concluída com sucesso!");
+            } else {
+                toast.error("Erro na análise: " + (response.error || "Erro desconhecido"));
+                setResult("Erro ao processar solicitação. Verifique sua chave de API.");
             }
-        } catch (e) {
-            console.log("AI log error (non-critical):", e);
+        } catch (error) {
+            console.error("Error executing AI:", error);
+            toast.error("Erro ao comunicar com o servidor");
+        } finally {
+            setLoading(false);
         }
-
-        toast.success("Análise concluída!");
     }
 
     const activeTool = AI_TOOLS.find((t) => t.id === activeModal);
@@ -375,8 +284,10 @@ Momento ideal para avançar na negociação!
                         </div>
 
                         {result && (
-                            <div className="bg-slate-50 rounded-lg p-4 prose prose-sm max-w-none">
-                                <pre className="whitespace-pre-wrap text-sm">{result}</pre>
+                            <div className="bg-muted/50 border rounded-lg p-4 mt-4">
+                                <div className="prose dark:prose-invert prose-sm max-w-none text-foreground">
+                                    <pre className="whitespace-pre-wrap font-sans text-sm">{result}</pre>
+                                </div>
                             </div>
                         )}
 

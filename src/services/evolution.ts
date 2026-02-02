@@ -62,6 +62,37 @@ export const EvolutionService = {
         return await res.json();
     },
 
+    async sendMessage(instanceName: string, remoteJid: string, text: string) {
+        if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) throw new Error("Missing Config");
+
+        const res = await fetch(`${EVOLUTION_API_URL}/message/sendText/${instanceName}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "apikey": EVOLUTION_API_KEY
+            },
+            body: JSON.stringify({
+                number: remoteJid,
+                options: {
+                    delay: 1200,
+                    presence: "composing",
+                    linkPreview: false
+                },
+                textMessage: {
+                    text: text
+                }
+            })
+        });
+
+        if (!res.ok) {
+            console.error("Evolution Send Error:", await res.text());
+            // don't throw to avoid crashing webhook loop, just log
+            return null;
+        }
+
+        return await res.json();
+    },
+
     async deleteInstance(instanceName: string) {
         if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) throw new Error("Missing Config");
 

@@ -1,18 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Filter, Phone, Mail, MessageCircle, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Phone, Mail, MessageCircle, Edit, Trash2, User, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -46,13 +39,13 @@ interface Lead {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  new: "bg-blue-100 text-blue-700",
-  contacted: "bg-yellow-100 text-yellow-700",
-  qualified: "bg-green-100 text-green-700",
-  proposal: "bg-purple-100 text-purple-700",
-  negotiation: "bg-orange-100 text-orange-700",
-  won: "bg-emerald-100 text-emerald-700",
-  lost: "bg-red-100 text-red-700",
+  new: "bg-blue-500 text-white",
+  contacted: "bg-yellow-500 text-white",
+  qualified: "bg-green-500 text-white",
+  proposal: "bg-purple-500 text-white",
+  negotiation: "bg-orange-500 text-white",
+  won: "bg-emerald-600 text-white",
+  lost: "bg-red-500 text-white",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -72,6 +65,14 @@ const SOURCE_LABELS: Record<string, string> = {
   instagram: "Instagram",
   referral: "Indicação",
   other: "Outro",
+};
+
+const SOURCE_COLORS: Record<string, string> = {
+  whatsapp: "bg-green-100 text-green-700 border-green-300",
+  website: "bg-blue-100 text-blue-700 border-blue-300",
+  instagram: "bg-pink-100 text-pink-700 border-pink-300",
+  referral: "bg-purple-100 text-purple-700 border-purple-300",
+  other: "bg-gray-100 text-gray-700 border-gray-300",
 };
 
 export function LeadList() {
@@ -124,25 +125,59 @@ export function LeadList() {
       return;
     }
 
-    const { error } = await supabase.from("contacts").insert({
-      organization_id: profile.organization_id,
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      company: formData.company,
-      source: formData.source,
-      type: "lead",
-      status: "new",
-      score: 50,
-    });
+    // 1. Create the lead/contact
+    const { data: newContact, error: contactError } = await supabase
+      .from("contacts")
+      .insert({
+        organization_id: profile.organization_id,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        company: formData.company,
+        source: formData.source,
+        type: "lead",
+        status: "new",
+        score: 50,
+      })
+      .select()
+      .single();
 
-    if (error) {
-      console.error("Error creating lead:", error);
+    if (contactError) {
+      console.error("Error creating lead:", contactError);
       toast.error("Erro ao criar lead");
       return;
     }
 
-    toast.success("Lead criado com sucesso!");
+    // 2. Get the default pipeline and its first stage
+    const { data: pipeline } = await supabase
+      .from("pipelines")
+      .select("id")
+      .eq("organization_id", profile.organization_id)
+      .eq("is_default", true)
+      .single();
+
+    if (pipeline) {
+      const { data: firstStage } = await supabase
+        .from("stages")
+        .select("id")
+        .eq("pipeline_id", pipeline.id)
+        .order("order", { ascending: true })
+        .limit(1)
+        .single();
+
+      if (firstStage) {
+        // 3. Create a deal in the first stage
+        await supabase.from("deals").insert({
+          organization_id: profile.organization_id,
+          stage_id: firstStage.id,
+          contact_id: newContact.id,
+          title: formData.name + (formData.company ? ` - ${formData.company}` : ""),
+          value: 0,
+        });
+      }
+    }
+
+    toast.success("Lead criado e adicionado ao Pipeline!");
     resetForm();
     setOpen(false);
     loadLeads();
@@ -165,7 +200,6 @@ export function LeadList() {
   }
 
   async function sendWhatsApp(lead: Lead) {
-    // In a real implementation, this would use the Evolution API
     if (lead.phone) {
       const phone = lead.phone.replace(/\D/g, "");
       window.open(`https://wa.me/55${phone}`, "_blank");
@@ -179,7 +213,8 @@ export function LeadList() {
     const matchesSearch =
       lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.company?.toLowerCase().includes(searchTerm.toLowerCase());
+      lead.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.phone?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "all" || lead.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -187,6 +222,13 @@ export function LeadList() {
   const formatDate = (date: string) => {
     if (!date) return "-";
     return new Date(date).toLocaleDateString("pt-BR");
+  };
+
+  const stats = {
+    total: leads.length,
+    new: leads.filter((l) => l.status === "new").length,
+    qualified: leads.filter((l) => l.status === "qualified").length,
+    negotiation: leads.filter((l) => l.status === "negotiation" || l.status === "proposal").length,
   };
 
   return (
@@ -312,133 +354,136 @@ export function LeadList() {
         </Select>
       </div>
 
-      {/* Stats */}
+      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <div className="bg-white rounded-lg border p-4">
-          <p className="text-sm text-muted-foreground">Total de Leads</p>
-          <p className="text-2xl font-bold">{leads.length}</p>
-        </div>
-        <div className="bg-white rounded-lg border p-4">
-          <p className="text-sm text-muted-foreground">Novos (hoje)</p>
-          <p className="text-2xl font-bold text-blue-600">
-            {leads.filter((l) => l.status === "new").length}
-          </p>
-        </div>
-        <div className="bg-white rounded-lg border p-4">
-          <p className="text-sm text-muted-foreground">Qualificados</p>
-          <p className="text-2xl font-bold text-green-600">
-            {leads.filter((l) => l.status === "qualified").length}
-          </p>
-        </div>
-        <div className="bg-white rounded-lg border p-4">
-          <p className="text-sm text-muted-foreground">Em Negociação</p>
-          <p className="text-2xl font-bold text-orange-600">
-            {leads.filter((l) => l.status === "negotiation").length}
-          </p>
-        </div>
+        <Card className="border-l-4 border-l-blue-500">
+          <CardContent className="p-4">
+            <p className="text-sm text-muted-foreground">Total de Leads</p>
+            <p className="text-3xl font-bold">{stats.total}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-l-4 border-l-green-500">
+          <CardContent className="p-4">
+            <p className="text-sm text-muted-foreground">Novos (hoje)</p>
+            <p className="text-3xl font-bold text-green-600">{stats.new}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-l-4 border-l-purple-500">
+          <CardContent className="p-4">
+            <p className="text-sm text-muted-foreground">Qualificados</p>
+            <p className="text-3xl font-bold text-purple-600">{stats.qualified}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-l-4 border-l-orange-500">
+          <CardContent className="p-4">
+            <p className="text-sm text-muted-foreground">Em Negociação</p>
+            <p className="text-3xl font-bold text-orange-600">{stats.negotiation}</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Contato</TableHead>
-              <TableHead>Empresa</TableHead>
-              <TableHead>Origem</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Score</TableHead>
-              <TableHead>Criado em</TableHead>
-              <TableHead>Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
-                  Carregando...
-                </TableCell>
-              </TableRow>
-            ) : filteredLeads.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                  Nenhum lead encontrado
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredLeads.map((lead) => (
-                <TableRow key={lead.id}>
-                  <TableCell className="font-medium">{lead.name}</TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      {lead.email && (
-                        <div className="flex items-center gap-1 text-sm">
-                          <Mail className="h-3 w-3" />
-                          {lead.email}
-                        </div>
-                      )}
-                      {lead.phone && (
-                        <div className="flex items-center gap-1 text-sm">
-                          <Phone className="h-3 w-3" />
-                          {lead.phone}
-                        </div>
+      {/* Leads Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {loading ? (
+          <div className="col-span-full text-center py-12 text-muted-foreground">
+            Carregando leads...
+          </div>
+        ) : filteredLeads.length === 0 ? (
+          <div className="col-span-full text-center py-12 text-muted-foreground">
+            Nenhum lead encontrado. Clique em "Novo Lead" para começar.
+          </div>
+        ) : (
+          filteredLeads.map((lead) => (
+            <Card key={lead.id} className="hover:shadow-lg transition-shadow">
+              <CardContent className="p-4">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                      {lead.name?.charAt(0)?.toUpperCase() || "?"}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">{lead.name || "Sem nome"}</h3>
+                      {lead.company && (
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <Building2 className="h-3 w-3" />
+                          {lead.company}
+                        </p>
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell>{lead.company || "-"}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">
-                      {SOURCE_LABELS[lead.source] || lead.source}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={STATUS_COLORS[lead.status] || "bg-gray-100"}>
-                      {STATUS_LABELS[lead.status] || lead.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="w-12 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-blue-500 rounded-full"
-                          style={{ width: `${lead.score || 0}%` }}
-                        />
-                      </div>
-                      <span className="text-sm text-muted-foreground">{lead.score || 0}</span>
+                  </div>
+                  <Badge className={STATUS_COLORS[lead.status] || "bg-gray-100"}>
+                    {STATUS_LABELS[lead.status] || lead.status || "Novo"}
+                  </Badge>
+                </div>
+
+                {/* Contact Info */}
+                <div className="space-y-2 mb-4">
+                  {lead.email && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <a href={`mailto:${lead.email}`} className="text-blue-600 hover:underline truncate">
+                        {lead.email}
+                      </a>
                     </div>
-                  </TableCell>
-                  <TableCell>{formatDate(lead.created_at)}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-green-600 hover:text-green-700"
-                        title="Enviar WhatsApp"
-                        onClick={() => sendWhatsApp(lead)}
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" title="Editar">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-red-600 hover:text-red-700"
-                        title="Excluir"
-                        onClick={() => deleteLead(lead.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                  )}
+                  {lead.phone && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <span>{lead.phone}</span>
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                  )}
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between pt-3 border-t">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={SOURCE_COLORS[lead.source] || ""}>
+                      {SOURCE_LABELS[lead.source] || lead.source || "Outro"}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">{formatDate(lead.created_at)}</span>
+                  </div>
+
+                  {/* Score */}
+                  <div className="flex items-center gap-1">
+                    <div className="w-8 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-blue-500 to-green-500 rounded-full"
+                        style={{ width: `${lead.score || 50}%` }}
+                      />
+                    </div>
+                    <span className="text-xs font-medium">{lead.score || 50}</span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-1 mt-3 pt-3 border-t">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                    onClick={() => sendWhatsApp(lead)}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-1" />
+                    WhatsApp
+                  </Button>
+                  <Button variant="ghost" size="sm" className="flex-1">
+                    <Edit className="h-4 w-4 mr-1" />
+                    Editar
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => deleteLead(lead.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   );

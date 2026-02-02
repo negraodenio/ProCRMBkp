@@ -2,11 +2,28 @@
 
 import { useState } from "react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
-import { Plus } from "lucide-react";
+import { Plus, MoreVertical, Edit2, Trash2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { DealCard } from "./deal-card";
 import { updateDealStage } from "@/app/pipeline/actions";
 import { toast } from "sonner";
+import { createClient } from "@/lib/supabase/client";
 
 // Types matching Supabase
 type Deal = {
@@ -23,17 +40,22 @@ type Stage = {
     name: string;
     color?: string;
     order?: number;
+    pipeline_id?: string;
 };
 
-// Color mapping for stages matching Replit screenshot
-const STAGE_COLORS: Record<string, { bg: string; header: string }> = {
-    "Prospecção": { bg: "bg-blue-500", header: "bg-blue-500" },
-    "Qualificação": { bg: "bg-orange-500", header: "bg-orange-500" },
-    "Proposta": { bg: "bg-green-500", header: "bg-green-500" },
-    "Negociação": { bg: "bg-blue-800", header: "bg-blue-800" },
-    "Fechado": { bg: "bg-green-700", header: "bg-green-700" },
-    "Perdido": { bg: "bg-red-500", header: "bg-red-500" },
-};
+// Color options for new stages
+const COLOR_OPTIONS = [
+    { name: "Azul", value: "bg-blue-500" },
+    { name: "Laranja", value: "bg-orange-500" },
+    { name: "Verde", value: "bg-green-500" },
+    { name: "Azul Escuro", value: "bg-blue-800" },
+    { name: "Verde Escuro", value: "bg-green-700" },
+    { name: "Vermelho", value: "bg-red-500" },
+    { name: "Roxo", value: "bg-purple-500" },
+    { name: "Rosa", value: "bg-pink-500" },
+    { name: "Amarelo", value: "bg-yellow-500" },
+    { name: "Cinza", value: "bg-gray-500" },
+];
 
 interface KanbanBoardProps {
     initialStages: Stage[];
@@ -42,7 +64,14 @@ interface KanbanBoardProps {
 
 export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
     const [deals, setDeals] = useState<any[]>(initialDeals);
-    const [stages] = useState<Stage[]>(initialStages);
+    const [stages, setStages] = useState<Stage[]>(initialStages);
+    const [editingStageId, setEditingStageId] = useState<string | null>(null);
+    const [editingName, setEditingName] = useState("");
+    const [newStageDialogOpen, setNewStageDialogOpen] = useState(false);
+    const [newStageName, setNewStageName] = useState("");
+    const [newStageColor, setNewStageColor] = useState("bg-blue-500");
+
+    const supabase = createClient();
 
     const onDragEnd = async (result: DropResult) => {
         const { destination, source, draggableId } = result;
@@ -82,75 +111,296 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
         }
     };
 
-    const getStageColor = (stageName: string) => {
-        return STAGE_COLORS[stageName] || { bg: "bg-slate-500", header: "bg-slate-500" };
+    const startEditingStage = (stage: Stage) => {
+        setEditingStageId(stage.id);
+        setEditingName(stage.name);
+    };
+
+    const cancelEditing = () => {
+        setEditingStageId(null);
+        setEditingName("");
+    };
+
+    const saveStageRename = async (stageId: string) => {
+        if (!editingName.trim()) {
+            toast.error("Nome não pode ser vazio");
+            return;
+        }
+
+        const { error } = await supabase
+            .from("stages")
+            .update({ name: editingName.trim() })
+            .eq("id", stageId);
+
+        if (error) {
+            console.error("Error renaming stage:", error);
+            toast.error("Erro ao renomear etapa");
+            return;
+        }
+
+        setStages(stages.map(s => s.id === stageId ? { ...s, name: editingName.trim() } : s));
+        toast.success("Etapa renomeada!");
+        cancelEditing();
+    };
+
+    const deleteStage = async (stageId: string) => {
+        const stageDeals = deals.filter(d => d.stage_id === stageId);
+
+        if (stageDeals.length > 0) {
+            toast.error(`Não é possível excluir. Existem ${stageDeals.length} deal(s) nesta etapa.`);
+            return;
+        }
+
+        if (!confirm("Tem certeza que deseja excluir esta etapa?")) return;
+
+        const { error } = await supabase
+            .from("stages")
+            .delete()
+            .eq("id", stageId);
+
+        if (error) {
+            console.error("Error deleting stage:", error);
+            toast.error("Erro ao excluir etapa");
+            return;
+        }
+
+        setStages(stages.filter(s => s.id !== stageId));
+        toast.success("Etapa excluída!");
+    };
+
+    const createNewStage = async () => {
+        if (!newStageName.trim()) {
+            toast.error("Nome não pode ser vazio");
+            return;
+        }
+
+        // Get pipeline_id from first stage
+        const pipelineId = stages[0]?.pipeline_id;
+        if (!pipelineId) {
+            // Try to get from database
+            const { data: pipeline } = await supabase
+                .from("pipelines")
+                .select("id")
+                .eq("is_default", true)
+                .single();
+
+            if (!pipeline) {
+                toast.error("Pipeline não encontrado");
+                return;
+            }
+        }
+
+        const maxOrder = Math.max(...stages.map(s => s.order || 0), 0);
+
+        const { data, error } = await supabase
+            .from("stages")
+            .insert({
+                pipeline_id: pipelineId || stages[0]?.pipeline_id,
+                name: newStageName.trim(),
+                color: newStageColor,
+                order: maxOrder + 1,
+            })
+            .select()
+            .single();
+
+        if (error) {
+            console.error("Error creating stage:", error);
+            toast.error("Erro ao criar etapa");
+            return;
+        }
+
+        setStages([...stages, data]);
+        toast.success("Etapa criada!");
+        setNewStageDialogOpen(false);
+        setNewStageName("");
+        setNewStageColor("bg-blue-500");
+    };
+
+    const getStageColor = (stage: Stage) => {
+        return stage.color || "bg-slate-500";
     };
 
     return (
-        <DragDropContext onDragEnd={onDragEnd}>
-            <div className="flex h-full gap-4 pb-4 overflow-x-auto">
-                {stages.map((stage) => {
-                    const stageDeals = deals.filter((deal) => deal.stage_id === stage.id);
-                    const totalValue = stageDeals.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0);
-                    const colors = getStageColor(stage.name);
+        <>
+            <DragDropContext onDragEnd={onDragEnd}>
+                <div className="flex h-full gap-4 pb-4 overflow-x-auto">
+                    {stages.map((stage) => {
+                        const stageDeals = deals.filter((deal) => deal.stage_id === stage.id);
+                        const totalValue = stageDeals.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0);
+                        const colors = getStageColor(stage);
 
-                    return (
-                        <div key={stage.id} className="flex flex-col w-72 min-w-[288px] bg-slate-50 rounded-xl overflow-hidden shadow-sm border">
-                            {/* Colored Header matching Replit */}
-                            <div className={`${colors.header} text-white p-3`}>
-                                <div className="flex items-center justify-between">
-                                    <h3 className="font-bold text-sm uppercase tracking-wider">
-                                        {stage.name}
-                                    </h3>
-                                    <span className="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full font-medium">
-                                        {stageDeals.length}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Droppable Area */}
-                            <Droppable droppableId={stage.id}>
-                                {(provided, snapshot) => (
-                                    <div
-                                        ref={provided.innerRef}
-                                        {...provided.droppableProps}
-                                        className={`flex-1 p-3 space-y-3 min-h-[200px] transition-colors ${snapshot.isDraggingOver ? "bg-slate-100" : ""
-                                            }`}
-                                    >
-                                        {stageDeals.length === 0 ? (
-                                            <div className="text-center py-8 text-slate-400 text-sm">
-                                                Nenhum lead nesta etapa
+                        return (
+                            <div key={stage.id} className="flex flex-col w-72 min-w-[288px] bg-slate-50 rounded-xl overflow-hidden shadow-sm border">
+                                {/* Colored Header */}
+                                <div className={`${colors} text-white p-3`}>
+                                    <div className="flex items-center justify-between mb-2">
+                                        {editingStageId === stage.id ? (
+                                            <div className="flex items-center gap-2 flex-1">
+                                                <Input
+                                                    value={editingName}
+                                                    onChange={(e) => setEditingName(e.target.value)}
+                                                    className="h-7 text-sm bg-white text-black"
+                                                    autoFocus
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "Enter") saveStageRename(stage.id);
+                                                        if (e.key === "Escape") cancelEditing();
+                                                    }}
+                                                />
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-7 w-7 text-white hover:bg-white/20"
+                                                    onClick={() => saveStageRename(stage.id)}
+                                                >
+                                                    <Check className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-7 w-7 text-white hover:bg-white/20"
+                                                    onClick={cancelEditing}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
                                             </div>
                                         ) : (
-                                            stageDeals.map((deal, index) => (
-                                                <Draggable key={deal.id} draggableId={deal.id} index={index}>
-                                                    {(provided, snapshot) => (
-                                                        <div
-                                                            ref={provided.innerRef}
-                                                            {...provided.draggableProps}
-                                                            {...provided.dragHandleProps}
-                                                            style={{ ...provided.draggableProps.style }}
+                                            <>
+                                                <h3 className="font-semibold text-sm uppercase tracking-wide">
+                                                    {stage.name}
+                                                </h3>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="h-6 w-6 text-white hover:bg-white/20"
                                                         >
-                                                            <DealCard
-                                                                deal={{
-                                                                    ...deal,
-                                                                    contact_name: deal.contact_name || deal.title || 'Lead'
-                                                                }}
-                                                                isDragging={snapshot.isDragging}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </Draggable>
-                                            ))
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem onClick={() => startEditingStage(stage)}>
+                                                            <Edit2 className="h-4 w-4 mr-2" />
+                                                            Renomear
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() => deleteStage(stage.id)}
+                                                            className="text-red-600"
+                                                        >
+                                                            <Trash2 className="h-4 w-4 mr-2" />
+                                                            Excluir
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </>
                                         )}
-                                        {provided.placeholder}
                                     </div>
-                                )}
-                            </Droppable>
+                                    <div className="flex items-center justify-between text-xs opacity-90">
+                                        <span>{stageDeals.length} deal{stageDeals.length !== 1 ? "s" : ""}</span>
+                                        <span>
+                                            {new Intl.NumberFormat("pt-BR", {
+                                                style: "currency",
+                                                currency: "BRL",
+                                            }).format(totalValue)}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Droppable Area */}
+                                <Droppable droppableId={stage.id}>
+                                    {(provided, snapshot) => (
+                                        <div
+                                            ref={provided.innerRef}
+                                            {...provided.droppableProps}
+                                            className={`flex-1 p-3 space-y-3 min-h-[200px] ${snapshot.isDraggingOver ? "bg-blue-50" : ""
+                                                }`}
+                                        >
+                                            {stageDeals.length === 0 ? (
+                                                <p className="text-center text-sm text-muted-foreground py-8">
+                                                    Nenhum lead nesta etapa
+                                                </p>
+                                            ) : (
+                                                stageDeals.map((deal, index) => (
+                                                    <Draggable key={deal.id} draggableId={deal.id} index={index}>
+                                                        {(provided, snapshot) => (
+                                                            <div
+                                                                ref={provided.innerRef}
+                                                                {...provided.draggableProps}
+                                                                {...provided.dragHandleProps}
+                                                            >
+                                                                <DealCard deal={deal} isDragging={snapshot.isDragging} />
+                                                            </div>
+                                                        )}
+                                                    </Draggable>
+                                                ))
+                                            )}
+                                            {provided.placeholder}
+                                        </div>
+                                    )}
+                                </Droppable>
+                            </div>
+                        );
+                    })}
+
+                    {/* Add New Stage Button */}
+                    <div className="flex flex-col w-72 min-w-[288px]">
+                        <Button
+                            variant="outline"
+                            className="h-full min-h-[200px] border-dashed border-2 hover:bg-slate-50"
+                            onClick={() => setNewStageDialogOpen(true)}
+                        >
+                            <Plus className="h-6 w-6 mr-2" />
+                            Nova Etapa
+                        </Button>
+                    </div>
+                </div>
+            </DragDropContext>
+
+            {/* New Stage Dialog */}
+            <Dialog open={newStageDialogOpen} onOpenChange={setNewStageDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Criar Nova Etapa</DialogTitle>
+                        <DialogDescription>
+                            Adicione uma nova etapa ao seu pipeline de vendas.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="stage-name">Nome da Etapa</Label>
+                            <Input
+                                id="stage-name"
+                                placeholder="Ex: Apresentação"
+                                value={newStageName}
+                                onChange={(e) => setNewStageName(e.target.value)}
+                            />
                         </div>
-                    );
-                })}
-            </div>
-        </DragDropContext>
+                        <div className="space-y-2">
+                            <Label>Cor</Label>
+                            <div className="grid grid-cols-5 gap-2">
+                                {COLOR_OPTIONS.map((color) => (
+                                    <button
+                                        key={color.value}
+                                        type="button"
+                                        className={`h-10 rounded ${color.value} ${newStageColor === color.value ? "ring-2 ring-offset-2 ring-black" : ""
+                                            }`}
+                                        onClick={() => setNewStageColor(color.value)}
+                                        title={color.name}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setNewStageDialogOpen(false)}>
+                            Cancelar
+                        </Button>
+                        <Button onClick={createNewStage} className="bg-blue-600 hover:bg-blue-700">
+                            Criar Etapa
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
     );
 }
