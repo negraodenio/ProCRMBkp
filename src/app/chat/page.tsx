@@ -130,9 +130,16 @@ export default function ChatPage() {
             setSending(true);
             const text = inputText;
             setInputText("");
-            await sendMessageAction(selectedId, text);
+            const result = await sendMessageAction(selectedId, text);
+            
+            if (result.error) {
+                toast.error(result.error);
+                setInputText(text); // Restore text on error
+            } else {
+                // Success is handled by Supabase Realtime subscription
+            }
         } catch (error: any) {
-            toast.error("Erro ao enviar: " + error.message);
+            toast.error("Erro inesperado: " + error.message);
         } finally {
             setSending(false);
         }

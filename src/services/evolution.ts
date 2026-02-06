@@ -82,7 +82,13 @@ export const EvolutionService = {
     },
 
     async sendMessage(instanceName: string, remoteJid: string, text: string) {
-        if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) throw new Error("Missing Config");
+        if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) {
+            console.error("❌ Evolution Config Missing:", { EVOLUTION_API_URL: !!EVOLUTION_API_URL, EVOLUTION_API_KEY: !!EVOLUTION_API_KEY });
+            throw new Error("Evolution API configuration is missing");
+        }
+
+        // Ensure JID format
+        const jid = remoteJid.includes("@") ? remoteJid : `${remoteJid}@s.whatsapp.net`;
 
         const res = await fetch(`${EVOLUTION_API_URL}/message/sendText/${instanceName}`, {
             method: "POST",
@@ -91,7 +97,7 @@ export const EvolutionService = {
                 "apikey": EVOLUTION_API_KEY
             },
             body: JSON.stringify({
-                number: remoteJid,
+                number: jid,
                 options: {
                     delay: 1200,
                     presence: "composing",
@@ -104,9 +110,9 @@ export const EvolutionService = {
         });
 
         if (!res.ok) {
-            console.error("Evolution Send Error:", await res.text());
-            // don't throw to avoid crashing webhook loop, just log
-            return null;
+            const errorText = await res.text();
+            console.error(`❌ Evolution Send Error (${res.status}):`, errorText);
+            throw new Error(`WhatsApp API Error: ${errorText}`);
         }
 
         return await res.json();

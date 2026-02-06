@@ -4,57 +4,65 @@ import { createClient } from "@/lib/supabase/server";
 import { EvolutionService } from "@/services/evolution";
 
 export async function sendMessageAction(conversationId: string, text: string) {
-    const supabase = await createClient();
-    
-    // 1. Get User/Org Context
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Unauthorized");
+    try {
+        const supabase = await createClient();
+        
+        // 1. Get User/Org Context
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return { error: "Não autorizado" };
 
-    const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
-    if (!profile) throw new Error("Org not found");
+        const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
+        if (!profile) return { error: "Organização não encontrada para este usuário" };
 
-    // 2. Get Conversation Details (Phone)
-    const { data: conversation } = await supabase
-        .from("conversations")
-        .select("*")
-        .eq("id", conversationId)
-        .single();
-    
-    if (!conversation) throw new Error("Conversation not found");
+        // 2. Get Conversation Details (Phone)
+        const { data: conversation, error: convErr } = await supabase
+            .from("conversations")
+            .select("*")
+            .eq("id", conversationId)
+            .single();
+        
+        if (convErr || !conversation) return { error: "Conversa não encontrada" };
 
-    // 3. Send via Evolution
-    // We assume the instance name is bot-{org_id} or similar as defined in webhook
-    // A better way is to store instance name in the conversation or org
-    const instanceName = `bot-${profile.organization_id}`; 
-    // Wait, let's use the same logic as the logout: sanitizedName-ShortID
-    // To be safe, let's try to find an active instance for this org.
-    // In this MVP, we use the instanceName derived in actions.ts logic.
-    
-    // For now, let's use the most robust naming:
-    const orgRes = await supabase.from("organizations").select("name").eq("id", profile.organization_id).single();
-    const orgName = orgRes.data?.name || "Empresa";
-    const sanitizedName = orgName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "");
-    const shortId = profile.organization_id.split('-')[0];
-    const derivedInstanceName = `${sanitizedName}-${shortId}`;
+        // 3. Derive Instance Name
+        const orgRes = await supabase.from("organizations").select("name").eq("id", profile.organization_id).single();
+        const orgName = orgRes.data?.name || "Empresa";
+        const sanitizedName = orgName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "");
+        const shortId = profile.organization_id.split('-')[0];
+        const derivedInstanceName = `${sanitizedName}-${shortId}`;
 
-    const res = await EvolutionService.sendMessage(derivedInstanceName, conversation.contact_phone, text);
-    
-    if (!res) throw new Error("Failed to send message via WhatsApp");
+        console.log(`🚀 Sending message to ${conversation.contact_phone} via ${derivedInstanceName}`);
 
-    // 4. Save to Database
-    const { data: newMessage, error: msgError } = await supabase.from("messages").insert({
-        conversation_id: conversationId,
-        organization_id: profile.organization_id,
-        content: text,
-        direction: "outbound",
-        status: "sent"
-    }).select().single();
+        // 4. Send via Evolution
+        try {
+            await EvolutionService.sendMessage(derivedInstanceName, conversation.contact_phone, text);
+        } catch (evoErr: any) {
+            console.error("❌ Failed to send via Evolution:", evoErr);
+            return { error: `WhatsApp Error: ${evoErr.message}` };
+        }
 
-    // 5. Update Conversation timestamp
-    await supabase.from("conversations").update({
-        last_message_content: text,
-        last_message_at: new Date().toISOString()
-    }).eq("id", conversationId);
+        // 5. Save to Database
+        const { data: newMessage, error: msgError } = await supabase.from("messages").insert({
+            conversation_id: conversationId,
+            organization_id: profile.organization_id,
+            content: text,
+            direction: "outbound",
+            status: "sent"
+        }).select().single();
 
-    return newMessage;
+        if (msgError) {
+            console.error("❌ Database Error saving message:", msgError);
+            return { error: "Mensagem enviada pelo WhatsApp mas não pôde ser salva no banco de dados." };
+        }
+
+        // 6. Update Conversation timestamp
+        await supabase.from("conversations").update({
+            last_message_content: text,
+            last_message_at: new Date().toISOString()
+        }).eq("id", conversationId);
+
+        return { success: true, data: newMessage };
+    } catch (err: any) {
+        console.error("❌ Unexpected Error in sendMessageAction:", err);
+        return { error: `Erro interno: ${err.message || 'Erro desconhecido'}` };
+    }
 }
