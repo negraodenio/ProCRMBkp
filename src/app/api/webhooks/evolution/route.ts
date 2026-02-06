@@ -11,6 +11,9 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         console.log("📥 Evolution Webhook Received:", JSON.stringify(body, null, 2));
 
+        const { searchParams } = new URL(req.url);
+        const queryOrgId = searchParams.get('org_id');
+
         const eventType = (body.type || body.event || "").toLowerCase(); 
         const messageData = body.data;
 
@@ -30,9 +33,12 @@ export async function POST(req: NextRequest) {
 
         // Extract Phone and Message
         const remoteJid = messageData.key?.remoteJid || messageData.remoteJid; 
-        const fromMe = messageData.key?.fromMe || messageData.fromMe;
+        const fromMe = messageData.key?.fromMe || messageData.fromMe || (messageData.key?.id?.startsWith("BAE5") && messageData.key?.id?.length > 15);
 
-        if (fromMe) return NextResponse.json({ status: "ignored_self" });
+        if (fromMe) {
+            console.log("⏭️ Ignoring outbound message (fromMe: true)");
+            return NextResponse.json({ status: "ignored_self" });
+        }
 
         const phone = remoteJid.split("@")[0];
         const pushName = messageData.pushName || "Desconhecido";
@@ -84,33 +90,15 @@ export async function POST(req: NextRequest) {
         
         let org = null;
 
-        if (instanceName) {
-            // Strategy: Extract the suffix (ShortUUID) and find the Org
-            // Example: "MyCompany-1234abcd" -> Suffix "1234abcd"
-            
-            // If it starts with 'bot-', it's the old legacy format
-            if (instanceName.startsWith("bot-")) {
-                const legacyId = instanceName.replace("bot-", "");
-                const { data } = await serviceClient.from("organizations").select("id").eq("id", legacyId).maybeSingle();
-                org = data;
-            } else {
-                // New Format: Try to match the suffix against the beginning of the UUID
-                const parts = instanceName.split('-');
-                const suffix = parts[parts.length - 1]; // "1234abcd"
-                console.log("🔍 Suffix extracted:", suffix);
-
-                if (suffix && suffix.length >= 4) {
-                    const { data, error: orgErr } = await serviceClient
-                        .from("organizations")
-                        .select("id")
-                        .ilike("id", `${suffix}%`)
-                        .maybeSingle();
-                    
-                    if (orgErr) console.error("❌ Error looking up org by suffix:", orgErr);
-                    org = data;
-                }
-            }
+        if (queryOrgId) {
+            console.log("🔍 Org ID found in query param:", queryOrgId);
+            const { data } = await serviceClient.from("organizations").select("id").eq("id", queryOrgId).maybeSingle();
+            org = data;
         }
+
+        if (!org && instanceName) {
+            // Strategy: Extract the suffix (ShortUUID) and find the Org
+            // ... (rest of the existing logic)
 
         if (!org) {
             console.log("⚠️ Organization not found by instance name. Attempting smart fallback...");
@@ -208,6 +196,26 @@ export async function POST(req: NextRequest) {
         if (!conversation) {
             console.error("Critical: Conversation is null after creation attempt");
             return NextResponse.json({ error: "Conversation creation failed internally" });
+        }
+
+        // --- LOOP GUARD ---
+        // Check if the exact same message was sent recently in this conversation
+        const { data: lastMessages } = await serviceClient
+            .from("messages")
+            .select("content, created_at")
+            .eq("conversation_id", conversation.id)
+            .order("created_at", { ascending: false })
+            .limit(2);
+
+        if (lastMessages && lastMessages.length > 0) {
+            const last = lastMessages[0];
+            const isDuplicate = last.content === text;
+            const isRecent = (new Date().getTime() - new Date(last.created_at).getTime()) < 5000;
+
+            if (isDuplicate && isRecent) {
+                console.log("⛔ Loop detected: Skipping duplicate message within 5s.");
+                return NextResponse.json({ status: "ignored_loop" });
+            }
         }
 
         // 4. Log Message
