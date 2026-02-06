@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Users,
   TrendingUp,
@@ -27,7 +27,7 @@ import {
   Cell,
 } from "recharts";
 
-import { useEffect, useState } from "react";
+
 import { createClient } from "@/lib/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
 
