@@ -81,6 +81,7 @@ export default function ProposalsPage() {
     const [proposals, setProposals] = useState<Proposal[]>([]);
     const [contacts, setContacts] = useState<{ id: string; name: string }[]>([]);
     const [loading, setLoading] = useState(true);
+    const [organizationId, setOrganizationId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [formData, setFormData] = useState({
         contactId: "",
@@ -93,18 +94,40 @@ export default function ProposalsPage() {
     const supabase = createClient();
 
     useEffect(() => {
-        loadProposals();
-        loadContacts();
+        async function init() {
+            setLoading(true);
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase
+                    .from("profiles")
+                    .select("organization_id")
+                    .eq("id", user.id)
+                    .single();
+                
+                if (profile?.organization_id) {
+                    setOrganizationId(profile.organization_id);
+                    await Promise.all([
+                        loadProposals(profile.organization_id),
+                        loadContacts(profile.organization_id)
+                    ]);
+                }
+            }
+            setLoading(false);
+        }
+        init();
     }, []);
 
-    async function loadProposals() {
-        setLoading(true);
+    async function loadProposals(orgId?: string) {
+        const id = orgId || organizationId;
+        if (!id) return;
+
         const { data, error } = await supabase
             .from("proposals")
             .select(`
-        *,
-        contact:contacts(name)
-      `)
+                *,
+                contact:contacts(name)
+            `)
+            .eq("organization_id", id)
             .order("created_at", { ascending: false });
 
         if (error) {
@@ -113,36 +136,30 @@ export default function ProposalsPage() {
         } else {
             setProposals(data || []);
         }
-        setLoading(false);
     }
 
-    async function loadContacts() {
+    async function loadContacts(orgId?: string) {
+        const id = orgId || organizationId;
+        if (!id) return;
+
         const { data } = await supabase
             .from("contacts")
             .select("id, name")
+            .eq("organization_id", id)
             .order("name");
         setContacts(data || []);
     }
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        if (!organizationId) return;
 
         const proposalNumber = `PROP-${Date.now()}`;
         const validUntil = new Date();
         validUntil.setDate(validUntil.getDate() + parseInt(formData.validDays));
 
-        const { data: profile } = await supabase
-            .from("profiles")
-            .select("organization_id")
-            .single();
-
-        if (!profile?.organization_id) {
-            toast.error("Organização não encontrada");
-            return;
-        }
-
         const { error } = await supabase.from("proposals").insert({
-            organization_id: profile.organization_id,
+            organization_id: organizationId,
             contact_id: formData.contactId,
             number: proposalNumber,
             title: formData.title,
