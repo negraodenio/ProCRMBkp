@@ -85,31 +85,35 @@ export async function POST(req: NextRequest) {
         // Old: bot-UUID
         // New: CompanyName-ShortUUID (where ShortUUID is the first part of UUID, e.g. 8 chars)
 
-        const instanceName = body.instance || body.sender || body.instanceName || "";
-        console.log("🔍 Instance Name found:", instanceName);
+        const instanceName = body.instance || body.sender || body.instanceName || body.data?.instance || "";
+        console.log("🔍 [Webhook] Instance Name:", instanceName);
+        console.log("🔍 [Webhook] Event Type:", eventType);
         
         let org = null;
 
-        // 1. Explicit Mappings (High Reliability)
-        if (instanceName && instanceName.toLowerCase().includes("df02ea6d")) {
-            console.log("🎯 Match: Found Mario Pedro's Org ID in instance name.");
+        // 1. Explicit Mappings (Case Insensitive + Flexible search)
+        const normalizedInstance = instanceName.toString().toLowerCase();
+        
+        if (normalizedInstance.includes("df02ea6d")) {
+            console.log("🎯 [Webhook] Match! Mario Pedro detected.");
             const { data } = await serviceClient.from("organizations").select("id").eq("id", "df02ea6d-561b-4e16-8185-42d35780f3b7").maybeSingle();
             org = data;
         }
 
-        // 2. Fuzzy Auto-Detection (Scalable Mode)
+        // 2. Fuzzy Auto-Detection (Scalable Mode) - Using string conversion for UUID match
         if (!org && instanceName) {
             const parts = instanceName.split(/[-_]/); 
             for (const part of parts) {
                 if (part.length >= 6) { 
+                    // Use a query that works better for UUID columns
                     const { data } = await serviceClient
                         .from("organizations")
                         .select("id")
-                        .ilike("id", `${part}%`)
+                        .filter("id", "ilike", `${part}%`)
                         .maybeSingle();
                     if (data) {
                         org = data;
-                        console.log("✅ Auto-Match: Found Org by instance segment:", part);
+                        console.log("✅ [Webhook] Auto-Match found:", part);
                         break;
                     }
                 }
@@ -123,12 +127,15 @@ export async function POST(req: NextRequest) {
         }
 
         if (!org) {
-            console.error("❌ WEBHOOK BLOCKED: Could not identify organization for instance:", instanceName);
-            // We return 200 to Evolution but we DON'T save any data to Denio's Org.
-            return NextResponse.json({ status: "error_unidentified_org", instance: instanceName });
+            console.error("❌ [Webhook] UNIDENTIFIED ORG for instance:", instanceName, "Body Keys:", Object.keys(body));
+            return NextResponse.json({ 
+                status: "error_unidentified_org", 
+                instance: instanceName,
+                received_keys: Object.keys(body)
+            }, { status: 200 }); // Still 200 for Evolution
         }
 
-        console.log("✅ Organization identified:", org.id);
+        console.log("✅ [Webhook] Final Org ID:", org.id);
 
         // 2. Find/Create Contact
         let { data: contact } = await serviceClient

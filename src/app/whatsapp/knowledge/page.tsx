@@ -20,12 +20,31 @@ export default async function KnowledgeBasePage() {
     const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
     if (!profile?.organization_id) return <div>Organization not found</div>;
 
-    // Fetch Documents
-    const { data: documents } = await supabase
+    // Fetch Documents (Chunks)
+    const { data: chunks } = await supabase
         .from("documents")
         .select("*")
         .eq("organization_id", profile.organization_id)
         .order("created_at", { ascending: false });
+
+    // Grouping logic: One filename -> most recent created_at
+    const groupedDocs: Record<string, { id: string, filename: string, created_at: string, count: number }> = {};
+    
+    chunks?.forEach(chunk => {
+        const filename = (chunk.metadata as any)?.filename || "Documento sem nome";
+        if (!groupedDocs[filename]) {
+            groupedDocs[filename] = {
+                id: chunk.id,
+                filename,
+                created_at: chunk.created_at,
+                count: 1
+            };
+        } else {
+            groupedDocs[filename].count++;
+        }
+    });
+
+    const documents = Object.values(groupedDocs);
 
     return (
         <div className="flex min-h-screen">
@@ -65,11 +84,11 @@ export default async function KnowledgeBasePage() {
                                 <CardContent className="space-y-2">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">Documentos:</span>
-                                        <span className="font-bold">{documents?.length || 0}</span>
+                                        <span className="font-bold">{documents.length}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">Trechos (Chunks):</span>
-                                        <span className="font-bold">{documents?.length || 0} (est.)</span>
+                                        <span className="font-bold">{chunks?.length || 0}</span>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -82,7 +101,7 @@ export default async function KnowledgeBasePage() {
                                     <CardTitle>Documentos Ativos</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    {!documents?.length ? (
+                                    {!documents.length ? (
                                         <div className="text-center py-10 text-muted-foreground">
                                             <FileText className="h-10 w-10 mx-auto mb-2 opacity-20" />
                                             Nenhum documento encontrado.
@@ -97,11 +116,16 @@ export default async function KnowledgeBasePage() {
                                                         </div>
                                                         <div>
                                                             <p className="font-medium truncate max-w-[200px] md:max-w-md">
-                                                                {(doc.metadata as any)?.filename || "Documento sem nome"}
+                                                                {doc.filename}
                                                             </p>
-                                                            <p className="text-xs text-muted-foreground">
-                                                                Enviado há {formatDistanceToNow(new Date(doc.created_at), { addSuffix: true, locale: ptBR })}
-                                                            </p>
+                                                            <div className="flex items-center gap-2">
+                                                                <p className="text-xs text-muted-foreground">
+                                                                    Enviado há {formatDistanceToNow(new Date(doc.created_at), { addSuffix: true, locale: ptBR })}
+                                                                </p>
+                                                                <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-mono">
+                                                                    {doc.count} trechos
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <DeleteButton id={doc.id} />
