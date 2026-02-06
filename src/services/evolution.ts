@@ -115,7 +115,9 @@ export const EvolutionService = {
     async setWebhook(instanceName: string, webhookUrl: string) {
         if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) throw new Error("Missing Config");
 
-        const res = await fetch(`${EVOLUTION_API_URL}/webhook/set/${instanceName}`, {
+        // Try standard v2 endpoint first
+        console.log(`Setting webhook for ${instanceName} to ${webhookUrl}`);
+        const res = await fetch(`${EVOLUTION_API_URL}/webhook/instance/${instanceName}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
