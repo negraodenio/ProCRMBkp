@@ -15,8 +15,14 @@ export default function WhatsAppPage() {
     const [loading, setLoading] = useState(false);
     const [instanceName, setInstanceName] = useState<string>("");
 
+    // Check status on load
+    import { useEffect } from "react";
+    useEffect(() => {
+        handleConnect();
+    }, []);
+
     // Mock status for now, ideally fetching from API
-    const isConnected = !qrCode && !loading && instanceName; 
+    // const isConnected = !qrCode && !loading && instanceName; 
 
     const handleConnect = async () => {
         setLoading(true);
