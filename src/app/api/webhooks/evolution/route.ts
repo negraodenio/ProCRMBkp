@@ -90,18 +90,21 @@ export async function POST(req: NextRequest) {
         
         let org = null;
 
-        // 1. Check Query Param (User can still force it if they want)
-        if (queryOrgId) {
+        // 1. Explicit Mappings (High Reliability for scaling)
+        if (instanceName === "TBA-df02ea6d") {
+            const { data } = await serviceClient.from("organizations").select("id").eq("id", "df02ea6d-561b-4e16-8185-42d35780f3b7").maybeSingle();
+            org = data;
+        }
+
+        // 2. Check Query Param
+        if (!org && queryOrgId) {
             console.log("🔍 Org ID found in query param:", queryOrgId);
             const { data } = await serviceClient.from("organizations").select("id").eq("id", queryOrgId).maybeSingle();
             org = data;
         }
 
-        // 2. Auto-Detection (Scalable Mode)
+        // 3. Auto-Detection (Prefix Match)
         if (!org && instanceName) {
-            console.log("🔍 Scaling Logic: Attempting auto-detection for instance:", instanceName);
-            
-            // Split by dash or underscore and check if any part is a prefix of an Org ID
             const parts = instanceName.split(/[-_]/); 
             for (const part of parts) {
                 if (part.length >= 6) { 
@@ -112,28 +115,20 @@ export async function POST(req: NextRequest) {
                         .maybeSingle();
                     if (data) {
                         org = data;
-                        console.log("✅ Scalable Match: Found Org by instance segment:", part);
                         break;
                     }
                 }
             }
-
-            // 3. Legacy bot- fallback
-            if (!org && instanceName.startsWith("bot-")) {
-                const legacyId = instanceName.replace("bot-", "");
-                const { data } = await serviceClient.from("organizations").select("id").eq("id", legacyId).maybeSingle();
-                org = data;
-            }
         }
 
+        // 4. Default Fallback
         if (!org) {
-            console.log("⚠️ Organization not found by instance name. Attempting smart fallback...");
-            const { data: firstOrg } = await serviceClient.from("organizations").select("id").limit(1).maybeSingle();
+            const { data: firstOrg } = await serviceClient.from("organizations").select("id").order("created_at", { ascending: true }).limit(1).maybeSingle();
             org = firstOrg;
         }
 
         if (!org) {
-            console.error("❌ CRITICAL: No organization found in the system.");
+            console.error("❌ CRITICAL: No organization found.");
             return NextResponse.json({ error: "Org not found" }, { status: 404 });
         }
 
