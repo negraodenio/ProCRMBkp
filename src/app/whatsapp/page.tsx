@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { QrCode, RefreshCw, LogOut } from "lucide-react";
+import { QrCode, RefreshCw, LogOut, BookOpen } from "lucide-react";
 import { getQrCode, logoutWhatsApp } from "./actions";
 import { toast } from "sonner";
+import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 
@@ -13,6 +14,9 @@ export default function WhatsAppPage() {
     const [qrCode, setQrCode] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [instanceName, setInstanceName] = useState<string>("");
+
+    // Mock status for now, ideally fetching from API
+    const isConnected = !qrCode && !loading && instanceName; 
 
     const handleConnect = async () => {
         setLoading(true);
@@ -27,6 +31,7 @@ export default function WhatsAppPage() {
                 toast.success("QR Code gerado! Escaneie agora.");
             } else {
                 toast.info("Instância já conectada ou aguardando.");
+                setInstanceName(res.instanceName || "Connected");
             }
         } catch (e) {
             toast.error("Erro inesperado.");
@@ -39,89 +44,159 @@ export default function WhatsAppPage() {
         if (!confirm("Tem certeza que deseja desconectar?")) return;
         await logoutWhatsApp();
         setQrCode(null);
+        setInstanceName("");
         toast.success("Desconectado.");
     }
 
     return (
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen bg-slate-50/50">
             <Sidebar />
-            <div className="flex flex-1 flex-col md:ml-64">
+            <div className="flex flex-1 flex-col md:ml-64 transition-all duration-300 ease-in-out">
                 <Header />
-                <main className="flex-1 p-6">
-                    <div className="space-y-6">
+                <main className="flex-1 p-8 max-w-5xl mx-auto w-full">
+                    
+                    {/* Header Section */}
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold">WhatsApp Connection</h1>
-                            <p className="text-muted-foreground">
-                                Conecte seu CRM ao WhatsApp para automação e chat.
-                            </p>
+                            <h1 className="text-3xl font-bold tracking-tight text-slate-900">WhatsApp</h1>
+                            <p className="text-slate-500 mt-1">Gerencie sua conexão e treine sua IA.</p>
                         </div>
+                        
+                        {/* Status Badge */}
+                        <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border shadow-sm">
+                            <div className={`h-2.5 w-2.5 rounded-full ${instanceName ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+                            <span className="text-sm font-medium text-slate-600">
+                                {instanceName ? 'Online' : 'Desconectado'}
+                            </span>
+                        </div>
+                    </div>
 
-                        <div className="grid gap-6 md:grid-cols-2">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <QrCode className="h-6 w-6" />
-                                        Conectar Nova Instância
+                    <div className="grid gap-6 md:grid-cols-12">
+                        
+                        {/* Connection Card (Main) */}
+                        <div className="md:col-span-8">
+                            <Card className="h-full border-0 shadow-xl shadow-slate-200/60 ring-1 ring-slate-200 overflow-hidden relative">
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-600" />
+                                <CardHeader className="pb-4">
+                                    <CardTitle className="flex items-center gap-2 text-xl">
+                                        <QrCode className="h-5 w-5 text-indigo-600" />
+                                        Conexão
                                     </CardTitle>
                                     <CardDescription>
-                                        Escaneie o QR Code com seu celular (WhatsApp Web)
+                                        Escaneie o QR Code para conectar seu número.
                                     </CardDescription>
                                 </CardHeader>
-                                <CardContent className="flex flex-col items-center justify-center min-h-[300px] space-y-6">
-                                    {!qrCode && !loading && (
-                                        <div className="text-center space-y-4">
-                                            <p className="text-sm text-muted-foreground max-w-xs">
-                                                Clique abaixo para gerar um novo QR Code. Certifique-se de que a API Evolution esteja rodando.
+                                <CardContent className="flex flex-col items-center justify-center min-h-[400px] p-8 bg-slate-50/50">
+                                    
+                                    {!qrCode && !loading && !instanceName && (
+                                        <div className="text-center space-y-6 max-w-sm animate-in fade-in zoom-in duration-500">
+                                            <div className="mx-auto w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
+                                                <QrCode className="h-8 w-8 text-indigo-600" />
+                                            </div>
+                                            <h3 className="text-lg font-semibold text-slate-900">Nenhuma conexão ativa</h3>
+                                            <p className="text-slate-500">
+                                                Clique no botão abaixo para gerar um novo QR Code e conectar seu WhatsApp.
                                             </p>
-                                            <Button onClick={handleConnect} size="lg">
+                                            <Button onClick={handleConnect} size="lg" className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200">
                                                 Gerar QR Code
                                             </Button>
                                         </div>
                                     )}
 
                                     {loading && (
-                                        <div className="flex flex-col items-center animate-pulse gap-2">
-                                            <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-                                            <p className="text-sm text-muted-foreground">Contactando Evolution API...</p>
+                                        <div className="flex flex-col items-center animate-pulse gap-4">
+                                            <div className="p-4 rounded-full bg-indigo-50">
+                                                <RefreshCw className="h-10 w-10 animate-spin text-indigo-600" />
+                                            </div>
+                                            <p className="text-sm font-medium text-slate-600">Iniciando Evolution API...</p>
                                         </div>
                                     )}
 
                                     {qrCode && (
-                                        <div className="flex flex-col items-center space-y-4">
-                                            <div className="border-4 border-white shadow-lg rounded-lg overflow-hidden">
-                                                <img src={qrCode} alt="QR Code" width={280} height={280} />
+                                        <div className="flex flex-col items-center space-y-6 animate-in fade-in zoom-in duration-300">
+                                            <div className="relative group">
+                                                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                                                <div className="relative bg-white p-2 rounded-xl border shadow-sm">
+                                                    <img src={qrCode} alt="QR Code" width={260} height={260} className="rounded-lg" />
+                                                </div>
                                             </div>
-                                            <p className="text-xs text-muted-foreground">
-                                                Instância: <span className="font-mono">{instanceName}</span>
+                                            <p className="text-sm text-slate-500 text-center max-w-[250px]">
+                                                Abra o WhatsApp &gt; Configurações &gt; Aparelhos Conectados &gt; Conectar
                                             </p>
-                                            <Button variant="outline" onClick={handleConnect}>
-                                                <RefreshCw className="mr-2 h-4 w-4" /> Atualizar Code
+                                            <Button variant="outline" onClick={handleConnect} size="sm">
+                                                <RefreshCw className="mr-2 h-3.5 w-3.5" /> Atualizar Code
                                             </Button>
-                                            <Button variant="destructive" onClick={handleDisconnect}>
+                                        </div>
+                                    )}
+
+                                    {instanceName && !qrCode && (
+                                        <div className="text-center space-y-6 animate-in fade-in zoom-in duration-500">
+                                            <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-2 ring-8 ring-green-50">
+                                                <div className="bg-green-500 p-2 rounded-full">
+                                                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h3 className="text-xl font-bold text-slate-900">Tudo conectado!</h3>
+                                                <p className="text-slate-500 mt-2">
+                                                    Instância: <span className="font-mono bg-slate-100 px-2 py-1 rounded text-slate-700 text-xs">{instanceName}</span>
+                                                </p>
+                                            </div>
+                                            <Button variant="destructive" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={handleDisconnect}>
                                                 <LogOut className="mr-2 h-4 w-4" /> Desconectar
                                             </Button>
                                         </div>
                                     )}
                                 </CardContent>
                             </Card>
+                        </div>
 
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Status da Conexão</CardTitle>
+                        {/* RAG / Actions Column */}
+                        <div className="md:col-span-4 flex flex-col gap-6">
+                            
+                            {/* Knowledge Base Card (Prominent) */}
+                            <Link href="/whatsapp/knowledge" className="group">
+                                <Card className="border-0 shadow-lg shadow-blue-100 hover:shadow-xl hover:shadow-blue-200 transition-all duration-300 ring-1 ring-blue-100 cursor-pointer overflow-hidden relative h-full">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-blue-500/20 transition-all" />
+                                    
+                                    <CardHeader>
+                                        <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-2 shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform duration-300">
+                                            <BookOpen className="h-6 w-6 text-white" />
+                                        </div>
+                                        <CardTitle className="text-blue-900">Base de Conhecimento</CardTitle>
+                                        <CardDescription className="text-blue-700/70">
+                                            Treine sua IA com PDFs e textos da sua empresa.
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="flex items-center text-sm font-medium text-blue-600 group-hover:translate-x-1 transition-transform">
+                                            Acessar RAG <div className="ml-1">→</div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </Link>
+
+                            {/* Info Card */}
+                            <Card className="border-0 shadow-md ring-1 ring-slate-100">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="text-base text-slate-700">Detalhes</CardTitle>
                                 </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border">
-                                            <span className="text-sm font-medium">API Status</span>
-                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Online</span>
-                                        </div>
-                                        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border">
-                                            <span className="text-sm font-medium">Webhook</span>
-                                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">Configurado</span>
-                                        </div>
+                                <CardContent className="space-y-4">
+                                    <div className="flex justify-between items-center text-sm border-b pb-2">
+                                        <span className="text-slate-500">API</span>
+                                        <span className="font-mono text-slate-700">Evolution v2</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm border-b pb-2">
+                                        <span className="text-slate-500">Webhook</span>
+                                        <span className="text-emerald-600 font-medium">Ativo</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-slate-500">Porta</span>
+                                        <span className="font-mono text-slate-700">3001</span>
                                     </div>
                                 </CardContent>
                             </Card>
+
                         </div>
                     </div>
                 </main>

@@ -1,17 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  webpack: (config) => {
-    if (process.env.NODE_ENV === "development") {
-      config.module.rules.push({
-        test: /\.(jsx|tsx)$/,
-        exclude: /node_modules/,
-        enforce: "pre",
-        use: "@dyad-sh/nextjs-webpack-component-tagger",
-      });
-    }
-    return config;
-  },
+  /* 
+   * Dev-only webpack config for component tagger removed to avoid Turbopack conflicts in Production.
+   * If needed in dev, uncomment or move to separate dev-only config.
+   */
+  // webpack: (config) => { ... } 
 };
 
 export default nextConfig;
