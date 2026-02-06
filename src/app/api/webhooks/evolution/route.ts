@@ -9,16 +9,13 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        // console.log("Webhook Body:", JSON.stringify(body, null, 2));
+        console.log("📥 Evolution Webhook Received:", JSON.stringify(body, null, 2));
 
-        // Evolution API Payload Structure varies by version
-        // Usually: data.messageType, data.message, data.key.remoteJid (phone)
-        // Let's assume standard Evolution v2 structure
-
-        const eventType = body.type; // "messages.upsert"
+        const eventType = body.type; 
         const messageData = body.data;
 
         if (eventType !== "messages.upsert" || !messageData) {
+            console.log("⏭️ Ignoring event type:", eventType);
             return NextResponse.json({ status: "ignored" });
         }
 
