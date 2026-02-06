@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { EvolutionService } from "@/services/evolution"; // Assuming this exists or I need to create/update it
 import { aiChat, generateEmbedding } from "@/lib/ai/client";
 
