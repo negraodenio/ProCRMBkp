@@ -43,14 +43,27 @@ const navigation = [
   { name: "Estratégias", href: "/strategies", icon: Target },
 ];
 
+import { useProfile } from "@/hooks/use-profile";
+
 export function Sidebar() {
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
+  const { profile, loading } = useProfile();
 
   const handleLogout = () => {
     startTransition(async () => {
       await logout();
     });
+  };
+
+  const getInitials = (name: string) => {
+    if (!name) return "??";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   return (
@@ -62,7 +75,9 @@ export function Sidebar() {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <LayoutDashboard className="h-4 w-4 text-primary-foreground" />
             </div>
-            <h1 className="text-xl font-bold">CRM IA</h1>
+            <h1 className="text-xl font-bold truncate">
+              {loading ? "..." : profile?.organizations?.name || "CRM IA"}
+            </h1>
           </div>
         </div>
 
@@ -101,12 +116,16 @@ export function Sidebar() {
             <Avatar className="h-9 w-9">
               <AvatarImage src="/avatars/user.png" alt="User" />
               <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
-                EP
+                {loading ? "..." : getInitials(profile?.full_name)}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">Elisangela Pereira</p>
-              <p className="text-xs text-muted-foreground">Admin</p>
+              <p className="text-sm font-medium truncate">
+                {loading ? "Carregando..." : profile?.full_name || "Usuário"}
+              </p>
+              <p className="text-xs text-muted-foreground capitalize">
+                {loading ? "..." : profile?.role || "Operador"}
+              </p>
             </div>
             <Button
               variant="ghost"

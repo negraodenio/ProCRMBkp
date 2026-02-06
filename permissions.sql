@@ -26,12 +26,18 @@ drop policy if exists "Users view org conversations" on public.conversations;
 
 create policy "Admins view all conversations" on public.conversations
 for all using (
-  (public.is_admin() and organization_id in (select organization_id from public.profiles where id = auth.uid()))
+  exists (
+    select 1 from public.profiles
+    where id = auth.uid()
+    and role in ('admin', 'manager')
+    and organization_id = public.conversations.organization_id
+  )
 );
 
 create policy "Users view assigned conversations" on public.conversations
 for all using (
-  (not public.is_admin() and assigned_to = auth.uid())
+  (assigned_to = auth.uid()) OR 
+  (exists (select 1 from public.profiles where id = auth.uid() and role in ('admin', 'manager') and organization_id = public.conversations.organization_id))
 );
 
 -- B. DEALS

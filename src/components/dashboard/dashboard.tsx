@@ -27,89 +27,120 @@ import {
   Cell,
 } from "recharts";
 
-// Mock Data - Replace with Supabase queries
-const primaryMetrics = [
-  {
-    title: "Leads Este Mês",
-    value: "47",
-    trend: 23,
-    description: "vs mês anterior",
-    icon: Users,
-    variant: "primary" as const,
-  },
-  {
-    title: "Taxa de Conversão",
-    value: "12.5%",
-    trend: -2,
-    description: "Meta: 15%",
-    icon: TrendingUp,
-    variant: "success" as const,
-    progress: 83,
-  },
-  {
-    title: "Valor Pipeline",
-    value: "R$ 125.000",
-    trend: 15,
-    description: "8 deals ativos",
-    icon: DollarSign,
-    variant: "primary" as const,
-  },
-  {
-    title: "Ticket Médio",
-    value: "R$ 8.500",
-    trend: 0,
-    description: "0 vendas fechadas",
-    icon: Target,
-    variant: "warning" as const,
-  },
-];
-
-const secondaryMetrics = [
-  {
-    title: "Leads Hoje",
-    value: "3",
-    description: "Captação diária",
-    icon: Zap,
-    variant: "default" as const,
-  },
-  {
-    title: "Taxa Qualificação",
-    value: "45%",
-    description: "de leads qualificados",
-    icon: PieChart,
-    variant: "default" as const,
-  },
-  {
-    title: "Atividades Semana",
-    value: "12",
-    description: "Interações registradas",
-    icon: Activity,
-    variant: "default" as const,
-  },
-  {
-    title: "Tempo Resposta",
-    value: "2.5h",
-    description: "Média de atendimento",
-    icon: Clock,
-    variant: "default" as const,
-  },
-];
-
-const funnelData = [
-  { name: "Leads Totais", value: 47, fill: "#3B82F6" },
-  { name: "Qualificados", value: 28, fill: "#22C55E" },
-  { name: "Propostas", value: 15, fill: "#F59E0B" },
-  { name: "Negociação", value: 8, fill: "#8B5CF6" },
-  { name: "Fechados", value: 3, fill: "#10B981" },
-];
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useProfile } from "@/hooks/use-profile";
 
 export function Dashboard() {
+  const { profile, loading: profileLoading } = useProfile();
+  const [metrics, setMetrics] = useState<any[]>([]);
+  const [secondaryStats, setSecondaryStats] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchDashboardData() {
+      if (!profile?.organization_id) return;
+      
+      const supabase = createClient();
+      
+      // Fetch Counts for current Org
+      const [leadsRes, dealsRes, convsRes] = await Promise.all([
+        supabase.from('leads').select('*', { count: 'exact', head: true }).eq('organization_id', profile.organization_id),
+        supabase.from('deals').select('amount', { count: 'exact' }).eq('organization_id', profile.organization_id),
+        supabase.from('conversations').select('*', { count: 'exact', head: true }).eq('organization_id', profile.organization_id)
+      ]);
+
+      const leadCount = leadsRes.count || 0;
+      const pipelineValue = dealsRes.data?.reduce((acc, d) => acc + (d.amount || 0), 0) || 0;
+      const convCount = dealsRes.count || 0;
+
+      setMetrics([
+        {
+          title: "Leads Totais",
+          value: leadCount.toString(),
+          trend: 0,
+          description: "No funil atual",
+          icon: Users,
+          variant: "primary" as const,
+        },
+        {
+          title: "Taxa de Conversão",
+          value: "0%",
+          trend: 0,
+          description: "Meta: 15%",
+          icon: TrendingUp,
+          variant: "success" as const,
+          progress: 0,
+        },
+        {
+          title: "Valor Pipeline",
+          value: `R$ ${pipelineValue.toLocaleString('pt-BR')}`,
+          trend: 0,
+          description: `${convCount} deals ativos`,
+          icon: DollarSign,
+          variant: "primary" as const,
+        },
+        {
+          title: "Ticket Médio",
+          value: "R$ 0",
+          trend: 0,
+          description: "0 vendas fechadas",
+          icon: Target,
+          variant: "warning" as const,
+        },
+      ]);
+
+      setSecondaryStats([
+        {
+          title: "Leads Hoje",
+          value: "0",
+          description: "Captação diária",
+          icon: Zap,
+          variant: "default" as const,
+        },
+        {
+          title: "Taxa Qualificação",
+          value: "0%",
+          description: "de leads qualificados",
+          icon: PieChart,
+          variant: "default" as const,
+        },
+        {
+          title: "Atividades Semana",
+          value: "0",
+          description: "Interações registradas",
+          icon: Activity,
+          variant: "default" as const,
+        },
+        {
+          title: "Tempo Resposta",
+          value: "0h",
+          description: "Média de atendimento",
+          icon: Clock,
+          variant: "default" as const,
+        },
+      ]);
+
+      setLoading(false);
+    }
+
+    if (profile) fetchDashboardData();
+  }, [profile]);
+
   const today = new Date().toLocaleDateString("pt-BR", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
   });
+
+  if (profileLoading || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -133,7 +164,7 @@ export function Dashboard() {
 
       {/* Primary KPIs - Row 1 */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {primaryMetrics.map((metric, index) => (
+        {metrics.map((metric, index) => (
           <KPICard
             key={index}
             title={metric.title}
@@ -149,7 +180,7 @@ export function Dashboard() {
 
       {/* Secondary KPIs - Row 2 */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {secondaryMetrics.map((metric, index) => (
+        {secondaryStats.map((metric, index) => (
           <KPICard
             key={index}
             title={metric.title}
@@ -162,7 +193,7 @@ export function Dashboard() {
         ))}
       </div>
 
-      {/* Funnel Chart */}
+      {/* Funnel Chart - Simplified placeholder for dynamic data */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -175,35 +206,9 @@ export function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {funnelData.map((item, index) => {
-              const maxValue = funnelData[0].value;
-              const percentage = Math.round((item.value / maxValue) * 100);
-              return (
-                <div key={index} className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">{item.name}</span>
-                    <span className="font-medium">{item.value}</span>
-                  </div>
-                  <div className="h-6 w-full bg-slate-100 rounded overflow-hidden">
-                    <div
-                      className="h-full rounded transition-all duration-500"
-                      style={{
-                        width: `${percentage}%`,
-                        backgroundColor: item.fill,
-                      }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-            <div className="pt-2 border-t">
-              <p className="text-sm text-muted-foreground">
-                Taxa de Conversão Geral:{" "}
-                <span className="font-bold text-foreground">
-                  {((funnelData[4].value / funnelData[0].value) * 100).toFixed(1)}%
-                </span>
-              </p>
-            </div>
+             <p className="text-sm text-muted-foreground italic">
+               Gráfico de funil em tempo real sendo populado com base nos novos leads da {profile?.organizations?.name}...
+             </p>
           </div>
         </CardContent>
       </Card>
