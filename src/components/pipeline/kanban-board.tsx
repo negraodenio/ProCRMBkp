@@ -316,9 +316,15 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                                                 }`}
                                         >
                                             {stageDeals.length === 0 ? (
-                                                <p className="text-center text-sm text-muted-foreground py-8">
-                                                    Nenhum lead nesta etapa
-                                                </p>
+                                                <div className="flex flex-col gap-3 py-4">
+                                                    <div className="h-24 rounded-lg border-2 border-dashed border-slate-200 flex items-center justify-center bg-white/50">
+                                                        <p className="text-center text-[10px] uppercase tracking-wider text-slate-400 font-medium">
+                                                            Aguardando leads
+                                                        </p>
+                                                    </div>
+                                                    <div className="h-24 rounded-lg border border-slate-100 bg-white/20 opacity-40"></div>
+                                                    <div className="h-24 rounded-lg border border-slate-100 bg-white/20 opacity-20"></div>
+                                                </div>
                                             ) : (
                                                 stageDeals.map((deal, index) => (
                                                     <Draggable key={deal.id} draggableId={deal.id} index={index}>

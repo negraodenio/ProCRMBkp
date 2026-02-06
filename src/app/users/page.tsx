@@ -35,6 +35,7 @@ import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { inviteUserAction } from "./actions";
 
 interface UserProfile {
     id: string;
@@ -89,12 +90,29 @@ export default function UsersPage() {
 
     async function handleInvite(e: React.FormEvent) {
         e.preventDefault();
+        setLoading(true);
 
-        // In a real app, this would send an invitation email
-        // For now, we'll just show success
-        toast.success(`Convite enviado para ${formData.email}`);
-        resetForm();
-        setOpen(false);
+        try {
+            const result = await inviteUserAction(
+                formData.email,
+                formData.name,
+                formData.role,
+                formData.department
+            );
+
+            if (result.success) {
+                toast.success(`Convite enviado para ${formData.email}`);
+                resetForm();
+                setOpen(false);
+                loadUsers();
+            } else {
+                toast.error(`Erro ao convidar: ${result.error}`);
+            }
+        } catch (error) {
+            toast.error("Erro inesperado ao enviar convite");
+        } finally {
+            setLoading(false);
+        }
     }
 
     function resetForm() {
