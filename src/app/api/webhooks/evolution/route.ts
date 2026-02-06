@@ -113,9 +113,14 @@ export async function POST(req: NextRequest) {
         }
 
         if (!org) {
-            console.log("⚠️ Organization not found by instance name. Falling back to first available organization for Single-Tenant/Testing.");
-            const { data: fallbackOrg } = await serviceClient.from("organizations").select("id").limit(1).maybeSingle();
-            org = fallbackOrg;
+            console.log("⚠️ Organization not found by instance name. Attempting smart fallback...");
+            const { data: crmia } = await serviceClient.from("organizations").select("id").eq("name", "CRM IA").maybeSingle();
+            if (crmia) {
+                org = crmia;
+            } else {
+                const { data: firstOrg } = await serviceClient.from("organizations").select("id").limit(1).maybeSingle();
+                org = firstOrg;
+            }
         }
 
         if (!org) {
