@@ -64,9 +64,8 @@ export async function POST(req: NextRequest) {
         // BUT RLS is enabled. We need a SERVICE ROLE CLIENT.
 
         // IMPORTANT: Webhooks need SUPABASE_SERVICE_ROLE_KEY to bypass RLS and find/create data.
-        // The standard `createClient` from `@/lib/supabase/server` uses cookies.
-        // I will import `createServiceRoleClient` if available, or make a custom one here using `process.env.SUPABASE_SERVICE_ROLE_KEY`.
-        const serviceClient = createServiceClient();
+        // We use `createServiceRoleClient` defined in our library.
+        const serviceClient = createServiceRoleClient();
 
         // 1. Identify Organization from Instance Name
         // Payload usually contains "instance" or "sender" field with the instance name.
