@@ -1,0 +1,491 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(215, 25%, 7.8%);
+  --card: hsl(210, 40%, 98%);
+  --card-foreground: hsl(215, 25%, 7.8%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(215, 25%, 7.8%);
+  --primary: hsl(217, 91%, 60%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(215, 25%, 7.8%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(210, 40%, 96%);
+  --muted-foreground: hsl(215, 25%, 7.8%);
+  --accent: hsl(210, 40%, 92%);
+  --accent-foreground: hsl(217, 91%, 60%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(214, 32%, 91%);
+  --input: hsl(214, 32%, 91%);
+  --ring: hsl(217, 91%, 60%);
+  --chart-1: hsl(217, 91%, 60%);
+  --chart-2: hsl(142, 76%, 36%);
+  --chart-3: hsl(45, 93%, 56%);
+  --chart-4: hsl(142, 76%, 36%);
+  --chart-5: hsl(0, 84%, 60%);
+  --sidebar: hsl(210, 40%, 98%);
+  --sidebar-foreground: hsl(215, 25%, 7.8%);
+  --sidebar-primary: hsl(217, 91%, 60%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(210, 40%, 92%);
+  --sidebar-accent-foreground: hsl(217, 91%, 60%);
+  --sidebar-border: hsl(214, 32%, 91%);
+  --sidebar-ring: hsl(217, 91%, 60%);
+  --font-sans: Inter, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 0.75rem;
+  --shadow-2xs: 0px 1px 2px 0px hsl(0, 0%, 0%, 0.05);
+  --shadow-xs: 0px 1px 2px 0px hsl(0, 0%, 0%, 0.05);
+  --shadow-sm: 0px 1px 2px 0px hsl(0, 0%, 0%, 0.05), 0px 1px 3px 0px hsl(0, 0%, 0%, 0.10);
+  --shadow: 0px 1px 2px 0px hsl(0, 0%, 0%, 0.05), 0px 1px 3px 0px hsl(0, 0%, 0%, 0.10);
+  --shadow-md: 0px 4px 6px -1px hsl(0, 0%, 0%, 0.10), 0px 2px 4px -1px hsl(0, 0%, 0%, 0.06);
+  --shadow-lg: 0px 10px 15px -3px hsl(0, 0%, 0%, 0.10), 0px 4px 6px -2px hsl(0, 0%, 0%, 0.05);
+  --shadow-xl: 0px 20px 25px -5px hsl(0, 0%, 0%, 0.10), 0px 10px 10px -5px hsl(0, 0%, 0%, 0.04);
+  --shadow-2xl: 0px 25px 50px -12px hsl(0, 0%, 0%, 0.25);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+
+  /* CRM-specific custom properties */
+  --primary-50: hsl(214, 95%, 93%);
+  --primary-100: hsl(214, 95%, 87%);
+  --primary-500: hsl(217, 91%, 60%);
+  --primary-600: hsl(221, 83%, 53%);
+  --primary-700: hsl(224, 76%, 48%);
+
+  --slate-50: hsl(210, 40%, 98%);
+  --slate-100: hsl(210, 40%, 96%);
+  --slate-200: hsl(214, 32%, 91%);
+  --slate-300: hsl(213, 27%, 84%);
+  --slate-400: hsl(215, 20%, 65%);
+  --slate-500: hsl(215, 16%, 47%);
+  --slate-600: hsl(215, 19%, 35%);
+  --slate-700: hsl(215, 25%, 27%);
+  --slate-800: hsl(217, 33%, 17%);
+  --slate-900: hsl(222, 84%, 5%);
+
+  --green-100: hsl(142, 76%, 90%);
+  --green-600: hsl(142, 71%, 45%);
+  --green-700: hsl(142, 69%, 38%);
+
+  --blue-100: hsl(214, 95%, 93%);
+  --blue-600: hsl(221, 83%, 53%);
+  --blue-800: hsl(217, 91%, 40%);
+
+  --purple-100: hsl(270, 95%, 95%);
+  --purple-600: hsl(271, 81%, 56%);
+  --purple-800: hsl(271, 91%, 40%);
+
+  --amber-100: hsl(48, 100%, 88%);
+  --amber-600: hsl(45, 93%, 47%);
+
+  --emerald-500: hsl(160, 84%, 39%);
+  --emerald-600: hsl(158, 64%, 52%);
+
+  --red-500: hsl(0, 84%, 60%);
+  --red-100: hsl(0, 93%, 94%);
+  --red-800: hsl(0, 91%, 40%);
+
+  --yellow-100: hsl(55, 92%, 88%);
+  --yellow-800: hsl(32, 81%, 29%);
+
+  --orange-100: hsl(34, 100%, 92%);
+  --orange-800: hsl(24, 94%, 50%);
+}
+
+.dark {
+  --background: hsl(224, 71%, 4%);
+  --foreground: hsl(213, 31%, 91%);
+  --card: hsl(224, 71%, 4%);
+  --card-foreground: hsl(213, 31%, 91%);
+  --popover: hsl(224, 71%, 4%);
+  --popover-foreground: hsl(213, 31%, 91%);
+  --primary: hsl(217, 91%, 60%);
+  --primary-foreground: hsl(222, 84%, 5%);
+  --secondary: hsl(215, 27%, 17%);
+  --secondary-foreground: hsl(210, 40%, 98%);
+  --muted: hsl(215, 27%, 17%);
+  --muted-foreground: hsl(217, 10%, 64%);
+  --accent: hsl(215, 27%, 17%);
+  --accent-foreground: hsl(210, 40%, 98%);
+  --destructive: hsl(0, 63%, 31%);
+  --destructive-foreground: hsl(210, 40%, 98%);
+  --border: hsl(215, 27%, 17%);
+  --input: hsl(215, 27%, 17%);
+  --ring: hsl(217, 91%, 60%);
+  --chart-1: hsl(220, 70%, 50%);
+  --chart-2: hsl(160, 60%, 45%);
+  --chart-3: hsl(30, 80%, 55%);
+  --chart-4: hsl(280, 65%, 60%);
+  --chart-5: hsl(340, 75%, 55%);
+  --sidebar: hsl(224, 71%, 4%);
+  --sidebar-foreground: hsl(213, 31%, 91%);
+  --sidebar-primary: hsl(217, 91%, 60%);
+  --sidebar-primary-foreground: hsl(222, 84%, 5%);
+  --sidebar-accent: hsl(215, 27%, 17%);
+  --sidebar-accent-foreground: hsl(210, 40%, 98%);
+  --sidebar-border: hsl(215, 27%, 17%);
+  --sidebar-ring: hsl(217, 91%, 60%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+}
+
+/* Custom CRM styles matching the design */
+.bg-primary-50 {
+  background-color: var(--primary-50);
+}
+
+.bg-primary-600 {
+  background-color: var(--primary-600);
+}
+
+.bg-primary-700 {
+  background-color: var(--primary-700);
+}
+
+.text-primary-700 {
+  color: var(--primary-700);
+}
+
+.hover\:bg-primary-700:hover {
+  background-color: var(--primary-700);
+}
+
+.bg-slate-50 {
+  background-color: var(--slate-50);
+}
+
+.bg-slate-100 {
+  background-color: var(--slate-100);
+}
+
+.bg-slate-200 {
+  background-color: var(--slate-200);
+}
+
+.text-slate-500 {
+  color: var(--slate-500);
+}
+
+.text-slate-600 {
+  color: var(--slate-600);
+}
+
+.text-slate-700 {
+  color: var(--slate-700);
+}
+
+.text-slate-900 {
+  color: var(--slate-900);
+}
+
+.border-slate-200 {
+  border-color: var(--slate-200);
+}
+
+.hover\:bg-slate-100:hover {
+  background-color: var(--slate-100);
+}
+
+.hover\:bg-slate-50:hover {
+  background-color: var(--slate-50);
+}
+
+/* Green colors for WhatsApp/success */
+.bg-green-100 {
+  background-color: var(--green-100);
+}
+
+.text-green-600 {
+  color: var(--green-600);
+}
+
+.text-green-800 {
+  color: var(--green-800);
+}
+
+.bg-green-600 {
+  background-color: var(--green-600);
+}
+
+.hover\:bg-green-700:hover {
+  background-color: var(--green-700);
+}
+
+/* Blue colors */
+.bg-blue-100 {
+  background-color: var(--blue-100);
+}
+
+.text-blue-600 {
+  color: var(--blue-600);
+}
+
+.text-blue-800 {
+  color: var(--blue-800);
+}
+
+/* Purple colors for automations */
+.bg-purple-100 {
+  background-color: var(--purple-100);
+}
+
+.text-purple-600 {
+  color: var(--purple-600);
+}
+
+.text-purple-800 {
+  color: var(--purple-800);
+}
+
+.bg-purple-600 {
+  background-color: var(--purple-600);
+}
+
+.hover\:bg-purple-700:hover {
+  background-color: hsl(271, 81%, 48%);
+}
+
+/* Amber colors for sales */
+.bg-amber-100 {
+  background-color: var(--amber-100);
+}
+
+.text-amber-600 {
+  color: var(--amber-600);
+}
+
+.bg-amber-600 {
+  background-color: var(--amber-600);
+}
+
+.hover\:bg-amber-700:hover {
+  background-color: hsl(45, 93%, 40%);
+}
+
+/* Success colors */
+.text-emerald-600 {
+  color: var(--emerald-600);
+}
+
+.bg-emerald-500 {
+  background-color: var(--emerald-500);
+}
+
+/* Status colors */
+.text-red-600 {
+  color: hsl(0, 84%, 60%);
+}
+
+.bg-red-100 {
+  background-color: var(--red-100);
+}
+
+.text-red-800 {
+  color: var(--red-800);
+}
+
+.bg-yellow-100 {
+  background-color: var(--yellow-100);
+}
+
+.text-yellow-800 {
+  color: var(--yellow-800);
+}
+
+.bg-orange-100 {
+  background-color: var(--orange-100);
+}
+
+.text-orange-800 {
+  color: var(--orange-800);
+}
+
+/* Badge variants for success status */
+.badge-success {
+  @apply bg-green-100 text-green-800;
+}
+
+/* Custom shadows */
+.shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+.shadow-md {
+  box-shadow: var(--shadow-md);
+}
+
+.shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+.shadow-xl {
+  box-shadow: var(--shadow-xl);
+}
+
+/* Focus states */
+.focus\:ring-2:focus {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+
+.focus\:ring-primary-500:focus {
+  --tw-ring-color: var(--primary-500);
+}
+
+.focus\:border-primary-500:focus {
+  border-color: var(--primary-500);
+}
+
+/* Transition utilities */
+.transition-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Custom scrollbar for webkit browsers */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: var(--slate-300);
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: var(--slate-400);
+}
+
+/* Custom horizontal scrollbar for Kanban */
+.kanban-scroll-container::-webkit-scrollbar {
+  height: 12px;
+  background-color: #f1f5f9;
+  border-radius: 6px;
+}
+
+.kanban-scroll-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+  border-radius: 6px;
+  border: 2px solid #f1f5f9;
+}
+
+.kanban-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #2563eb, #7c3aed);
+}
+
+.kanban-scroll-container::-webkit-scrollbar-track {
+  background-color: #f1f5f9;
+  border-radius: 6px;
+}
+
+/* Para Firefox */
+.kanban-scroll-container {
+  scrollbar-width: auto;
+  scrollbar-color: #3b82f6 #f1f5f9;
+}
+
+/* Kanban Column Scrollbar Styling */
+.kanban-column-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #E2E8F0 #F8FAFC;
+}
+
+.kanban-column-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.kanban-column-scroll::-webkit-scrollbar-track {
+  background: #F8FAFC;
+  border-radius: 3px;
+}
+
+.kanban-column-scroll::-webkit-scrollbar-thumb {
+  background: #E2E8F0;
+  border-radius: 3px;
+}
+
+.kanban-column-scroll::-webkit-scrollbar-thumb:hover {
+  background: #CBD5E1;
+}
+
+/* Uppy Dashboard - Posicionamento centralizado */
+.uppy-Dashboard--modal .uppy-Dashboard-overlay {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.uppy-Dashboard--modal .uppy-Dashboard-inner {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  margin: 20px !important;
+  max-height: 85vh !important;
+}
+
+/* Uppy Dashboard - Destaque no botão "Procurar arquivos" */
+.uppy-DashboardTab-name button,
+.uppy-Dashboard-browse {
+  background: linear-gradient(135deg, #92400e 0%, #d97706 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 10px 20px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-size: 15px !important;
+}
+
+.uppy-DashboardTab-name button:hover,
+.uppy-Dashboard-browse:hover {
+  background: linear-gradient(135deg, #78350f 0%, #b45309 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3) !important;
+}
+
+/* Destaque na área de drop */
+.uppy-Dashboard-AddFiles {
+  border: 2px dashed #d97706 !important;
+  border-radius: 12px !important;
+  background: #fef3c7 !important;
+}
+
+.uppy-Dashboard-AddFiles-title {
+  color: #92400e !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+}
+
+.uppy-Dashboard-note {
+  color: #92400e !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  margin-top: 10px !important;
+}

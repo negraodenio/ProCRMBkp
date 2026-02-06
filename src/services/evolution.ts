@@ -112,6 +112,31 @@ export const EvolutionService = {
         return await res.json();
     },
 
+    async setWebhook(instanceName: string, webhookUrl: string) {
+        if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) throw new Error("Missing Config");
+
+        const res = await fetch(`${EVOLUTION_API_URL}/webhook/set/${instanceName}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "apikey": EVOLUTION_API_KEY
+            },
+            body: JSON.stringify({
+                enabled: true,
+                url: webhookUrl,
+                webhookByEvents: false,
+                events: ["MESSAGES_UPSERT", "MESSAGES_UPDATE", "SEND_MESSAGE"]
+            })
+        });
+
+        if (!res.ok) {
+            console.error("Evolution Webhook Error:", await res.text());
+            return false;
+        }
+
+        return true;
+    },
+
     async deleteInstance(instanceName: string) {
         if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) throw new Error("Missing Config");
 

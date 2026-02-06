@@ -37,6 +37,14 @@ export async function getQrCode() {
             data = await EvolutionService.connectInstance(instanceName);
         }
 
+        // AUTO-CONFIGURE WEBHOOK (SaaS Mode)
+        // Uses NEXT_PUBLIC_APP_URL if set, otherwise falls back to the hardcoded production URL
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pro-crm-ihdnx5um0-deniolisbon-7343s-projects.vercel.app";
+        const webhookUrl = `${appUrl}/api/webhooks/evolution`;
+        
+        console.log(`Configuring Webhook for ${instanceName} to ${webhookUrl}`);
+        await EvolutionService.setWebhook(instanceName, webhookUrl);
+
 
 
         // Handle different Evolution API versions response structures
