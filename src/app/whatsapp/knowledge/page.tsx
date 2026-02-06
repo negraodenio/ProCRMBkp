@@ -12,7 +12,9 @@ export default async function KnowledgeBasePage() {
 
     // Get Organization ID
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return <div>Unauthorized</div>;
+    
+    import { redirect } from "next/navigation";
+    if (!user) return redirect("/login");
 
     const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
     if (!profile?.organization_id) return <div>Organization not found</div>;
