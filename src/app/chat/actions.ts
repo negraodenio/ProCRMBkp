@@ -4,40 +4,51 @@ import { createClient } from "@/lib/supabase/server";
 import { EvolutionService } from "@/services/evolution";
 
 export async function sendMessageAction(conversationId: string, text: string) {
+    console.log(`[Action] Starting sendMessageAction for conv: ${conversationId}`);
     try {
         const supabase = await createClient();
         
         // 1. Get User/Org Context
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return { error: "Não autorizado" };
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (authError || !authData?.user) {
+            console.error("[Action] Auth Error:", authError);
+            return { error: "Não autorizado" };
+        }
+        const user = authData.user;
 
-        const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
-        if (!profile) return { error: "Organização não encontrada para este usuário" };
+        const { data: profile, error: profErr } = await supabase.from("profiles").select("organization_id").eq("id", user.id).maybeSingle();
+        if (profErr || !profile) {
+            console.error("[Action] Profile Error:", profErr);
+            return { error: "Perfil ou organização não encontrados" };
+        }
 
         // 2. Get Conversation Details (Phone)
         const { data: conversation, error: convErr } = await supabase
             .from("conversations")
             .select("*")
             .eq("id", conversationId)
-            .single();
+            .maybeSingle();
         
-        if (convErr || !conversation) return { error: "Conversa não encontrada" };
+        if (convErr || !conversation) {
+            console.error("[Action] Conv Error:", convErr);
+            return { error: "Conversa não encontrada" };
+        }
 
         // 3. Derive Instance Name
-        const orgRes = await supabase.from("organizations").select("name").eq("id", profile.organization_id).single();
-        const orgName = orgRes.data?.name || "Empresa";
+        const { data: orgData } = await supabase.from("organizations").select("name").eq("id", profile.organization_id).maybeSingle();
+        const orgName = orgData?.name || "Empresa";
         const sanitizedName = orgName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "");
         const shortId = profile.organization_id.split('-')[0];
         const derivedInstanceName = `${sanitizedName}-${shortId}`;
 
-        console.log(`🚀 Sending message to ${conversation.contact_phone} via ${derivedInstanceName}`);
+        console.log(`[Action] Attempting send via Evolution: ${derivedInstanceName} to ${conversation.contact_phone}`);
 
         // 4. Send via Evolution
         try {
             await EvolutionService.sendMessage(derivedInstanceName, conversation.contact_phone, text);
         } catch (evoErr: any) {
-            console.error("❌ Failed to send via Evolution:", evoErr);
-            return { error: `WhatsApp Error: ${evoErr.message}` };
+            console.error("[Action] Evolution API Call Exception:", evoErr);
+            return { error: `WhatsApp API Error: ${evoErr.message || 'Erro de conexão'}` };
         }
 
         // 5. Save to Database
@@ -47,11 +58,11 @@ export async function sendMessageAction(conversationId: string, text: string) {
             content: text,
             direction: "outbound",
             status: "sent"
-        }).select().single();
+        }).select().maybeSingle();
 
         if (msgError) {
-            console.error("❌ Database Error saving message:", msgError);
-            return { error: "Mensagem enviada pelo WhatsApp mas não pôde ser salva no banco de dados." };
+            console.error("[Action] DB Insert Error:", msgError);
+            return { error: "Falha ao registrar mensagem no banco" };
         }
 
         // 6. Update Conversation timestamp
@@ -60,9 +71,15 @@ export async function sendMessageAction(conversationId: string, text: string) {
             last_message_at: new Date().toISOString()
         }).eq("id", conversationId);
 
-        return { success: true, data: newMessage };
+        console.log("[Action] Success!");
+        // Return a plain object to ensure serialization
+        return { 
+            success: true, 
+            id: newMessage?.id,
+            content: newMessage?.content 
+        };
     } catch (err: any) {
-        console.error("❌ Unexpected Error in sendMessageAction:", err);
-        return { error: `Erro interno: ${err.message || 'Erro desconhecido'}` };
+        console.error("[Action] CRITICAL UNEXPECTED ERROR:", err);
+        return { error: `Erro interno crítico: ${err.message || 'Erro desconhecido'}` };
     }
 }

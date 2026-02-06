@@ -129,17 +129,29 @@ export default function ChatPage() {
         try {
             setSending(true);
             const text = inputText;
-            setInputText("");
-            const result = await sendMessageAction(selectedId, text);
             
-            if (result.error) {
-                toast.error(result.error);
-                setInputText(text); // Restore text on error
+            console.log("📤 UI: Sending message...", { selectedId, textLength: text.length });
+            
+            const result = await sendMessageAction(selectedId, text);
+            console.log("📥 UI: Action result:", result);
+
+            if (result && typeof result === 'object' && 'error' in result && result.error) {
+                toast.error("Erro: " + result.error);
+                return; // Don't clear input on error
+            }
+            
+            if (result && (result as any).success) {
+                setInputText("");
+            } else if (result && (result as any).id) {
+                // Legacy support if it returns message object directly
+                setInputText("");
             } else {
-                // Success is handled by Supabase Realtime subscription
+                // Generic failure if result is empty/unexpected
+                toast.error("Erro: Resposta inesperada do servidor");
             }
         } catch (error: any) {
-            toast.error("Erro inesperado: " + error.message);
+            console.error("❌ UI: Unexpected error sending:", error);
+            toast.error("Erro inesperado: " + (error.message || "Erro desconhecido"));
         } finally {
             setSending(false);
         }
