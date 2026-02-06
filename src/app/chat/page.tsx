@@ -116,6 +116,13 @@ export default function ChatPage() {
         scrollToBottom();
     }, [messages]);
 
+    // Auto-select first conversation
+    useEffect(() => {
+        if (!selectedId && conversations.length > 0) {
+            setSelectedId(conversations[0].id);
+        }
+    }, [conversations, selectedId]);
+
     const handleSend = async () => {
         if (!selectedId || !inputText.trim() || sending) return;
 
