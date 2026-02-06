@@ -94,18 +94,22 @@ export async function POST(req: NextRequest) {
         // 1. Explicit Mappings (Case Insensitive + Flexible search)
         const normalizedInstance = instanceName.toString().toLowerCase();
         
+        // 1. Explicit Mappings (Case Insensitive + Flexible search)
         if (normalizedInstance.includes("df02ea6d")) {
             console.log("🎯 [Webhook] Match! Mario Pedro detected.");
             const { data } = await serviceClient.from("organizations").select("id").eq("id", "df02ea6d-561b-4e16-8185-42d35780f3b7").maybeSingle();
             org = data;
+        } else if (normalizedInstance === "tba" || normalizedInstance === "negraodenio" || normalizedInstance === "main") {
+            console.log("🎯 [Webhook] Match! Main Instance (Denio) detected.");
+            const { data } = await serviceClient.from("organizations").select("id").eq("id", "11111111-1111-1111-1111-111111111111").maybeSingle();
+            org = data;
         }
 
-        // 2. Fuzzy Auto-Detection (Scalable Mode) - Using string conversion for UUID match
+        // 2. Fuzzy Auto-Detection (Scalable Mode)
         if (!org && instanceName) {
             const parts = instanceName.split(/[-_]/); 
             for (const part of parts) {
                 if (part.length >= 6) { 
-                    // Use a query that works better for UUID columns
                     const { data } = await serviceClient
                         .from("organizations")
                         .select("id")
@@ -126,13 +130,16 @@ export async function POST(req: NextRequest) {
             org = data;
         }
 
+        // 4. Emergency Fallback: Primary Org (Denio)
         if (!org) {
-            console.error("❌ [Webhook] UNIDENTIFIED ORG for instance:", instanceName, "Body Keys:", Object.keys(body));
-            return NextResponse.json({ 
-                status: "error_unidentified_org", 
-                instance: instanceName,
-                received_keys: Object.keys(body)
-            }, { status: 200 }); // Still 200 for Evolution
+            console.warn("⚠️ [Webhook] No org identified for instance:", instanceName, "- Falling back to Main Org.");
+            const { data } = await serviceClient.from("organizations").select("id").eq("id", "11111111-1111-1111-1111-111111111111").maybeSingle();
+            org = data;
+        }
+
+        if (!org) {
+            console.error("❌ [Webhook] FATAL: Could not even find Main Org.");
+            return NextResponse.json({ status: "error_no_org" });
         }
 
         console.log("✅ [Webhook] Final Org ID:", org.id);
