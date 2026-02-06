@@ -205,23 +205,46 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Conversation creation failed internally" });
         }
 
-        // --- LOOP GUARD ---
-        // Check if the exact same message was sent recently in this conversation
-        const { data: lastMessages } = await serviceClient
+        // --- LOOP GUARD & FREQUENCY COOLDOWN ---
+        // 1. Stricter "me" check
+        if (fromMe) {
+            console.log("⏭️ Ignoring outbound message (fromMe: true)");
+            return NextResponse.json({ status: "ignored_self" });
+        }
+
+        // 2. Cooldown check (prevent AI from responding too fast to the same contact)
+        const { data: recentMessages } = await serviceClient
             .from("messages")
-            .select("content, created_at")
+            .select("content, direction, created_at")
             .eq("conversation_id", conversation.id)
             .order("created_at", { ascending: false })
-            .limit(2);
+            .limit(5);
 
-        if (lastMessages && lastMessages.length > 0) {
-            const last = lastMessages[0];
+        if (recentMessages && recentMessages.length > 0) {
+            // A. Exact content match (already exists, but let's keep it robust)
+            const last = recentMessages[0];
             const isDuplicate = last.content === text;
-            const isRecent = (new Date().getTime() - new Date(last.created_at).getTime()) < 5000;
+            const now = new Date().getTime();
+            const lastTime = new Date(last.created_at).getTime();
+            
+            // B. Frequency lock: If last message was very recent (< 3s), skip.
+            if (now - lastTime < 3000) {
+                console.log("⛔ Cooldown active: Skipping message from same contact within 3s.");
+                return NextResponse.json({ status: "ignored_cooldown" });
+            }
 
-            if (isDuplicate && isRecent) {
-                console.log("⛔ Loop detected: Skipping duplicate message within 5s.");
-                return NextResponse.json({ status: "ignored_loop" });
+            // C. Loop detection: If 3 out of last 5 messages are "outbound" and happened in last 15s
+            const outboundCount = recentMessages.filter(m => m.direction === "outbound").length;
+            const oldestInBatchTime = new Date(recentMessages[recentMessages.length - 1].created_at).getTime();
+            
+            if (outboundCount >= 3 && (now - oldestInBatchTime < 15000)) {
+                console.log("🚨 Loop detected: Too many AI responses in short time. Auto-muting for this contact.");
+                return NextResponse.json({ status: "ignored_loop_frequency" });
+            }
+
+            if (isDuplicate && (now - lastTime < 10000)) {
+                console.log("⛔ Loop detected: Skipping exact duplicate message within 10s.");
+                return NextResponse.json({ status: "ignored_duplicate" });
             }
         }
 
