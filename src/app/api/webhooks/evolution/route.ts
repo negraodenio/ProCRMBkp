@@ -90,20 +90,14 @@ export async function POST(req: NextRequest) {
         
         let org = null;
 
-        // 1. Explicit Mappings (High Reliability for scaling)
-        if (instanceName === "TBA-df02ea6d") {
+        // 1. Explicit Mappings (High Reliability)
+        if (instanceName && instanceName.toLowerCase().includes("df02ea6d")) {
+            console.log("🎯 Match: Found Mario Pedro's Org ID in instance name.");
             const { data } = await serviceClient.from("organizations").select("id").eq("id", "df02ea6d-561b-4e16-8185-42d35780f3b7").maybeSingle();
             org = data;
         }
 
-        // 2. Check Query Param
-        if (!org && queryOrgId) {
-            console.log("🔍 Org ID found in query param:", queryOrgId);
-            const { data } = await serviceClient.from("organizations").select("id").eq("id", queryOrgId).maybeSingle();
-            org = data;
-        }
-
-        // 3. Auto-Detection (Prefix Match)
+        // 2. Fuzzy Auto-Detection (Scalable Mode)
         if (!org && instanceName) {
             const parts = instanceName.split(/[-_]/); 
             for (const part of parts) {
@@ -115,21 +109,23 @@ export async function POST(req: NextRequest) {
                         .maybeSingle();
                     if (data) {
                         org = data;
+                        console.log("✅ Auto-Match: Found Org by instance segment:", part);
                         break;
                     }
                 }
             }
         }
 
-        // 4. Default Fallback
-        if (!org) {
-            const { data: firstOrg } = await serviceClient.from("organizations").select("id").order("created_at", { ascending: true }).limit(1).maybeSingle();
-            org = firstOrg;
+        // 3. Fallback: Query Param
+        if (!org && queryOrgId) {
+            const { data } = await serviceClient.from("organizations").select("id").eq("id", queryOrgId).maybeSingle();
+            org = data;
         }
 
         if (!org) {
-            console.error("❌ CRITICAL: No organization found.");
-            return NextResponse.json({ error: "Org not found" }, { status: 404 });
+            console.error("❌ WEBHOOK BLOCKED: Could not identify organization for instance:", instanceName);
+            // We return 200 to Evolution but we DON'T save any data to Denio's Org.
+            return NextResponse.json({ status: "error_unidentified_org", instance: instanceName });
         }
 
         console.log("✅ Organization identified:", org.id);

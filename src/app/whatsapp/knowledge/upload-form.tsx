@@ -57,7 +57,13 @@ export function UploadForm() {
     }
 
     return (
-        <form action={handleSubmit} className="space-y-4 border p-4 rounded-lg bg-muted/30">
+        <form 
+            onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit(new FormData(e.currentTarget));
+            }} 
+            className="space-y-4 border p-4 rounded-lg bg-muted/30"
+        >
             <div className="space-y-2">
                 <Label htmlFor="file">Novo Documento (PDF ou TXT)</Label>
                 <div className="flex gap-2">
