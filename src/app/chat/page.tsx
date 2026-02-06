@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/client";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { sendMessageAction } from "./actions";
+import { useProfile } from "@/hooks/use-profile";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
@@ -36,6 +37,7 @@ type Message = {
 
 export default function ChatPage() {
     const supabase = createClient();
+    const { profile, loading: profileLoading } = useProfile();
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -47,21 +49,28 @@ export default function ChatPage() {
     // 1. Fetch Conversations
     useEffect(() => {
         const fetchConversations = async () => {
+            if (!profile?.organization_id) return;
+            
             const { data, error } = await supabase
                 .from("conversations")
                 .select("*")
+                .eq("organization_id", profile.organization_id)
                 .order("last_message_at", { ascending: false });
 
             if (data) setConversations(data);
             setLoading(false);
         };
 
-        fetchConversations();
+        if (profile) fetchConversations();
 
         // 2. Realtime Conversations
         const channel = supabase
             .channel("conversations_changes")
-            .on("postgres_changes" as any, { event: "*", table: "conversations" }, (payload: any) => {
+            .on("postgres_changes" as any, { 
+                event: "*", 
+                table: "conversations",
+                filter: profile?.organization_id ? `organization_id=eq.${profile.organization_id}` : undefined
+            }, (payload: any) => {
                 if (payload.eventType === "INSERT") {
                     setConversations(prev => [payload.new as Conversation, ...prev]);
                 } else if (payload.eventType === "UPDATE") {

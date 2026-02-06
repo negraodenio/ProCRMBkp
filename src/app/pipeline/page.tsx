@@ -6,10 +6,23 @@ import { createClient } from "@/lib/supabase/server";
 export default async function PipelinePage() {
     const supabase = await createClient();
 
-    // 1. Get Default Pipeline
+    // 0. Get User Profile for Org Isolation
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null; // Or redirect
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+    if (!profile?.organization_id) return null;
+
+    // 1. Get Default Pipeline for THIS ORG
     const { data: pipeline } = await supabase
         .from('pipelines')
         .select('id')
+        .eq('organization_id', profile.organization_id)
         .eq('is_default', true)
         .single();
 
@@ -36,10 +49,11 @@ export default async function PipelinePage() {
         .eq('pipeline_id', pipeline.id)
         .order('order', { ascending: true });
 
-    // 3. Get Deals
+    // 3. Get Deals for THIS ORG
     const { data: deals } = await supabase
         .from('deals')
         .select('*')
+        .eq('organization_id', profile.organization_id)
         .in('stage_id', (stages || []).map(s => s.id));
 
     return (

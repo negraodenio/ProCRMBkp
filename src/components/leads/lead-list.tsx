@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { useProfile } from "@/hooks/use-profile";
 
 interface Lead {
   id: string;
@@ -77,6 +78,7 @@ const SOURCE_COLORS: Record<string, string> = {
 
 export function LeadList() {
   const [open, setOpen] = useState(false);
+  const { profile, loading: profileLoading } = useProfile();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -92,15 +94,17 @@ export function LeadList() {
   const supabase = createClient();
 
   useEffect(() => {
-    loadLeads();
-  }, []);
+    if (profile) loadLeads();
+  }, [profile]);
 
   async function loadLeads() {
+    if (!profile?.organization_id) return;
     setLoading(true);
     const { data, error } = await supabase
       .from("contacts")
       .select("*")
       .eq("type", "lead")
+      .eq("organization_id", profile.organization_id)
       .order("created_at", { ascending: false });
 
     if (error) {
