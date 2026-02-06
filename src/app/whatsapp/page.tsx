@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { QrCode, RefreshCw, LogOut, BookOpen } from "lucide-react";
@@ -16,7 +16,6 @@ export default function WhatsAppPage() {
     const [instanceName, setInstanceName] = useState<string>("");
 
     // Check status on load
-    import { useEffect } from "react";
     useEffect(() => {
         handleConnect();
     }, []);
