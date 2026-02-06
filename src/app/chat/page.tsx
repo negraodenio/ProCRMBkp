@@ -126,32 +126,45 @@ export default function ChatPage() {
     const handleSend = async () => {
         if (!selectedId || !inputText.trim() || sending) return;
 
+        const text = inputText;
+        const tempId = 'temp-' + Date.now();
+        
         try {
             setSending(true);
-            const text = inputText;
+            setInputText("");
             
-            console.log("📤 UI: Sending message...", { selectedId, textLength: text.length });
+            // 1. Optimistic Update
+            const optimisticMsg: Message = {
+                id: tempId,
+                content: text,
+                direction: "outbound",
+                created_at: new Date().toISOString(),
+                status: "sending"
+            };
+            setMessages(prev => [...prev, optimisticMsg]);
+            
+            console.log("📤 UI: Sending message (Optimistic)...", { selectedId, textLength: text.length });
             
             const result = await sendMessageAction(selectedId, text);
             console.log("📥 UI: Action result:", result);
 
-            if (result && typeof result === 'object' && 'error' in result && result.error) {
+            if (result && result.error) {
                 toast.error("Erro: " + result.error);
-                return; // Don't clear input on error
+                // Remove optimistic message on error
+                setMessages(prev => prev.filter(m => m.id !== tempId));
+                setInputText(text); // Restore text
+                return;
             }
             
-            if (result && (result as any).success) {
-                setInputText("");
-            } else if (result && (result as any).id) {
-                // Legacy support if it returns message object directly
-                setInputText("");
-            } else {
-                // Generic failure if result is empty/unexpected
-                toast.error("Erro: Resposta inesperada do servidor");
+            // Update the optimistic message with the real one
+            if (result && result.id) {
+                setMessages(prev => prev.map(m => m.id === tempId ? { ...m, id: result.id, status: 'sent' } : m));
             }
         } catch (error: any) {
             console.error("❌ UI: Unexpected error sending:", error);
             toast.error("Erro inesperado: " + (error.message || "Erro desconhecido"));
+            setMessages(prev => prev.filter(m => m.id !== tempId));
+            setInputText(text);
         } finally {
             setSending(false);
         }

@@ -103,7 +103,7 @@ export const EvolutionService = {
                     text: text // Standard for some v2.x versions
                 },
                 options: {
-                    delay: 1200,
+                    delay: 0,
                     presence: "composing",
                     linkPreview: false
                 }
