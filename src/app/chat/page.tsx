@@ -8,12 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Send, User, Bot } from "lucide-react";
+import { MessageSquare, Send, User, Trash2, Tag, Plus, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { sendMessageAction } from "./actions";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 type Conversation = {
     id: string;
@@ -41,7 +42,7 @@ export default function ChatPage() {
     const [inputText, setInputText] = useState("");
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
-    const scrollRef = useRef<HTMLDivElement>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // 1. Fetch Conversations
     useEffect(() => {
@@ -60,7 +61,7 @@ export default function ChatPage() {
         // 2. Realtime Conversations
         const channel = supabase
             .channel("conversations_changes")
-            .on("postgres_changes", { event: "*", table: "conversations" }, (payload) => {
+            .on("postgres_changes" as any, { event: "*", table: "conversations" }, (payload: any) => {
                 if (payload.eventType === "INSERT") {
                     setConversations(prev => [payload.new as Conversation, ...prev]);
                 } else if (payload.eventType === "UPDATE") {
@@ -94,11 +95,11 @@ export default function ChatPage() {
         // 4. Realtime Messages
         const channel = supabase
             .channel(`messages_${selectedId}`)
-            .on("postgres_changes", { 
+            .on("postgres_changes" as any, { 
                 event: "INSERT", 
                 table: "messages", 
                 filter: `conversation_id=eq.${selectedId}` 
-            }, (payload) => {
+            }, (payload: any) => {
                 setMessages(prev => [...prev, payload.new as Message]);
             })
             .subscribe();
@@ -107,10 +108,12 @@ export default function ChatPage() {
     }, [selectedId, supabase]);
 
     // Scroll to bottom
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
     useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }
+        scrollToBottom();
     }, [messages]);
 
     const handleSend = async () => {
@@ -131,121 +134,188 @@ export default function ChatPage() {
     const selectedChat = conversations.find(c => c.id === selectedId);
 
     return (
-        <div className="flex h-screen bg-background overflow-hidden">
+        <div className="flex h-screen bg-[#f8fafc] overflow-hidden">
             <Sidebar />
             
             <div className="flex flex-1 flex-col md:ml-64 relative overflow-hidden">
                 <Header />
                 
-                <main className="flex-1 flex overflow-hidden">
+                <main className="flex-1 flex overflow-hidden p-4 gap-4">
                     {/* Chat Sidebar */}
-                    <div className="w-80 border-r flex flex-col bg-muted/20">
-                        <div className="p-4 border-b bg-background">
-                            <h2 className="font-semibold text-lg">Conversas</h2>
+                    <div className="w-96 flex flex-col gap-4">
+                        <div className="flex flex-col gap-2">
+                            <h2 className="font-bold text-xl text-slate-800">Conversas Ativas</h2>
                         </div>
-                        <ScrollArea className="flex-1">
+                        
+                        <ScrollArea className="flex-1 rounded-3xl bg-white shadow-sm border border-slate-100">
                             {loading ? (
-                                <div className="p-4 text-center text-muted-foreground">Carregando...</div>
+                                <div className="p-4 text-center text-muted-foreground italic">Carregando conversas...</div>
                             ) : conversations.length === 0 ? (
-                                <div className="p-8 text-center space-y-2">
-                                    <MessageSquare className="h-10 w-10 mx-auto text-muted-foreground/50" />
-                                    <p className="text-sm text-muted-foreground">Nenhuma conversa encontrada.</p>
+                                <div className="p-12 text-center space-y-4">
+                                    <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
+                                        <MessageSquare className="h-8 w-8 text-slate-400" />
+                                    </div>
+                                    <p className="text-sm text-slate-500">Nenhuma conversa encontrada. Aguardando mensagens...</p>
                                 </div>
                             ) : (
-                                conversations.map(chat => (
-                                    <div 
-                                        key={chat.id}
-                                        onClick={() => setSelectedId(chat.id)}
-                                        className={`p-4 border-b cursor-pointer transition-colors hover:bg-muted/50 ${selectedId === chat.id ? 'bg-primary/10 border-r-4 border-r-primary' : ''}`}
-                                    >
-                                        <div className="flex justify-between items-start mb-1">
-                                            <span className="font-medium truncate">{chat.contact_name || chat.contact_phone}</span>
-                                            <span className="text-[10px] text-muted-foreground">
-                                                {format(new Date(chat.last_message_at), "HH:mm", { locale: ptBR })}
-                                            </span>
+                                <div className="p-2 space-y-2">
+                                    {conversations.map(chat => (
+                                        <div 
+                                            key={chat.id}
+                                            onClick={() => setSelectedId(chat.id)}
+                                            className={`p-4 rounded-2xl cursor-pointer transition-all border ${
+                                                selectedId === chat.id 
+                                                    ? 'bg-blue-50/50 border-blue-200 ring-1 ring-blue-200' 
+                                                    : 'bg-white border-transparent hover:bg-slate-50 hover:border-slate-100'
+                                            }`}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div className="bg-slate-100 p-2 rounded-xl text-blue-500">
+                                                    <MessageSquare className="h-5 w-5" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex justify-between items-center mb-0.5">
+                                                        <span className="font-bold text-slate-800 truncate block">
+                                                            {chat.contact_name || "Contato Novo"}
+                                                        </span>
+                                                        {chat.unread_count > 0 && (
+                                                            <Badge variant="default" className="bg-blue-600 h-5 px-1.5 min-w-[20px] justify-center text-[10px]">
+                                                                {chat.unread_count}
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-xs text-blue-500 font-medium mb-1">
+                                                        {chat.contact_phone}
+                                                    </div>
+                                                    <p className="text-xs text-slate-500 line-clamp-1 italic mb-1">
+                                                        {chat.last_message_content || "..."}
+                                                    </p>
+                                                    <div className="text-[10px] text-slate-400 flex items-center gap-1">
+                                                        <CheckCircle2 className="h-3 w-3" />
+                                                        Há {formatDistanceToNow(new Date(chat.last_message_at), { locale: ptBR })}
+                                                    </div>
+                                                </div>
+                                                <button className="p-1 text-slate-300 hover:text-red-500 transition-colors">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            </div>
                                         </div>
-                                        <p className="text-xs text-muted-foreground line-clamp-1">
-                                            {chat.last_message_content || "Inicie uma conversa..."}
-                                        </p>
-                                    </div>
-                                ))
+                                    ))}
+                                </div>
                             )}
                         </ScrollArea>
                     </div>
 
                     {/* Chat Window */}
-                    <div className="flex-1 flex flex-col bg-background relative">
+                    <div className="flex-1 flex flex-col bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden relative">
                         {selectedId ? (
                             <>
                                 {/* Chat Header */}
-                                <div className="p-4 border-b flex items-center justify-between bg-background/95 backdrop-blur">
-                                    <div className="flex items-center gap-3">
-                                        <Avatar>
-                                            <AvatarFallback><User /></AvatarFallback>
-                                        </Avatar>
+                                <div className="p-6 border-b flex items-start justify-between bg-white">
+                                    <div className="flex items-start gap-4">
+                                        <div className="bg-slate-50 p-3 rounded-2xl">
+                                            <User className="h-6 w-6 text-slate-400" />
+                                        </div>
                                         <div>
-                                            <h3 className="font-medium leading-none">{selectedChat?.contact_name || selectedChat?.contact_phone}</h3>
-                                            <span className="text-xs text-green-500 flex items-center gap-1">
-                                                <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                                                Online
-                                            </span>
+                                            <div className="flex items-center gap-3 mb-1">
+                                                <h3 className="font-bold text-xl text-slate-800">
+                                                    {selectedChat?.contact_name || "Contato Novo"}
+                                                </h3>
+                                                <Badge variant="outline" className="text-blue-600 bg-blue-50 border-blue-100 text-[10px] font-bold">
+                                                    {selectedChat?.contact_phone}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex items-center gap-4 text-sm text-slate-500">
+                                                <div className="flex items-center gap-1.5">
+                                                    <Tag className="h-4 w-4" />
+                                                    <span className="font-medium">Etiquetas:</span>
+                                                    <button className="flex items-center gap-1 text-blue-600 hover:underline">
+                                                        <Plus className="h-3 w-3" /> Adicionar
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Messages */}
-                                <ScrollArea className="flex-1 p-4" viewportRef={scrollRef}>
-                                    <div className="space-y-4 pb-4">
-                                        {messages.map((msg) => (
-                                            <div 
-                                                key={msg.id}
-                                                className={`flex ${msg.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}
-                                            >
-                                                <div className={`max-w-[70%] rounded-2xl p-3 text-sm shadow-sm ${
-                                                    msg.direction === 'outbound' 
-                                                        ? 'bg-primary text-primary-foreground rounded-tr-none' 
-                                                        : 'bg-muted rounded-tl-none'
-                                                }`}>
-                                                    <p className="whitespace-pre-wrap">{msg.content}</p>
-                                                    <div className={`text-[10px] mt-1 opacity-70 ${msg.direction === 'outbound' ? 'text-right' : ''}`}>
-                                                        {format(new Date(msg.created_at), "HH:mm")}
+                                {/* Messages Area */}
+                                <div className="flex-1 relative overflow-hidden bg-slate-50/30">
+                                    <ScrollArea className="h-full p-6">
+                                        <div className="space-y-6 pb-6">
+                                            {messages.map((msg) => (
+                                                <div 
+                                                    key={msg.id}
+                                                    className={`flex flex-col ${msg.direction === 'outbound' ? 'items-end' : 'items-start'}`}
+                                                >
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-[11px] font-bold text-slate-800">
+                                                            {msg.direction === 'outbound' ? 'Você' : (selectedChat?.contact_name || 'Cliente')}
+                                                        </span>
+                                                        <span className="text-[10px] text-slate-400">
+                                                            {format(new Date(msg.created_at), "HH:mm")}
+                                                        </span>
+                                                    </div>
+                                                    <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] border ${
+                                                        msg.direction === 'outbound' 
+                                                            ? 'bg-[#eff6ff] text-slate-700 border-blue-100 rounded-tr-none' 
+                                                            : 'bg-white text-slate-700 border-slate-100 rounded-tl-none'
+                                                    }`}>
+                                                        <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </ScrollArea>
+                                            ))}
+                                            <div ref={messagesEndRef} />
+                                        </div>
+                                    </ScrollArea>
+                                </div>
 
-                                {/* Input */}
-                                <div className="p-4 border-t bg-background">
-                                    <div className="flex gap-2">
-                                        <Input 
-                                            placeholder="Digite sua mensagem..." 
-                                            value={inputText}
-                                            onChange={(e) => setInputText(e.target.value)}
-                                            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                                            disabled={sending}
-                                            className="focus-visible:ring-primary"
-                                        />
-                                        <Button onClick={handleSend} disabled={sending || !inputText.trim()} size="icon">
-                                            <Send className="h-4 w-4" />
-                                        </Button>
+                                {/* Message Input Area */}
+                                <div className="p-6 border-t bg-white">
+                                    <div className="flex flex-col gap-3">
+                                        <div className="flex gap-4 items-end">
+                                            <div className="flex-1 bg-slate-50 rounded-2xl border border-slate-200 px-4 py-2 flex items-center">
+                                                <textarea
+                                                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 resize-none min-h-[44px] max-h-32"
+                                                    placeholder="Digite sua mensagem..."
+                                                    value={inputText}
+                                                    onChange={(e) => setInputText(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                                            e.preventDefault();
+                                                            handleSend();
+                                                        }
+                                                    }}
+                                                    disabled={sending}
+                                                    rows={1}
+                                                />
+                                            </div>
+                                            <Button 
+                                                onClick={handleSend} 
+                                                disabled={sending || !inputText.trim()} 
+                                                className="h-[60px] w-[60px] rounded-2xl bg-emerald-400 hover:bg-emerald-500 shadow-lg shadow-emerald-200/50"
+                                            >
+                                                <Send className="h-6 w-6 text-white" />
+                                            </Button>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium ml-1">
+                                            <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                                            Conectado via Evolution API
+                                        </div>
                                     </div>
                                 </div>
                             </>
                         ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center text-center p-12 space-y-4">
-                                <div className="relative">
-                                    <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-                                    <MessageSquare className="h-16 w-16 text-primary relative" />
+                            <div className="flex-1 flex flex-col items-center justify-center text-center p-12 bg-slate-50/20">
+                                <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6">
+                                    <MessageSquare className="h-10 w-10 text-blue-500" />
                                 </div>
-                                <div className="max-w-md space-y-2">
-                                    <h2 className="text-xl font-semibold">Suas Mensagens</h2>
-                                    <p className="text-muted-foreground italic">
+                                <div className="max-w-md space-y-4">
+                                    <h2 className="text-2xl font-bold text-slate-800">Conversas WhatsApp</h2>
+                                    <p className="text-slate-500 leading-relaxed italic border-l-4 border-blue-200 pl-4 py-2 bg-blue-50/50 rounded-r-xl text-sm">
                                         "A comunicação eficiente é o segredo de um CRM de sucesso."
                                     </p>
-                                    <p className="text-sm text-muted-foreground pt-4">
-                                        Selecione uma conversa ao lado para começar ou envie uma mensagem do seu WhatsApp para testar a integração.
+                                    <p className="text-sm text-slate-400 pt-6">
+                                        Selecione uma conversa ao lado para começar ou aguarde novas mensagens dos seus clientes.
                                     </p>
                                 </div>
                             </div>
