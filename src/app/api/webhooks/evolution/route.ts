@@ -90,25 +90,46 @@ export async function POST(req: NextRequest) {
         
         let org = null;
 
+        // 1. Check Query Param (User can still force it if they want)
         if (queryOrgId) {
             console.log("🔍 Org ID found in query param:", queryOrgId);
             const { data } = await serviceClient.from("organizations").select("id").eq("id", queryOrgId).maybeSingle();
             org = data;
         }
 
+        // 2. Auto-Detection (Scalable Mode)
         if (!org && instanceName) {
-            // Strategy: Extract the suffix (ShortUUID) and find the Org
-            // ... (rest of the existing logic)
+            console.log("🔍 Scaling Logic: Attempting auto-detection for instance:", instanceName);
+            
+            // Split by dash or underscore and check if any part is a prefix of an Org ID
+            const parts = instanceName.split(/[-_]/); 
+            for (const part of parts) {
+                if (part.length >= 6) { 
+                    const { data } = await serviceClient
+                        .from("organizations")
+                        .select("id")
+                        .ilike("id", `${part}%`)
+                        .maybeSingle();
+                    if (data) {
+                        org = data;
+                        console.log("✅ Scalable Match: Found Org by instance segment:", part);
+                        break;
+                    }
+                }
+            }
+
+            // 3. Legacy bot- fallback
+            if (!org && instanceName.startsWith("bot-")) {
+                const legacyId = instanceName.replace("bot-", "");
+                const { data } = await serviceClient.from("organizations").select("id").eq("id", legacyId).maybeSingle();
+                org = data;
+            }
+        }
 
         if (!org) {
             console.log("⚠️ Organization not found by instance name. Attempting smart fallback...");
-            const { data: crmia } = await serviceClient.from("organizations").select("id").eq("name", "CRM IA").maybeSingle();
-            if (crmia) {
-                org = crmia;
-            } else {
-                const { data: firstOrg } = await serviceClient.from("organizations").select("id").limit(1).maybeSingle();
-                org = firstOrg;
-            }
+            const { data: firstOrg } = await serviceClient.from("organizations").select("id").limit(1).maybeSingle();
+            org = firstOrg;
         }
 
         if (!org) {
@@ -117,25 +138,6 @@ export async function POST(req: NextRequest) {
         }
 
         console.log("✅ Organization identified:", org.id);
-
-        if (!org) {
-            // Fallback for Single Tenant / Custom Deployment (CRM IA)
-            // If the instance name doesn't match a UUID, we assume it belongs to the only Organization in the system.
-            console.log("No explicit instance match. Attempting Single Tenant Fallback...");
-            const { data: firstOrg } = await serviceClient
-                .from("organizations")
-                .select("id")
-                .limit(1)
-                .single();
-            
-            if (firstOrg) {
-                console.log("Fallback: Using default organization", firstOrg.id);
-                org = firstOrg;
-            } else {
-                console.error("Webhook Error: Could not parse/find Org from instance:", instanceName);
-                return NextResponse.json({ status: "ignored_no_instance_match" });
-            }
-        }
 
         // 2. Find/Create Contact
         let { data: contact } = await serviceClient
