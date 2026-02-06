@@ -142,7 +142,7 @@ export default function WhatsAppPage() {
                                                     Instância: <span className="font-mono bg-slate-100 px-2 py-1 rounded text-slate-700 text-xs">{instanceName}</span>
                                                 </p>
                                             </div>
-                                            <Button variant="destructive" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={handleDisconnect}>
+                                            <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={handleDisconnect}>
                                                 <LogOut className="mr-2 h-4 w-4" /> Desconectar
                                             </Button>
                                         </div>
