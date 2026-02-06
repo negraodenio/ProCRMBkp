@@ -124,8 +124,14 @@ export const EvolutionService = {
             body: JSON.stringify({
                 enabled: true,
                 url: webhookUrl,
-                webhookByEvents: false,
-                events: ["MESSAGES_UPSERT", "MESSAGES_UPDATE", "SEND_MESSAGE"]
+                webhookByEvents: true, // MUST be true to respect the events list
+                events: [
+                    "MESSAGES_UPSERT", 
+                    "MESSAGES_UPDATE", 
+                    "SEND_MESSAGE",
+                    "CONNECTION_UPDATE",
+                    "QRCODE_UPDATED" 
+                ]
             })
         });
 
