@@ -49,7 +49,10 @@ export default function ChatPage() {
     // 1. Fetch Conversations
     useEffect(() => {
         const fetchConversations = async () => {
-            if (!profile?.organization_id) return;
+            if (!profile?.organization_id) {
+                setLoading(false);
+                return;
+            }
             
             const { data, error } = await supabase
                 .from("conversations")
@@ -61,7 +64,7 @@ export default function ChatPage() {
             setLoading(false);
         };
 
-        if (profile) fetchConversations();
+        if (!profileLoading) fetchConversations();
 
         // 2. Realtime Conversations
         const channel = supabase
@@ -196,8 +199,21 @@ export default function ChatPage() {
                         </div>
                         
                         <ScrollArea className="flex-1 rounded-3xl bg-white shadow-sm border border-slate-100">
-                            {loading ? (
-                                <div className="p-4 text-center text-muted-foreground italic">Carregando conversas...</div>
+                            {loading || profileLoading ? (
+                                <div className="p-3 space-y-3">
+                                    {[1, 2, 3, 4].map((i) => (
+                                        <div key={i} className="p-4 rounded-2xl bg-white border border-slate-50 animate-pulse">
+                                            <div className="flex items-start gap-3">
+                                                <div className="bg-slate-100 h-10 w-10 rounded-xl" />
+                                                <div className="flex-1 space-y-2">
+                                                    <div className="h-3 bg-slate-100 rounded-full w-24" />
+                                                    <div className="h-2 bg-slate-50 rounded-full w-full" />
+                                                    <div className="h-2 bg-slate-50 rounded-full w-2/3" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             ) : conversations.length === 0 ? (
                                 <div className="p-12 text-center space-y-4">
                                     <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
