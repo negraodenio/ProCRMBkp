@@ -11,17 +11,26 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         console.log("📥 Evolution Webhook Received:", JSON.stringify(body, null, 2));
 
-        const eventType = body.type; 
+        const eventType = (body.type || body.event || "").toLowerCase(); 
         const messageData = body.data;
 
-        if (eventType !== "messages.upsert" || !messageData) {
-            console.log("⏭️ Ignoring event type:", eventType);
+        if (!eventType.includes("messages.upsert") && !eventType.includes("messages_upsert") && !eventType.includes("messages-upsert")) {
+            if (!messageData) {
+                console.log("⏭️ Ignoring event type (no data):", eventType);
+                return NextResponse.json({ status: "ignored" });
+            }
+            // Some versions might send upsert with different names but valid data
+            console.log("⚠️ Received event type:", eventType, "but continuing to check for message data.");
+        }
+
+        if (!messageData) {
+            console.log("⏭️ Ignoring event: No message data found.");
             return NextResponse.json({ status: "ignored" });
         }
 
         // Extract Phone and Message
-        const remoteJid = messageData.key.remoteJid; // 551199999999@s.whatsapp.net
-        const fromMe = messageData.key.fromMe;
+        const remoteJid = messageData.key?.remoteJid || messageData.remoteJid; 
+        const fromMe = messageData.key?.fromMe || messageData.fromMe;
 
         if (fromMe) return NextResponse.json({ status: "ignored_self" });
 
@@ -70,7 +79,8 @@ export async function POST(req: NextRequest) {
         // Old: bot-UUID
         // New: CompanyName-ShortUUID (where ShortUUID is the first part of UUID, e.g. 8 chars)
 
-        const instanceName = body.instance || body.sender || "";
+        const instanceName = body.instance || body.sender || body.instanceName || "";
+        console.log("🔍 Instance Name found:", instanceName);
         
         let org = null;
 
@@ -81,27 +91,39 @@ export async function POST(req: NextRequest) {
             // If it starts with 'bot-', it's the old legacy format
             if (instanceName.startsWith("bot-")) {
                 const legacyId = instanceName.replace("bot-", "");
-                const { data } = await serviceClient.from("organizations").select("id").eq("id", legacyId).single();
+                const { data } = await serviceClient.from("organizations").select("id").eq("id", legacyId).maybeSingle();
                 org = data;
             } else {
                 // New Format: Try to match the suffix against the beginning of the UUID
                 const parts = instanceName.split('-');
                 const suffix = parts[parts.length - 1]; // "1234abcd"
+                console.log("🔍 Suffix extracted:", suffix);
 
                 if (suffix && suffix.length >= 4) {
-                    // Search for Org where ID starts with this suffix
-                    // Note: Supabase/Postgres don't have a direct "startsWith" for UUID column type without casting.
-                    // We can try to search using text cast.
-                    const { data } = await serviceClient
+                    const { data, error: orgErr } = await serviceClient
                         .from("organizations")
                         .select("id")
-                        .or(`id.ilike.${suffix}%`) // Try casting implicitly or explicitly if needed
-                        .limit(1)
-                        .single();
+                        .ilike("id", `${suffix}%`)
+                        .maybeSingle();
+                    
+                    if (orgErr) console.error("❌ Error looking up org by suffix:", orgErr);
                     org = data;
                 }
             }
         }
+
+        if (!org) {
+            console.log("⚠️ Organization not found by instance name. Falling back to first available organization for Single-Tenant/Testing.");
+            const { data: fallbackOrg } = await serviceClient.from("organizations").select("id").limit(1).maybeSingle();
+            org = fallbackOrg;
+        }
+
+        if (!org) {
+            console.error("❌ CRITICAL: No organization found in the system.");
+            return NextResponse.json({ error: "Org not found" }, { status: 404 });
+        }
+
+        console.log("✅ Organization identified:", org.id);
 
         if (!org) {
             // Fallback for Single Tenant / Custom Deployment (CRM IA)
