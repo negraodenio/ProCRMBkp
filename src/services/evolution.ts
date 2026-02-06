@@ -115,25 +115,27 @@ export const EvolutionService = {
     async setWebhook(instanceName: string, webhookUrl: string) {
         if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) throw new Error("Missing Config");
 
-        // Try standard v2 endpoint first
+        // For v2.3.x, /webhook/set/ is often the correct endpoint but REQUIRES the 'webhook' object wrapper
         console.log(`Setting webhook for ${instanceName} to ${webhookUrl}`);
-        const res = await fetch(`${EVOLUTION_API_URL}/webhook/instance/${instanceName}`, {
+        const res = await fetch(`${EVOLUTION_API_URL}/webhook/set/${instanceName}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "apikey": EVOLUTION_API_KEY
             },
             body: JSON.stringify({
-                enabled: true,
-                url: webhookUrl,
-                webhookByEvents: true, // MUST be true to respect the events list
-                events: [
-                    "MESSAGES_UPSERT", 
-                    "MESSAGES_UPDATE", 
-                    "SEND_MESSAGE",
-                    "CONNECTION_UPDATE",
-                    "QRCODE_UPDATED" 
-                ]
+                webhook: {
+                    enabled: true,
+                    url: webhookUrl,
+                    webhookByEvents: true,
+                    events: [
+                        "MESSAGES_UPSERT", 
+                        "MESSAGES_UPDATE", 
+                        "SEND_MESSAGE",
+                        "CONNECTION_UPDATE",
+                        "QRCODE_UPDATED" 
+                    ]
+                }
             })
         });
 
