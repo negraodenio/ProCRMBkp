@@ -1,4 +1,4 @@
-"use strict";
+"use server";
 
 import { createClient } from "@/lib/supabase/server";
 import { EvolutionService } from "@/services/evolution";
