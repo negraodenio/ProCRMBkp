@@ -98,13 +98,14 @@ export const EvolutionService = {
             },
             body: JSON.stringify({
                 number: jid,
+                text: text, // Standard for many v2 versions
+                textMessage: {
+                    text: text // Standard for some v2.x versions
+                },
                 options: {
                     delay: 1200,
                     presence: "composing",
                     linkPreview: false
-                },
-                textMessage: {
-                    text: text
                 }
             })
         });
