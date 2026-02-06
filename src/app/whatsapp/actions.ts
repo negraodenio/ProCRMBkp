@@ -43,9 +43,7 @@ export async function getQrCode() {
         const webhookUrl = `${appUrl}/api/webhooks/evolution`;
         
         console.log(`Configuring Webhook for ${instanceName} to ${webhookUrl}`);
-        await EvolutionService.setWebhook(instanceName, webhookUrl);
-
-
+        const webhookSuccess = await EvolutionService.setWebhook(instanceName, webhookUrl);
 
         // Handle different Evolution API versions response structures
         const qrBase64 = data?.qrcode?.base64 || 
@@ -54,7 +52,9 @@ export async function getQrCode() {
 
         return {
             qrcode: qrBase64,
-            instanceName
+            instanceName,
+            webhookUrl,
+            webhookSuccess
         };
 
     } catch (error: any) {
@@ -68,7 +68,22 @@ export async function logoutWhatsApp() {
     const { data: profile } = await supabase.from('profiles').select('organization_id').single();
     if (!profile?.organization_id) return;
 
-    const instanceName = `bot-${profile.organization_id}`;
+    // Fetch Org Name to match creation logic
+    const { data: org } = await supabase.from('organizations').select('name').eq('id', profile.organization_id).single();
+    const orgName = org?.name || "Empresa";
+    const sanitizedName = orgName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "");
+    const shortId = profile.organization_id.split('-')[0];
+    
+    // New Naming Scheme
+    const instanceName = `${sanitizedName}-${shortId}`;
+    
+    // Attempt delete
     await EvolutionService.deleteInstance(instanceName);
+
+    // Also try legacy name just in case (Cleanup)
+    try {
+         await EvolutionService.deleteInstance(`bot-${profile.organization_id}`);
+    } catch (e) {}
+
     return { success: true };
 }

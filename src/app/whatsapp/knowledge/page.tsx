@@ -7,13 +7,14 @@ import { UploadForm, DeleteButton } from "./upload-form";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+import { redirect } from "next/navigation";
+
 export default async function KnowledgeBasePage() {
     const supabase = await createClient();
 
     // Get Organization ID
     const { data: { user } } = await supabase.auth.getUser();
     
-    import { redirect } from "next/navigation";
     if (!user) return redirect("/login");
 
     const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();

@@ -35,8 +35,13 @@ export default function WhatsAppPage() {
                 setInstanceName(res.instanceName || "");
                 toast.success("QR Code gerado! Escaneie agora.");
             } else {
-                toast.info("Instância já conectada ou aguardando.");
+                toast.info("Instância já conectada.");
                 setInstanceName(res.instanceName || "Connected");
+                if (res.webhookUrl) {
+                    console.log("Webhook Active:", res.webhookUrl);
+                    // Optional: Show to user as confirmation
+                    // toast.success(`Webhook: ${res.webhookUrl}`); 
+                }
             }
         } catch (e) {
             toast.error("Erro inesperado.");
