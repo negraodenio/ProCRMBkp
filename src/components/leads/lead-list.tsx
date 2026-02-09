@@ -29,7 +29,7 @@ import {
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
-import { cn } from "@/lib/utils";
+import { cn, formatPhoneNumber } from "@/lib/utils";
 
 interface Lead {
   id: string;
@@ -504,7 +504,7 @@ export function LeadList() {
                   {lead.phone && (
                     <div className="flex items-center gap-2 text-sm">
                       <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span>{lead.phone}</span>
+                      <span>{formatPhoneNumber(lead.phone)}</span>
                     </div>
                   )}
                 </div>
@@ -608,7 +608,7 @@ export function LeadList() {
                   <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center justify-between">
                       <div className="flex items-center gap-2 text-sm text-slate-600">
                           <Phone className="h-4 w-4" />
-                          {selectedLeadForWhatsApp?.phone}
+                          {formatPhoneNumber(selectedLeadForWhatsApp?.phone || "")}
                       </div>
                       <Badge variant="outline" className="text-[10px] bg-white">VIA EVOLUTION API</Badge>
                   </div>
