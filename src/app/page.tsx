@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Sparkles,
   Brain,
@@ -22,7 +23,7 @@ export default function LandingPage() {
       <header className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-8 w-8 text-blue-600" />
+            <Brain className="h-8 w-8 text-gradient" />
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               ProCRM
             </span>
@@ -428,6 +429,110 @@ export default function LandingPage() {
               </ul>
               <Button variant="outline" className="w-full">Falar com Vendas</Button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Form */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Fale Conosco
+            </h2>
+            <p className="text-lg text-slate-600">
+              Dúvidas? Nossa equipe está pronta para ajudar!
+            </p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xl border p-8 md:p-12">
+            <form action="https://formspree.io/f/xvzbgwbj" method="POST" className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">
+                    Nome *
+                  </label>
+                  <Input
+                    type="text"
+                    id="name"
+                    name="name"
+                    required
+                    placeholder="Seu nome completo"
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2">
+                    Email *
+                  </label>
+                  <Input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    placeholder="seu@email.com"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="company" className="block text-sm font-semibold text-slate-700 mb-2">
+                    Empresa
+                  </label>
+                  <Input
+                    type="text"
+                    id="company"
+                    name="company"
+                    placeholder="Nome da sua empresa"
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-2">
+                    Telefone
+                  </label>
+                  <Input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    placeholder="+351 / +55"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="message" className="block text-sm font-semibold text-slate-700 mb-2">
+                  Mensagem *
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  required
+                  rows={5}
+                  placeholder="Como podemos ajudar?"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent resize-none"
+                />
+              </div>
+
+              <input type="hidden" name="_subject" value="Novo contato - ProCRM Landing Page" />
+              <input type="hidden" name="_next" value="https://procrm.com/obrigado" />
+
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg"
+              >
+                Enviar Mensagem
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+
+              <p className="text-sm text-slate-500 text-center">
+                Respondemos em até 24 horas úteis
+              </p>
+            </form>
           </div>
         </div>
       </section>
