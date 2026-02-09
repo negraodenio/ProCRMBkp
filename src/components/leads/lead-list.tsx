@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Search, Phone, Mail, MessageCircle, Edit, Trash2, User, Building2, Sparkles, Send, Loader2, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -81,6 +82,7 @@ const SOURCE_COLORS: Record<string, string> = {
 };
 
 export function LeadList() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const { profile, loading: profileLoading } = useProfile();
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -558,7 +560,7 @@ export function LeadList() {
                     variant="ghost"
                     size="sm"
                     className="flex-1 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                    onClick={() => window.location.href = `/leads/qualification?leadId=${lead.id}`}
+                    onClick={() => router.push(`/leads/qualification?leadId=${lead.id}`)}
                   >
                     <Sparkles className="h-4 w-4 mr-1" />
                     Qualificar
