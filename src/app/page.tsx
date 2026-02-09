@@ -17,8 +17,8 @@ import {
   Globe
 } from "lucide-react";
 
-export default function LandingPage() {
-  const headersList = headers();
+export default async function LandingPage() {
+  const headersList = await headers();
   const country = headersList.get("x-vercel-ip-country") || "PT";
   const isBR = country === "BR";
 
