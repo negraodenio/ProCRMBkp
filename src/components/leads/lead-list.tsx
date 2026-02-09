@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Phone, Mail, MessageCircle, Edit, Trash2, User, Building2, Sparkles } from "lucide-react";
+import { Plus, Search, Phone, Mail, MessageCircle, Edit, Trash2, User, Building2, Sparkles, Send, Loader2, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { sendIntegratedWhatsAppMessage } from "@/app/whatsapp/messages/actions";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +29,7 @@ import {
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
+import { cn } from "@/lib/utils";
 
 interface Lead {
   id: string;
@@ -91,6 +94,11 @@ export function LeadList() {
     company: "",
     source: "whatsapp",
   });
+
+  // Integrated WhatsApp State
+  const [selectedLeadForWhatsApp, setSelectedLeadForWhatsApp] = useState<Lead | null>(null);
+  const [waMessage, setWaMessage] = useState("");
+  const [isSendingWA, setIsSendingWA] = useState(false);
 
   const supabase = createClient();
 
@@ -205,14 +213,32 @@ export function LeadList() {
   }
 
   async function sendWhatsApp(lead: Lead) {
-    if (lead.phone) {
-      const phone = lead.phone.replace(/\D/g, "");
-      window.open(`https://wa.me/55${phone}`, "_blank");
-      toast.success("Abrindo WhatsApp...");
-    } else {
-      toast.error("Lead sem telefone cadastrado");
-    }
+    setSelectedLeadForWhatsApp(lead);
+    setWaMessage("");
   }
+
+  const handleSendWhatsApp = async () => {
+    if (!selectedLeadForWhatsApp || !waMessage.trim()) return;
+    setIsSendingWA(true);
+    try {
+        const res = await sendIntegratedWhatsAppMessage(selectedLeadForWhatsApp.phone, waMessage);
+        if (res.success) {
+            toast.success("Mensagem enviada via CRM!");
+            setSelectedLeadForWhatsApp(null);
+            setWaMessage("");
+        } else {
+            toast.error("Erro via API: " + res.error);
+            if (confirm("Deseja tentar enviar manualmente pelo WhatsApp Web?")) {
+                const phone = selectedLeadForWhatsApp.phone.replace(/\D/g, "");
+                window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(waMessage)}`, "_blank");
+            }
+        }
+    } catch (e) {
+        toast.error("Erro inesperado ao enviar mensagem.");
+    } finally {
+        setIsSendingWA(false);
+    }
+  };
 
   const filteredLeads = leads.filter((lead) => {
     const matchesSearch =
@@ -511,6 +537,66 @@ export function LeadList() {
           ))
         )}
       </div>
+
+      {/* Integrated WhatsApp Modal */}
+      <Dialog open={!!selectedLeadForWhatsApp} onOpenChange={(open) => !open && setSelectedLeadForWhatsApp(null)}>
+          <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                      <div className="p-2 bg-green-100 rounded-full">
+                          <MessageCircle className="h-5 w-5 text-green-600" />
+                      </div>
+                      Mensagem para {selectedLeadForWhatsApp?.name}
+                  </DialogTitle>
+                  <DialogDescription>
+                      Envie uma mensagem direta via CRM usando sua conta conectada.
+                  </DialogDescription>
+              </DialogHeader>
+
+              <div className="py-4 space-y-4">
+                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-slate-600">
+                          <Phone className="h-4 w-4" />
+                          {selectedLeadForWhatsApp?.phone}
+                      </div>
+                      <Badge variant="outline" className="text-[10px] bg-white">VIA EVOLUTION API</Badge>
+                  </div>
+
+                  <div className="space-y-2">
+                      <Label htmlFor="wa-message" className="text-xs font-bold uppercase text-slate-500 tracking-wider">
+                          Conteúdo da Mensagem
+                      </Label>
+                      <Textarea
+                          id="wa-message"
+                          placeholder="Eai, tudo bem? Vi seu interesse em..."
+                          className="min-h-[120px]"
+                          value={waMessage}
+                          onChange={(e) => setWaMessage(e.target.value)}
+                      />
+                  </div>
+              </div>
+
+              <DialogFooter>
+                  <Button
+                      variant="ghost"
+                      onClick={() => {
+                          const phone = selectedLeadForWhatsApp?.phone.replace(/\D/g, "");
+                          window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(waMessage)}`, "_blank");
+                      }}
+                  >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Link Externo
+                  </Button>
+                  <Button
+                      onClick={handleSendWhatsApp}
+                      disabled={isSendingWA || !waMessage.trim()}
+                  >
+                      {isSendingWA ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+                      Enviar
+                  </Button>
+              </DialogFooter>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }

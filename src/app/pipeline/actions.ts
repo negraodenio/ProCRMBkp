@@ -19,3 +19,23 @@ export async function updateDealStage(dealId: string, newStageId: string) {
     revalidatePath('/pipeline')
     return { success: true }
 }
+
+export async function updateDeal(dealId: string, data: { title?: string, value?: number, notes?: string }) {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('deals')
+        .update({
+            ...data,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', dealId)
+
+    if (error) {
+        console.error('Error updating deal:', error)
+        return { success: false, error: error.message }
+    }
+
+    revalidatePath('/pipeline')
+    return { success: true }
+}

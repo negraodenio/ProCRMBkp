@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
-import { Plus, MoreVertical, Edit2, Trash2, Check, X } from "lucide-react";
+import { Plus, MoreVertical, Edit2, Trash2, Check, X, FileText, DollarSign, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { DealCard } from "./deal-card";
-import { updateDealStage } from "@/app/pipeline/actions";
+import { updateDealStage, updateDeal } from "@/app/pipeline/actions";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
@@ -33,6 +34,7 @@ type Deal = {
     contact_id?: string;
     contact_name?: string;
     stage_id: string;
+    notes?: string;
 };
 
 type Stage = {
@@ -71,7 +73,45 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
     const [newStageName, setNewStageName] = useState("");
     const [newStageColor, setNewStageColor] = useState("bg-blue-500");
 
+    // Edit Deal State
+    const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
+    const [dealFormData, setDealFormData] = useState<Partial<Deal>>({});
+    const [isSavingDeal, setIsSavingDeal] = useState(false);
+
     const supabase = createClient();
+
+    const openEditDeal = (deal: Deal) => {
+        setEditingDeal(deal);
+        setDealFormData({
+            title: deal.title,
+            value: deal.value,
+            notes: deal.notes || ""
+        });
+    };
+
+    const handleSaveDeal = async () => {
+        if (!editingDeal) return;
+        setIsSavingDeal(true);
+        try {
+            const result = await updateDeal(editingDeal.id, {
+                title: dealFormData.title,
+                value: Number(dealFormData.value) || 0,
+                notes: dealFormData.notes
+            });
+
+            if (result.success) {
+                setDeals(deals.map(d => d.id === editingDeal.id ? { ...d, ...dealFormData } : d));
+                toast.success("Negócio atualizado!");
+                setEditingDeal(null);
+            } else {
+                toast.error("Erro ao salvar: " + result.error);
+            }
+        } catch (e) {
+            toast.error("Erro inesperado ao salvar.");
+        } finally {
+            setIsSavingDeal(false);
+        }
+    };
 
     const onDragEnd = async (result: DropResult) => {
         const { destination, source, draggableId } = result;
@@ -334,7 +374,11 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                                                                 {...provided.draggableProps}
                                                                 {...provided.dragHandleProps}
                                                             >
-                                                                <DealCard deal={deal} isDragging={snapshot.isDragging} />
+                                                                <DealCard
+                                                                    deal={deal}
+                                                                    isDragging={snapshot.isDragging}
+                                                                    onEdit={openEditDeal}
+                                                                />
                                                             </div>
                                                         )}
                                                     </Draggable>
@@ -403,6 +447,74 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                         </Button>
                         <Button onClick={createNewStage} className="bg-blue-600 hover:bg-blue-700">
                             Criar Etapa
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+            {/* Modal de Edição do Negócio (Deal) */}
+            <Dialog open={!!editingDeal} onOpenChange={(open) => !open && setEditingDeal(null)}>
+                <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Tag className="h-5 w-5 text-indigo-500" />
+                            Editar Negócio
+                        </DialogTitle>
+                        <DialogDescription>
+                            Atualize as informações e adicione notas internas sobre este lead.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-6 py-4">
+                        <div className="space-y-4 border-b pb-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="deal-title" className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                    Título do Negócio
+                                </Label>
+                                <Input
+                                    id="deal-title"
+                                    value={dealFormData.title}
+                                    onChange={(e) => setDealFormData({ ...dealFormData, title: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="deal-value" className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                    Valor Estimado (R$)
+                                </Label>
+                                <div className="relative">
+                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <Input
+                                        id="deal-value"
+                                        type="number"
+                                        value={dealFormData.value}
+                                        onChange={(e) => setDealFormData({ ...dealFormData, value: Number(e.target.value) })}
+                                        className="pl-9"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="deal-notes" className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                                <FileText className="h-3.5 w-3.5" />
+                                Notas e Observações Externas
+                            </Label>
+                            <Textarea
+                                id="deal-notes"
+                                placeholder="Registre aqui detalhes sobre a negociação..."
+                                value={dealFormData.notes}
+                                onChange={(e) => setDealFormData({ ...dealFormData, notes: e.target.value })}
+                                className="min-h-[150px] resize-none"
+                            />
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setEditingDeal(null)} disabled={isSavingDeal}>
+                            Cancelar
+                        </Button>
+                        <Button onClick={handleSaveDeal} disabled={isSavingDeal}>
+                            {isSavingDeal ? "Salvando..." : "Salvar Alterações"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
