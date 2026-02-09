@@ -1,36 +1,48 @@
 -- ==============================================================================
 -- SUBSCRIPTIONS SCHEMA (Stripe Integration)
--- Run this to enable SaaS features.
 -- ==============================================================================
 
--- 1. Add Stripe Customer ID to Organizations (or Profiles, but usually Org pays)
-alter table public.organizations add column if not exists stripe_customer_id text;
-alter table public.organizations add column if not exists subscription_status text default 'free'; -- 'active', 'past_due', 'canceled', 'free'
-alter table public.organizations add column if not exists subscription_plan text default 'basic'; -- 'pro', 'enterprise'
+-- 1. Add Stripe Customer ID to Organizations
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'organizations' AND column_name = 'stripe_customer_id') THEN
+        ALTER TABLE public.organizations ADD COLUMN stripe_customer_id text;
+    END IF;
 
--- 2. SUBSCRIPTIONS TABLE (Optional if you only want basic status, but good for history)
-create table if not exists public.subscriptions (
-  id uuid default uuid_generate_v4() primary key,
-  organization_id uuid references public.organizations(id) not null,
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'organizations' AND column_name = 'subscription_status') THEN
+        ALTER TABLE public.organizations ADD COLUMN subscription_status text DEFAULT 'free';
+    END IF;
 
-  stripe_subscription_id text not null,
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'organizations' AND column_name = 'subscription_plan') THEN
+        ALTER TABLE public.organizations ADD COLUMN subscription_plan text DEFAULT 'basic';
+    END IF;
+END $$;
+
+-- 2. SUBSCRIPTIONS TABLE
+CREATE TABLE IF NOT EXISTS public.subscriptions (
+  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  organization_id uuid REFERENCES public.organizations(id) NOT NULL,
+
+  stripe_subscription_id text NOT NULL,
   stripe_price_id text,
-  status text not null, -- 'active', 'trialing', etc.
+  status text NOT NULL,
 
   current_period_start timestamptz,
   current_period_end timestamptz,
-  cancel_at_period_end boolean default false,
+  cancel_at_period_end boolean DEFAULT false,
 
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
 
 -- 3. Security (RLS)
-alter table public.subscriptions enable row level security;
+ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
 
-drop policy if exists "Users view org subscriptions" on public.subscriptions;
+-- Drop existing policy to avoid conflict
+DROP POLICY IF EXISTS "Users view org subscriptions" ON public.subscriptions;
 
-create policy "Users view org subscriptions" on public.subscriptions
-for all using (
-  organization_id in (select organization_id from public.profiles where id = auth.uid())
+-- Create policy
+CREATE POLICY "Users view org subscriptions" ON public.subscriptions
+FOR ALL USING (
+  organization_id IN (SELECT organization_id FROM public.profiles WHERE id = auth.uid())
 );
