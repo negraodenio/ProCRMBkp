@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "ProCRM - Sistema de Gestão de Relacionamento com Clientes",
   description: "Sistema CRM para gerenciamento de clientes e leads",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
