@@ -26,6 +26,7 @@ export default async function LandingPage() {
   const prices = {
     starter: isBR ? "129" : "29",
     pro: isBR ? "349" : "79",
+    enterprise: "Custom",
   };
 
   return (
