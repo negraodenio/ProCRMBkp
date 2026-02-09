@@ -1,6 +1,6 @@
 "use client";
 
-import { Moon, Sun, Bell, User, Search } from "lucide-react";
+import { Moon, Sun, Bell, User, Search, LogOut } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,9 +12,31 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export function Header() {
   const { setTheme } = useTheme();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      toast.success("Logout realizado com sucesso!");
+      router.push("/login");
+      router.refresh();
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+      toast.error("Erro ao fazer logout");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 glass-nav">
@@ -57,7 +79,14 @@ export function Header() {
               <DropdownMenuItem className="cursor-pointer">Meu Perfil</DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer">Configurações</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive cursor-pointer hover:bg-destructive/10">Sair</DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive cursor-pointer hover:bg-destructive/10 gap-2"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+              >
+                <LogOut className="h-4 w-4" />
+                {isLoggingOut ? "Saindo..." : "Sair"}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
