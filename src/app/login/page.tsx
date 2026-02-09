@@ -20,12 +20,21 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false)
 
     async function handleLogin(formData: FormData) {
-        setLoading(true)
-        const result = await login(formData)
-        setLoading(false)
+        console.log("Tentando fazer login...", Object.fromEntries(formData));
+        setLoading(true);
+        try {
+            const result = await login(formData);
+            console.log("Resultado do login:", result);
 
-        if (result?.error) {
-            toast.error(result.error)
+            if (result?.error) {
+                toast.error(result.error);
+                setLoading(false);
+            }
+            // Se sucesso, o redirect acontece no server e esta linha pode nao ser atingida ou o componente desmonta
+        } catch (error) {
+            console.error("Erro no login:", error);
+            toast.error("Erro ao conectar. Verifique o console.");
+            setLoading(false);
         }
     }
 
@@ -58,7 +67,11 @@ export default function LoginPage() {
                         </TabsList>
 
                         <TabsContent value="login">
-                            <form action={handleLogin} className="space-y-4">
+                            <form onSubmit={async (e) => {
+                                e.preventDefault();
+                                const formData = new FormData(e.currentTarget);
+                                await handleLogin(formData);
+                            }} className="space-y-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="email">Email</Label>
                                     <Input id="email" name="email" type="email" placeholder="seu@email.com" required />
