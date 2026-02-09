@@ -28,6 +28,7 @@ import { logout } from "@/app/auth/actions";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Analytics", href: "/dashboard", icon: BarChart3 },
   { name: "Leads", href: "/leads", icon: Building2 },
   { name: "Pipeline", href: "/pipeline", icon: KanbanSquare },
   { name: "Clientes", href: "/clients", icon: Users },
