@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
+import { createOrgScopedServiceClient } from "@/lib/supabase/service-scoped";
 import { EvolutionService } from "@/services/evolution"; // Assuming this exists or I need to create/update it
 import { aiChat, generateEmbedding } from "@/lib/ai/client";
 
@@ -85,16 +86,12 @@ export async function POST(req: NextRequest) {
         // We need `createClient` with Service Key for webhooks usually, or just Anonymous if RLS allows.
         // BUT RLS is enabled. We need a SERVICE ROLE CLIENT.
 
-        // IMPORTANT: Webhooks need SUPABASE_SERVICE_ROLE_KEY to bypass RLS and find/create data.
-        // We use `createServiceRoleClient` defined in our library.
-        const serviceClient = createServiceRoleClient();
+        // IMPORTANT: Webhooks need to bypass RLS to create contacts/conversations
+        // But we MUST scope by organization_id to prevent data leakage
+        // Using org-scoped service client for safety ✅
+        const serviceClient = createOrgScopedServiceClient(queryOrgId);
 
-        // 1. Identify Organization from Instance Name
-        // Payload usually contains "instance" or "sender" field with the instance name.
-        // Format expectations:
-        // Old: bot-UUID
-        // New: CompanyName-ShortUUID (where ShortUUID is the first part of UUID, e.g. 8 chars)
-
+        // Extract instance name for validation
         const instanceName = body.instance || body.sender || body.instanceName || body.data?.instance || "";
         console.log("🔍 [Webhook] Instance Name:", instanceName);
         console.log("🔍 [Webhook] Event Type:", eventType);
@@ -104,7 +101,7 @@ export async function POST(req: NextRequest) {
         const { data: org, error: orgError } = await serviceClient
             .from("organizations")
             .select("id")
-            .eq("id", queryOrgId)
+            // .eq("id", queryOrgId) ← AUTO-INJECTED by org-scoped client!
             .maybeSingle();
 
         if (!org) {

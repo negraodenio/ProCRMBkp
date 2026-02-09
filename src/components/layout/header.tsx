@@ -17,15 +17,15 @@ export function Header() {
   const { setTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-40 border-b border-white/10 glass-nav">
       <div className="flex items-center justify-between h-16 px-4 gap-4">
-        {/* Search - Hidden on mobile */}
+        {/* Modern Search - Hidden on mobile */}
         <div className="hidden md:flex flex-1 max-w-md">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="relative w-full group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
               placeholder="Buscar leads, clientes..."
-              className="pl-9 bg-muted/50 border-0 focus-visible:ring-1"
+              className="pl-9 pr-4 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/60"
             />
           </div>
         </div>
@@ -35,12 +35,12 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
+          {/* Notifications com Badge Animado */}
+          <Button variant="ghost" size="icon" className="relative hover:bg-white/10">
             <Bell className="h-5 w-5" />
             <Badge
               variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs animate-pulse shadow-glow-warning"
             >
               2
             </Badge>
@@ -49,36 +49,36 @@ export function Header() {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="hover:bg-white/10">
                 <User className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem>Meu Perfil</DropdownMenuItem>
-              <DropdownMenuItem>Configurações</DropdownMenuItem>
+            <DropdownMenuContent align="end" className="w-48 glass-card">
+              <DropdownMenuItem className="cursor-pointer">Meu Perfil</DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">Configurações</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">Sair</DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive cursor-pointer hover:bg-destructive/10">Sair</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
           {/* Theme Toggle */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <Button variant="ghost" size="icon" className="hover:bg-white/10">
+                <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-warning" />
+                <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-info" />
                 <span className="sr-only">Alternar tema</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setTheme("light")}>
-                Claro
+            <DropdownMenuContent align="end" className="glass-card">
+              <DropdownMenuItem onClick={() => setTheme("light")} className="cursor-pointer">
+                ☀️ Claro
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")}>
-                Escuro
+              <DropdownMenuItem onClick={() => setTheme("dark")} className="cursor-pointer">
+                🌙 Escuro
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("system")}>
-                Sistema
+              <DropdownMenuItem onClick={() => setTheme("system")} className="cursor-pointer">
+                💻 Sistema
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -68,20 +68,21 @@ export function Sidebar() {
 
   return (
     <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 z-50">
-      <div className="flex flex-col flex-grow border-r bg-background">
-        {/* Header */}
-        <div className="flex items-center h-16 px-4 border-b shrink-0">
+      {/* Modern Sidebar com Glassmorphism */}
+      <div className="flex flex-col flex-grow border-r border-white/10 bg-gradient-to-b from-background via-background to-background/95 backdrop-blur-xl">
+        {/* Header com Gradient */}
+        <div className="flex items-center h-16 px-4 border-b border-white/10 shrink-0 bg-gradient-to-r from-primary/5 to-secondary/5">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <LayoutDashboard className="h-4 w-4 text-primary-foreground" />
+            <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center shadow-lg shadow-primary/20">
+              <LayoutDashboard className="h-4 w-4 text-white" />
             </div>
-            <h1 className="text-xl font-bold truncate">
+            <h1 className="text-xl font-bold truncate bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
               {loading ? "..." : profile?.organizations?.name || "CRM IA"}
             </h1>
           </div>
         </div>
 
-        {/* Navigation */}
+        {/* Navigation com Hover Effects */}
         <div className="flex flex-col flex-1 overflow-y-auto">
           <nav className="flex-1 px-2 py-4 space-y-1">
             {navigation.map((item) => {
@@ -93,34 +94,34 @@ export function Sidebar() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                    "group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200",
                     isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      ? "gradient-primary text-white shadow-lg shadow-primary/20"
+                      : "text-muted-foreground hover:bg-white/5 hover:text-foreground hover:translate-x-1"
                   )}
                 >
                   <Icon className={cn(
-                    "w-5 h-5 mr-3",
-                    isActive && "text-primary"
+                    "w-5 h-5 mr-3 transition-transform group-hover:scale-110",
+                    isActive ? "text-white" : "text-muted-foreground group-hover:text-primary"
                   )} />
-                  {item.name}
+                  <span className={isActive ? "font-semibold" : ""}>{item.name}</span>
                 </Link>
               );
             })}
           </nav>
         </div>
 
-        {/* User Profile Footer */}
-        <div className="border-t p-4">
+        {/* User Profile Footer com Glass Effect */}
+        <div className="border-t border-white/10 p-4 bg-white/5 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9">
+            <Avatar className="h-9 w-9 ring-2 ring-primary/20">
               <AvatarImage src="/avatars/user.png" alt="User" />
-              <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+              <AvatarFallback className="gradient-primary text-white text-sm font-semibold">
                 {loading ? "..." : getInitials(profile?.full_name)}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">
+              <p className="text-sm font-semibold truncate">
                 {loading ? "Carregando..." : profile?.full_name || "Usuário"}
               </p>
               <p className="text-xs text-muted-foreground capitalize">
@@ -130,7 +131,7 @@ export function Sidebar() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
               onClick={handleLogout}
               disabled={isPending}
             >
