@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Phone, Mail, MessageCircle, Edit, Trash2, User, Building2 } from "lucide-react";
+import { Plus, Search, Phone, Mail, MessageCircle, Edit, Trash2, User, Building2, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -452,11 +453,23 @@ export function LeadList() {
                   <div className="flex items-center gap-1">
                     <div className="w-8 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-blue-500 to-green-500 rounded-full"
-                        style={{ width: `${lead.score || 50}%` }}
+                        className={cn(
+                          "h-full rounded-full transition-all duration-500",
+                          lead.score >= 70 ? "bg-orange-500" :
+                          lead.score >= 40 ? "bg-yellow-500" :
+                          "bg-blue-500"
+                        )}
+                        style={{ width: `${lead.score || 0}%` }}
                       />
                     </div>
-                    <span className="text-xs font-medium">{lead.score || 50}</span>
+                    <span className={cn(
+                      "text-[10px] font-bold",
+                      lead.score >= 70 ? "text-orange-600" :
+                      lead.score >= 40 ? "text-yellow-600" :
+                      "text-blue-600"
+                    )}>
+                      {lead.score || 0}
+                    </span>
                   </div>
                 </div>
 
@@ -471,10 +484,19 @@ export function LeadList() {
                     <MessageCircle className="h-4 w-4 mr-1" />
                     WhatsApp
                   </Button>
+
+                  <Link href={`/leads/qualification?leadId=${lead.id}`} className="flex-1">
+                    <Button variant="ghost" size="sm" className="w-full text-purple-600 hover:text-purple-700 hover:bg-purple-50">
+                      <Sparkles className="h-4 w-4 mr-1" />
+                      Qualificar
+                    </Button>
+                  </Link>
+
                   <Button variant="ghost" size="sm" className="flex-1">
                     <Edit className="h-4 w-4 mr-1" />
                     Editar
                   </Button>
+
                   <Button
                     variant="ghost"
                     size="icon"
