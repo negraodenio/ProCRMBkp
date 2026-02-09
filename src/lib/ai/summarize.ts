@@ -15,15 +15,91 @@ interface SummaryResult {
   confidence_score: number
 }
 
-export async function summarizeConversation(messages: Message[]): Promise<SummaryResult> {
-  const apiKey = process.env.OPENAI_API_KEY
+// Configuração de providers com fallback
+const AI_PROVIDERS = [
+  {
+    name: 'SiliconFlow (DeepSeek)',
+    baseURL: 'https://api.siliconflow.cn/v1',
+    apiKey: process.env.SILICONFLOW_API_KEY,
+    model: 'deepseek-ai/DeepSeek-V3',
+    enabled: !!process.env.SILICONFLOW_API_KEY
+  },
+  {
+    name: 'SiliconFlow (Kimi)',
+    baseURL: 'https://api.siliconflow.cn/v1',
+    apiKey: process.env.SILICONFLOW_API_KEY,
+    model: 'Qwen/Qwen2.5-7B-Instruct',
+    enabled: !!process.env.SILICONFLOW_API_KEY
+  },
+  {
+    name: 'OpenRouter',
+    baseURL: 'https://openrouter.ai/api/v1',
+    apiKey: process.env.OPENROUTER_API_KEY,
+    model: 'deepseek/deepseek-chat',
+    enabled: !!process.env.OPENROUTER_API_KEY
+  },
+  {
+    name: 'OpenAI',
+    baseURL: 'https://api.openai.com/v1',
+    apiKey: process.env.OPENAI_API_KEY,
+    model: 'gpt-4o-mini',
+    enabled: !!process.env.OPENAI_API_KEY
+  }
+]
 
-  if (!apiKey) {
-    throw new Error('OPENAI_API_KEY não configurada')
+async function callAIWithFallback(
+  systemPrompt: string,
+  userPrompt: string,
+  jsonMode: boolean = true
+): Promise<string> {
+  const enabledProviders = AI_PROVIDERS.filter(p => p.enabled)
+
+  if (enabledProviders.length === 0) {
+    throw new Error('Nenhum provider de IA configurado. Configure SILICONFLOW_API_KEY, OPENROUTER_API_KEY ou OPENAI_API_KEY')
   }
 
-  const openai = new OpenAI({ apiKey })
+  let lastError: Error | null = null
 
+  for (const provider of enabledProviders) {
+    try {
+      console.log(`[IA] Tentando ${provider.name} (${provider.model})...`)
+
+      const client = new OpenAI({
+        baseURL: provider.baseURL,
+        apiKey: provider.apiKey,
+      })
+
+      const response = await client.chat.completions.create({
+        model: provider.model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        ...(jsonMode && { response_format: { type: 'json_object' } }),
+        temperature: 0.3,
+      })
+
+      const content = response.choices[0].message.content
+      if (!content) {
+        throw new Error('Resposta vazia da IA')
+      }
+
+      console.log(`[IA] ✅ Sucesso com ${provider.name}`)
+      return content
+
+    } catch (error) {
+      console.error(`[IA] ❌ Falha com ${provider.name}:`, error)
+      lastError = error as Error
+      // Continua para o próximo provider
+      continue
+    }
+  }
+
+  // Se chegou aqui, todos falharam
+  throw new Error(`Todos os providers de IA falharam. Último erro: ${lastError?.message}`)
+}
+
+export async function summarizeConversation(messages: Message[]): Promise<SummaryResult> {
   // Formatar mensagens para o prompt
   const conversationText = messages
     .map(m => {
@@ -32,7 +108,9 @@ export async function summarizeConversation(messages: Message[]): Promise<Summar
     })
     .join('\n')
 
-  const prompt = `Analise as seguintes conversas com um lead/cliente e forneça um resumo estruturado em JSON:
+  const systemPrompt = 'Você é um assistente de vendas especializado em analisar conversas e extrair insights acionáveis.'
+
+  const userPrompt = `Analise as seguintes conversas com um lead/cliente e forneça um resumo estruturado em JSON:
 
 CONVERSAS:
 ${conversationText}
@@ -54,23 +132,8 @@ IMPORTANTE:
 - confidence_score: 0-1 baseado na qualidade dos dados`
 
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: 'Você é um assistente de vendas especializado em analisar conversas e extrair insights acionáveis.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.3,
-    })
-
-    const result = JSON.parse(response.choices[0].message.content || '{}')
+    const responseText = await callAIWithFallback(systemPrompt, userPrompt, true)
+    const result = JSON.parse(responseText)
 
     return {
       summary: result.summary || 'Resumo não disponível',
@@ -91,17 +154,11 @@ export async function analyzeMessageIntent(message: string, history: Message[]):
   suggested_action: string
   urgency: 'high' | 'medium' | 'low'
 }> {
-  const apiKey = process.env.OPENAI_API_KEY
-
-  if (!apiKey) {
-    throw new Error('OPENAI_API_KEY não configurada')
-  }
-
-  const openai = new OpenAI({ apiKey })
-
   const historyText = history.slice(-5).map(m => m.content).join('\n')
 
-  const prompt = `Analise a mensagem mais recente de um lead e retorne em JSON:
+  const systemPrompt = 'Você é um especialista em qualificação de leads e análise de intenção de compra.'
+
+  const userPrompt = `Analise a mensagem mais recente de um lead e retorne em JSON:
 
 MENSAGEM ATUAL: "${message}"
 
@@ -125,23 +182,8 @@ CRITÉRIOS:
 - urgency: high se precisar resposta imediata`
 
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: 'Você é um especialista em qualificação de leads e análise de intenção de compra.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.2,
-    })
-
-    const result = JSON.parse(response.choices[0].message.content || '{}')
+    const responseText = await callAIWithFallback(systemPrompt, userPrompt, true)
+    const result = JSON.parse(responseText)
 
     return {
       intent: result.intent || 'casual',
