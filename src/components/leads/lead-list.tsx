@@ -95,6 +95,9 @@ export function LeadList() {
     source: "whatsapp",
   });
 
+  // Edit Lead State
+  const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
+
   // Integrated WhatsApp State
   const [selectedLeadForWhatsApp, setSelectedLeadForWhatsApp] = useState<Lead | null>(null);
   const [waMessage, setWaMessage] = useState("");
@@ -138,7 +141,34 @@ export function LeadList() {
       return;
     }
 
-    // 1. Create the lead/contact
+    // Edit mode
+    if (editingLeadId) {
+      const { error } = await supabase
+        .from("contacts")
+        .update({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          company: formData.company,
+          source: formData.source,
+        })
+        .eq("id", editingLeadId);
+
+      if (error) {
+        console.error("Error updating lead:", error);
+        toast.error("Erro ao atualizar lead");
+        return;
+      }
+
+      toast.success("Lead atualizado!");
+      resetForm();
+      setOpen(false);
+      setEditingLeadId(null);
+      loadLeads();
+      return;
+    }
+
+    // Create mode (existing logic)
     const { data: newContact, error: contactError } = await supabase
       .from("contacts")
       .insert({
@@ -196,8 +226,21 @@ export function LeadList() {
     loadLeads();
   }
 
+  function handleEditLead(lead: Lead) {
+    setFormData({
+      name: lead.name,
+      email: lead.email,
+      phone: lead.phone,
+      company: lead.company,
+      source: lead.source,
+    });
+    setEditingLeadId(lead.id);
+    setOpen(true);
+  }
+
   function resetForm() {
     setFormData({ name: "", email: "", phone: "", company: "", source: "whatsapp" });
+    setEditingLeadId(null);
   }
 
   async function deleteLead(id: string) {
@@ -280,9 +323,9 @@ export function LeadList() {
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Novo Lead</DialogTitle>
+              <DialogTitle>{editingLeadId ? "Editar Lead" : "Novo Lead"}</DialogTitle>
               <DialogDescription>
-                Adicione um novo lead manualmente.
+                {editingLeadId ? "Atualize as informações do lead." : "Adicione um novo lead manualmente."}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -351,7 +394,7 @@ export function LeadList() {
                   Cancelar
                 </Button>
                 <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                  Criar Lead
+                  {editingLeadId ? "Salvar Alterações" : "Criar Lead"}
                 </Button>
               </DialogFooter>
             </form>
@@ -511,14 +554,22 @@ export function LeadList() {
                     WhatsApp
                   </Button>
 
-                  <Link href={`/leads/qualification?leadId=${lead.id}`} className="flex-1">
-                    <Button variant="ghost" size="sm" className="w-full text-purple-600 hover:text-purple-700 hover:bg-purple-50">
-                      <Sparkles className="h-4 w-4 mr-1" />
-                      Qualificar
-                    </Button>
-                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                    onClick={() => window.location.href = `/leads/qualification?leadId=${lead.id}`}
+                  >
+                    <Sparkles className="h-4 w-4 mr-1" />
+                    Qualificar
+                  </Button>
 
-                  <Button variant="ghost" size="sm" className="flex-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => handleEditLead(lead)}
+                  >
                     <Edit className="h-4 w-4 mr-1" />
                     Editar
                   </Button>
