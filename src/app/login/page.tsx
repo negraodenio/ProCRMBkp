@@ -20,21 +20,17 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false)
 
     async function handleLogin(formData: FormData) {
-        console.log("Tentando fazer login...", Object.fromEntries(formData));
         setLoading(true);
-        try {
-            const result = await login(formData);
-            console.log("Resultado do login:", result);
+        console.log("Enviando login...", Object.fromEntries(formData));
 
-            if (result?.error) {
-                toast.error(result.error);
-                setLoading(false);
-            }
-            // Se sucesso, o redirect acontece no server e esta linha pode nao ser atingida ou o componente desmonta
-        } catch (error) {
-            console.error("Erro no login:", error);
-            toast.error("Erro ao conectar. Verifique o console.");
-            setLoading(false);
+        // Server Action connection
+        const result = await login(formData); // Se der redirect, lança erro aqui que o Next trata
+
+        console.log("Retorno login:", result);
+        setLoading(false);
+
+        if (result?.error) {
+            toast.error(result.error);
         }
     }
 
