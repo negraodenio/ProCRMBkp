@@ -117,3 +117,38 @@ export async function deleteDocument(id: string) {
     revalidatePath("/whatsapp/knowledge");
     return { success: true };
 }
+
+export async function updateBotSettings(organizationId: string, settings: any) {
+    const supabase = await createClient();
+
+    // Auth check
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        throw new Error("Unauthorized");
+    }
+
+    // Verify user belongs to this organization
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("organization_id")
+        .eq("id", user.id)
+        .single();
+
+    if (profile?.organization_id !== organizationId) {
+        throw new Error("Unauthorized to modify this organization");
+    }
+
+    // Update bot_settings
+    const { error } = await supabase
+        .from("organizations")
+        .update({ bot_settings: settings })
+        .eq("id", organizationId);
+
+    if (error) {
+        console.error("Error updating bot settings:", error);
+        throw new Error("Failed to save settings");
+    }
+
+    revalidatePath("/whatsapp/knowledge");
+    return { success: true };
+}
