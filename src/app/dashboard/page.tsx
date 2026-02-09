@@ -4,10 +4,13 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { redirect } from "next/navigation";
 import { getDashboardMetrics } from "./actions";
 import { getSmartAlerts } from "@/app/automations/actions";
+import { getFunnelData, getRealTimeInsights } from "./funnel-actions";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { SourceDistribution } from "@/components/dashboard/source-distribution";
 import { LeadsTimeline } from "@/components/dashboard/leads-timeline";
 import { SmartAlerts } from "@/components/dashboard/smart-alerts";
+import { ConversionFunnel } from "@/components/dashboard/conversion-funnel";
+import { RealTimeInsights } from "@/components/dashboard/real-time-insights";
 import { Users, Target, TrendingUp, DollarSign } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -33,6 +36,8 @@ export default async function DashboardPage() {
 
   const dashboardData = await getDashboardMetrics(profile.organization_id);
   const alerts = await getSmartAlerts(profile.organization_id);
+  const funnelData = await getFunnelData(profile.organization_id);
+  const insights = await getRealTimeInsights(profile.organization_id);
 
   return (
     <div className="flex min-h-screen">
@@ -91,6 +96,17 @@ export default async function DashboardPage() {
           <div className="grid gap-6 md:grid-cols-2">
             <LeadsTimeline data={dashboardData.leadsTimeline} />
             <SourceDistribution data={dashboardData.sourceDistribution} />
+          </div>
+
+          {/* Funil e Insights */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <ConversionFunnel stages={funnelData} />
+            <RealTimeInsights
+              hotLeads={insights.hotLeads}
+              coldLeads={insights.coldLeads}
+              closingDeals={insights.closingDeals}
+              revenueAtRisk={insights.revenueAtRisk}
+            />
           </div>
         </main>
       </div>

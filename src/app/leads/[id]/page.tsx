@@ -3,8 +3,10 @@ import { Header } from "@/components/layout/header"
 import { Sidebar } from "@/components/layout/sidebar"
 import { redirect } from "next/navigation"
 import { getConversationHistory, generateSummary } from "./actions"
+import { calculateCloseProbability } from "@/app/automations/actions"
 import { AISummary } from "@/components/leads/ai-summary"
 import { ConversationTimeline } from "@/components/leads/conversation-timeline"
+import { ClosePrediction } from "@/components/leads/close-prediction"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -47,8 +49,45 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
     return redirect("/leads")
   }
 
+  // Buscar deal associado (se houver)
+  const { data: deal } = await supabase
+    .from("deals")
+    .select("*, stages(name)")
+    .eq("contact_id", params.id)
+    .eq("organization_id", profile.organization_id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single()
+
   // Buscar histórico de conversas
   const { conversations, summary } = await getConversationHistory(params.id)
+
+  // Calcular probabilidade de fechamento
+  const probability = await calculateCloseProbability(lead, deal)
+
+  // Calcular fatores individuais
+  const scoreWeight = lead.score ? (lead.score / 100) * 30 : 0
+  const daysSinceContact = lead.last_contact
+    ? Math.floor((Date.now() - new Date(lead.last_contact).getTime()) / (1000 * 60 * 60 * 24))
+    : 999
+  const engagementScore = Math.max(0, 100 - daysSinceContact * 10)
+  const engagementWeight = (engagementScore / 100) * 25
+
+  const stageWeights: Record<string, number> = {
+    'Novo': 10, 'Contatado': 20, 'Qualificado': 40, 'Proposta': 70, 'Negociação': 85
+  }
+  const stageName = (deal?.stages as any)?.name || 'Novo'
+  const stageScore = stageWeights[stageName] || 10
+  const stageWeight = stageScore * 0.25
+
+  const factors = {
+    score: lead.score || 0,
+    engagement: Math.round(engagementScore),
+    stage: Math.round(stageWeight * 4),
+    qualified: lead.status === 'qualified'
+  }
+
+  const estimatedDays = probability > 50 ? Math.round(30 - (probability / 100) * 20) : undefined
 
   return (
     <div className="flex min-h-screen">
@@ -131,6 +170,13 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
                   </CardContent>
                 </Card>
               )}
+
+              {/* Previsão de Fechamento */}
+              <ClosePrediction
+                probability={probability}
+                estimatedDays={estimatedDays}
+                factors={factors}
+              />
             </div>
 
             {/* Coluna Direita - Conversas e IA */}
