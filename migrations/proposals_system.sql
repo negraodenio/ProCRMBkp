@@ -81,17 +81,18 @@ CREATE TABLE IF NOT EXISTS proposal_templates (
 );
 
 -- Índices
-CREATE INDEX idx_proposals_organization ON proposals(organization_id);
-CREATE INDEX idx_proposals_contact ON proposals(contact_id);
-CREATE INDEX idx_proposals_deal ON proposals(deal_id);
-CREATE INDEX idx_proposals_status ON proposals(status);
-CREATE INDEX idx_proposal_templates_organization ON proposal_templates(organization_id);
+CREATE INDEX IF NOT EXISTS idx_proposals_organization ON proposals(organization_id);
+CREATE INDEX IF NOT EXISTS idx_proposals_contact ON proposals(contact_id);
+CREATE INDEX IF NOT EXISTS idx_proposals_deal ON proposals(deal_id);
+CREATE INDEX IF NOT EXISTS idx_proposals_status ON proposals(status);
+CREATE INDEX IF NOT EXISTS idx_proposal_templates_organization ON proposal_templates(organization_id);
 
 -- RLS Policies
 ALTER TABLE proposals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE proposal_templates ENABLE ROW LEVEL SECURITY;
 
 -- Proposals: usuários podem ver/editar propostas da sua organização
+DROP POLICY IF EXISTS "Users can view proposals from their organization" ON proposals;
 CREATE POLICY "Users can view proposals from their organization"
   ON proposals FOR SELECT
   USING (
@@ -100,6 +101,7 @@ CREATE POLICY "Users can view proposals from their organization"
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert proposals for their organization" ON proposals;
 CREATE POLICY "Users can insert proposals for their organization"
   ON proposals FOR INSERT
   WITH CHECK (
@@ -108,6 +110,7 @@ CREATE POLICY "Users can insert proposals for their organization"
     )
   );
 
+DROP POLICY IF EXISTS "Users can update proposals from their organization" ON proposals;
 CREATE POLICY "Users can update proposals from their organization"
   ON proposals FOR UPDATE
   USING (
@@ -116,6 +119,7 @@ CREATE POLICY "Users can update proposals from their organization"
     )
   );
 
+DROP POLICY IF EXISTS "Users can delete proposals from their organization" ON proposals;
 CREATE POLICY "Users can delete proposals from their organization"
   ON proposals FOR DELETE
   USING (
@@ -125,6 +129,7 @@ CREATE POLICY "Users can delete proposals from their organization"
   );
 
 -- Proposal Templates: mesmas políticas
+DROP POLICY IF EXISTS "Users can view templates from their organization" ON proposal_templates;
 CREATE POLICY "Users can view templates from their organization"
   ON proposal_templates FOR SELECT
   USING (
@@ -133,6 +138,7 @@ CREATE POLICY "Users can view templates from their organization"
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert templates for their organization" ON proposal_templates;
 CREATE POLICY "Users can insert templates for their organization"
   ON proposal_templates FOR INSERT
   WITH CHECK (
@@ -141,6 +147,7 @@ CREATE POLICY "Users can insert templates for their organization"
     )
   );
 
+DROP POLICY IF EXISTS "Users can update templates from their organization" ON proposal_templates;
 CREATE POLICY "Users can update templates from their organization"
   ON proposal_templates FOR UPDATE
   USING (
@@ -149,6 +156,7 @@ CREATE POLICY "Users can update templates from their organization"
     )
   );
 
+DROP POLICY IF EXISTS "Users can delete templates from their organization" ON proposal_templates;
 CREATE POLICY "Users can delete templates from their organization"
   ON proposal_templates FOR DELETE
   USING (
@@ -166,36 +174,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS proposals_updated_at ON proposals;
 CREATE TRIGGER proposals_updated_at
   BEFORE UPDATE ON proposals
   FOR EACH ROW
   EXECUTE FUNCTION update_proposals_updated_at();
 
+DROP TRIGGER IF EXISTS proposal_templates_updated_at ON proposal_templates;
 CREATE TRIGGER proposal_templates_updated_at
   BEFORE UPDATE ON proposal_templates
   FOR EACH ROW
   EXECUTE FUNCTION update_proposals_updated_at();
-
--- Template Padrão
-INSERT INTO proposal_templates (
-  organization_id,
-  name,
-  description,
-  header_html,
-  footer_html,
-  terms_and_conditions,
-  is_default
-)
-SELECT
-  id,
-  'Template Padrão',
-  'Template básico para propostas comerciais',
-  '<h1 style="color: #3b82f6;">Proposta Comercial</h1>',
-  '<p style="text-align: center; color: #666;">Obrigado pela confiança!</p>',
-  'Esta proposta é válida por 30 dias. Valores sujeitos a alteração sem aviso prévio.',
-  true
-FROM organizations
-WHERE NOT EXISTS (
-  SELECT 1 FROM proposal_templates WHERE is_default = true
-)
-LIMIT 1;
