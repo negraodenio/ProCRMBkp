@@ -3,9 +3,11 @@ import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { redirect } from "next/navigation";
 import { getDashboardMetrics } from "./actions";
+import { getSmartAlerts } from "@/app/automations/actions";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { SourceDistribution } from "@/components/dashboard/source-distribution";
 import { LeadsTimeline } from "@/components/dashboard/leads-timeline";
+import { SmartAlerts } from "@/components/dashboard/smart-alerts";
 import { Users, Target, TrendingUp, DollarSign } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -30,6 +32,7 @@ export default async function DashboardPage() {
   }
 
   const dashboardData = await getDashboardMetrics(profile.organization_id);
+  const alerts = await getSmartAlerts(profile.organization_id);
 
   return (
     <div className="flex min-h-screen">
@@ -46,6 +49,11 @@ export default async function DashboardPage() {
               Visão geral do seu funil de vendas e performance
             </p>
           </div>
+
+          {/* Alertas Inteligentes */}
+          {alerts.length > 0 && (
+            <SmartAlerts alerts={alerts} />
+          )}
 
           {/* Metrics Cards */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
