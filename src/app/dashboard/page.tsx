@@ -11,6 +11,7 @@ import { LeadsTimeline } from "@/components/dashboard/leads-timeline";
 import { SmartAlerts } from "@/components/dashboard/smart-alerts";
 import { ConversionFunnel } from "@/components/dashboard/conversion-funnel";
 import { RealTimeInsights } from "@/components/dashboard/real-time-insights";
+import { WelcomeEmailTrigger } from "@/components/dashboard/welcome-trigger";
 import { Users, Target, TrendingUp, DollarSign } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -42,6 +43,7 @@ export default async function DashboardPage() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
+      <WelcomeEmailTrigger />
       <div className="flex flex-1 flex-col md:ml-64">
         <Header />
         <main className="flex-1 p-6 space-y-6">
