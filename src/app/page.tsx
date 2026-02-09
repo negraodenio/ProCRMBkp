@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,16 @@ import {
 } from "lucide-react";
 
 export default function LandingPage() {
+  const headersList = headers();
+  const country = headersList.get("x-vercel-ip-country") || "PT";
+  const isBR = country === "BR";
+
+  const currency = isBR ? "R$" : "€";
+  const prices = {
+    starter: isBR ? "129" : "29",
+    pro: isBR ? "349" : "79",
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Header */}
@@ -318,7 +329,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing */}
+
       <section id="pricing" className="bg-slate-50 py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -334,7 +345,7 @@ export default function LandingPage() {
               <h3 className="text-2xl font-bold mb-2">Starter</h3>
               <p className="text-slate-600 mb-6">Para começar a vender mais</p>
               <div className="mb-6">
-                <span className="text-4xl font-bold">€29</span>
+                <span className="text-4xl font-bold">{currency}{prices.starter}</span>
                 <span className="text-slate-600">/mês</span>
               </div>
               <ul className="space-y-3 mb-8">
@@ -368,7 +379,7 @@ export default function LandingPage() {
               <h3 className="text-2xl font-bold mb-2">Pro</h3>
               <p className="text-blue-100 mb-6">Para times que querem crescer</p>
               <div className="mb-6">
-                <span className="text-4xl font-bold">€79</span>
+                <span className="text-4xl font-bold">{currency}{prices.pro}</span>
                 <span className="text-blue-100">/mês</span>
               </div>
               <ul className="space-y-3 mb-8">
@@ -403,7 +414,7 @@ export default function LandingPage() {
               <h3 className="text-2xl font-bold mb-2">Enterprise</h3>
               <p className="text-slate-600 mb-6">Para grandes equipes</p>
               <div className="mb-6">
-                <span className="text-4xl font-bold">Custom</span>
+                <span className="text-4xl font-bold">{prices.enterprise}</span>
               </div>
               <ul className="space-y-3 mb-8">
                 <li className="flex items-center gap-2">
