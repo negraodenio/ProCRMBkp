@@ -261,14 +261,19 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                     {stages.map((stage) => {
                         const stageDeals = deals.filter((deal) => deal.stage_id === stage.id);
                         const totalValue = stageDeals.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0);
-                        const colors = getStageColor(stage);
 
                         return (
                             <div key={stage.id} className="flex flex-col w-72 min-w-[288px] bg-slate-50 rounded-xl overflow-hidden shadow-sm border">
                                 {/* Colored Header */}
                                 <div
                                     className={getStageClassName(stage)}
-                                    style={getStageStyle(stage)}
+                                    style={{
+                                        ...getStageStyle(stage),
+                                        minHeight: '4rem',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'center'
+                                    }}
                                 >
                                     <div className="flex items-center justify-between mb-2">
                                         {editingStageId === stage.id ? (
