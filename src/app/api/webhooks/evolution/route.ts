@@ -22,24 +22,36 @@ export async function POST(req: NextRequest) {
         const messageData = body.data;
 
         if (!eventType.includes("messages.upsert") && !eventType.includes("messages_upsert") && !eventType.includes("messages-upsert")) {
-            if (!messageData) return NextResponse.json({ status: "ignored" });
+            console.log(`⏭️ [Webhook] Event type '${eventType}' is not messages.upsert, checking if messageData exists...`);
+            if (!messageData) {
+                console.log("⏭️ [Webhook] No messageData, ignoring event");
+                return NextResponse.json({ status: "ignored" });
+            }
         }
 
-        if (!messageData) return NextResponse.json({ status: "ignored" });
+        if (!messageData) {
+            console.log("⏭️ [Webhook] No messageData found, ignoring");
+            return NextResponse.json({ status: "ignored" });
+        }
 
         // Extract Phone and Message
         const remoteJid = messageData.key?.remoteJid || messageData.remoteJid;
         const fromMe = messageData.key?.fromMe || messageData.fromMe || (messageData.key?.id?.startsWith("BAE5") && messageData.key?.id?.length > 15);
 
-        if (fromMe) return NextResponse.json({ status: "ignored_self" });
+        if (fromMe) {
+            console.log("⏭️ [Webhook] Message from self, ignoring");
+            return NextResponse.json({ status: "ignored_self" });
+        }
 
         // Safety check for remoteJid
         if (!remoteJid || typeof remoteJid !== 'string') {
-             return NextResponse.json({ status: "ignored_no_jid" });
+            console.log("⏭️ [Webhook] Invalid remoteJid, ignoring");
+            return NextResponse.json({ status: "ignored_no_jid" });
         }
 
         // Ignore Group Messages
         if (remoteJid.includes("@g.us")) {
+            console.log(`⏭️ [Webhook] Group message detected (${remoteJid}), ignoring`);
             return NextResponse.json({ status: "ignored_group" });
         }
 
@@ -54,7 +66,12 @@ export async function POST(req: NextRequest) {
             text = messageData.message.extendedTextMessage.text;
         }
 
-        if (!text) return NextResponse.json({ status: "no_text" });
+        if (!text) {
+            console.log("⏭️ [Webhook] No text content found in message, ignoring");
+            return NextResponse.json({ status: "no_text" });
+        }
+
+        console.log(`✅ [Webhook] Processing message from ${phone}: "${text.substring(0, 50)}..."`);
 
         // Extract instance name EARLY for validation and fallback
         const instanceName = body.instance || body.sender || body.instanceName || body.data?.instance || "";
