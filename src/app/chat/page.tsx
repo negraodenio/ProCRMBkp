@@ -36,7 +36,7 @@ type Message = {
 };
 
 export default function ChatPage() {
-    const supabase = createClient();
+    const [supabase] = useState(() => createClient());
     const { profile, loading: profileLoading } = useProfile();
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -77,7 +77,9 @@ export default function ChatPage() {
             }
         };
 
-        if (!profileLoading) fetchConversations();
+        if (!profileLoading) {
+            fetchConversations();
+        }
 
         // 2. Realtime Conversations
         const channel = supabase
@@ -98,8 +100,10 @@ export default function ChatPage() {
             })
             .subscribe();
 
-        return () => { supabase.removeChannel(channel); };
-    }, [supabase]);
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [supabase, profileLoading, profile?.organization_id]);
 
     // 3. Fetch Messages when selection changes
     useEffect(() => {
