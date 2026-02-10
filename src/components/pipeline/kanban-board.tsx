@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { DealCard } from "./deal-card";
-import { updateDealStage, updateDeal } from "@/app/pipeline/actions";
+import { updateDealStage, updateDeal, createStage, updateStage, deleteStage } from "@/app/pipeline/actions";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
@@ -167,13 +167,9 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
             return;
         }
 
-        const { error } = await supabase
-            .from("stages")
-            .update({ name: editingName.trim() })
-            .eq("id", stageId);
+        const result = await updateStage(stageId, { name: editingName.trim() });
 
-        if (error) {
-            console.error("Error renaming stage:", error);
+        if (result.error) {
             toast.error("Erro ao renomear etapa");
             return;
         }
@@ -183,7 +179,7 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
         cancelEditing();
     };
 
-    const deleteStage = async (stageId: string) => {
+    const handleDeleteStage = async (stageId: string) => {
         const stageDeals = deals.filter(d => d.stage_id === stageId);
 
         if (stageDeals.length > 0) {
@@ -193,14 +189,10 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
 
         if (!confirm("Tem certeza que deseja excluir esta etapa?")) return;
 
-        const { error } = await supabase
-            .from("stages")
-            .delete()
-            .eq("id", stageId);
+        const result = await deleteStage(stageId);
 
-        if (error) {
-            console.error("Error deleting stage:", error);
-            toast.error("Erro ao excluir etapa");
+        if (result.error) {
+            toast.error(result.error || "Erro ao excluir etapa");
             return;
         }
 
@@ -208,7 +200,7 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
         toast.success("Etapa excluída!");
     };
 
-    const createNewStage = async () => {
+    const handleCreateStage = async () => {
         if (!newStageName.trim()) {
             toast.error("Nome não pode ser vazio");
             return;
@@ -217,47 +209,49 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
         // Get pipeline_id from first stage
         const pipelineId = stages[0]?.pipeline_id;
         if (!pipelineId) {
-            // Try to get from database
-            const { data: pipeline } = await supabase
-                .from("pipelines")
-                .select("id")
-                .eq("is_default", true)
-                .single();
-
-            if (!pipeline) {
-                toast.error("Pipeline não encontrado");
-                return;
-            }
+            // Error case
+            toast.error("Pipeline não encontrado");
+            return;
         }
 
         const maxOrder = Math.max(...stages.map(s => s.order || 0), 0);
 
-        const { data, error } = await supabase
-            .from("stages")
-            .insert({
-                pipeline_id: pipelineId || stages[0]?.pipeline_id,
-                name: newStageName.trim(),
-                color: newStageColor,
-                order: maxOrder + 1,
-            })
-            .select()
-            .single();
+        const result = await createStage({
+            pipeline_id: pipelineId,
+            name: newStageName.trim(),
+            color: newStageColor,
+            order: maxOrder + 1,
+        });
 
-        if (error) {
-            console.error("Error creating stage:", error);
+        if (result.error) {
             toast.error("Erro ao criar etapa");
             return;
         }
 
-        setStages([...stages, data]);
-        toast.success("Etapa criada!");
+        if (result.data) {
+            setStages([...stages, result.data as Stage]);
+            toast.success("Etapa criada!");
+        }
+
         setNewStageDialogOpen(false);
         setNewStageName("");
         setNewStageColor("bg-blue-500");
     };
 
-    const getStageColor = (stage: Stage) => {
-        return stage.color || "bg-slate-500";
+    const getStageStyle = (stage: Stage) => {
+        const color = stage.color || "bg-slate-500";
+        if (color.startsWith("#")) {
+            return { backgroundColor: color };
+        }
+        return {};
+    };
+
+    const getStageClassName = (stage: Stage) => {
+        const color = stage.color || "bg-slate-500";
+        if (color.startsWith("#")) {
+            return "text-white p-3";
+        }
+        return `${color} text-white p-3`;
     };
 
     return (
@@ -272,7 +266,10 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                         return (
                             <div key={stage.id} className="flex flex-col w-72 min-w-[288px] bg-slate-50 rounded-xl overflow-hidden shadow-sm border">
                                 {/* Colored Header */}
-                                <div className={`${colors} text-white p-3`}>
+                                <div
+                                    className={getStageClassName(stage)}
+                                    style={getStageStyle(stage)}
+                                >
                                     <div className="flex items-center justify-between mb-2">
                                         {editingStageId === stage.id ? (
                                             <div className="flex items-center gap-2 flex-1">
@@ -324,7 +321,7 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                                                             Renomear
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
-                                                            onClick={() => deleteStage(stage.id)}
+                                                            onClick={() => handleDeleteStage(stage.id)}
                                                             className="text-red-600"
                                                         >
                                                             <Trash2 className="h-4 w-4 mr-2" />
@@ -445,7 +442,7 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                         <Button variant="outline" onClick={() => setNewStageDialogOpen(false)}>
                             Cancelar
                         </Button>
-                        <Button onClick={createNewStage} className="bg-blue-600 hover:bg-blue-700">
+                        <Button onClick={handleCreateStage} className="bg-blue-600 hover:bg-blue-700">
                             Criar Etapa
                         </Button>
                     </DialogFooter>
