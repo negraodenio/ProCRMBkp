@@ -56,7 +56,9 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ status: "ignored_group" });
         }
 
-        const phone = remoteJid.split("@")[0];
+        // Normalize phone: only digits
+        const rawPhone = remoteJid.split("@")[0];
+        const phone = rawPhone.replace(/\D/g, "");
         const pushName = messageData.pushName || "Desconhecido";
 
         // Extract Text Content
@@ -105,7 +107,7 @@ export async function POST(req: NextRequest) {
         // Lookup Org + Bot Settings
         const { data: org, error: orgError} = await unscopedClient
             .from("organizations")
-            .select("id, bot_settings")
+            .select("id, name, bot_settings")
             .eq("id", finalOrgId)
             .maybeSingle();
 
@@ -121,7 +123,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Organization not found" }, { status: 404 });
         }
 
-        console.log(`✅ [Webhook] Organization confirmed: ${org.id}`);
+        console.log(`✅ [Webhook] Organization confirmed: ${org.id} (${org.name})`);
 
         const botSettings = org.bot_settings || {};
 
@@ -182,7 +184,7 @@ export async function POST(req: NextRequest) {
         // 3. Find/Create Conversation
         let { data: conversation, error: convLookupError } = await serviceClient
             .from("conversations")
-            .select("id")
+            .select("id, unread_count")
             .eq("contact_phone", phone)
             .eq("status", "open")
             .maybeSingle();
@@ -210,12 +212,20 @@ export async function POST(req: NextRequest) {
             }
             conversation = newConv;
         }
-        console.log(`✅ [Webhook] Conversation ready: ${conversation?.id}`);
 
         if (!contact || !conversation) {
             console.error("❌ [Webhook] Critical failure: contact or conversation is still null");
             return NextResponse.json({ error: "DB Failure - Contact/Conv missing" }, { status: 500 });
         }
+
+        // Update conversation metadata (so it appears at the top of the chat list)
+        await serviceClient.from("conversations").update({
+            last_message_content: text,
+            last_message_at: new Date().toISOString(),
+            unread_count: (conversation.unread_count || 0) + 1
+        }).eq("id", conversation.id);
+
+        console.log(`✅ [Webhook] Conversation ready and updated: ${conversation?.id}`);
 
         const { data: recentMessages } = await serviceClient
             .from("messages")
@@ -373,6 +383,12 @@ export async function POST(req: NextRequest) {
             direction: "outbound",
             status: "sent"
         });
+
+        // Update conversation with bot reply
+        await serviceClient.from("conversations").update({
+            last_message_content: aiResponse,
+            last_message_at: new Date().toISOString()
+        }).eq("id", conversation.id);
 
         return NextResponse.json({ status: "processed" });
 
