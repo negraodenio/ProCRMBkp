@@ -22,6 +22,7 @@ create extension if not exists "uuid-ossp";
 create table if not exists public.organizations (
   id uuid default uuid_generate_v4() primary key,
   name text not null,
+  bot_settings jsonb default '{"personality": "friendly", "active": true}'::jsonb,
   created_at timestamptz default now()
 );
 
@@ -35,22 +36,22 @@ create table if not exists public.profiles (
   company_name text,
   role text default 'user',   -- 'admin', 'user', 'manager'
   status text default 'active',
-  
+
   -- Link to Organization
   organization_id uuid references public.organizations(id),
-  
+
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
 
 -- Ensure V3 columns exist even if table was created by V1 script
-alter table public.profiles 
+alter table public.profiles
 add column if not exists organization_id uuid references public.organizations(id);
 
-alter table public.profiles 
+alter table public.profiles
 add column if not exists role text default 'user';
 
-alter table public.profiles 
+alter table public.profiles
 add column if not exists status text default 'active';
 
 alter table public.profiles enable row level security;
@@ -69,7 +70,7 @@ create table if not exists public.stages (
   pipeline_id uuid references public.pipelines(id) on delete cascade not null,
   name text not null,
   "order" integer not null default 0,
-  color text, 
+  color text,
   created_at timestamptz default now()
 );
 
@@ -246,31 +247,45 @@ create policy "Access Org AI Logs" on public.ai_operations for all using (organi
 -- ==============================================================================
 -- 9. USER SIGNUP HANDLER (Transactional Tenant Creation)
 -- ==============================================================================
-create or replace function public.handle_new_user() 
+create or replace function public.handle_new_user()
 returns trigger as $$
 declare
   new_org_id uuid;
 begin
   -- 1. Create Organization
-  insert into public.organizations (name)
-  values (coalesce(new.raw_user_meta_data->>'company_name', 'Minha Organização'))
+  insert into public.organizations (name, bot_settings)
+  values (
+    coalesce(new.raw_user_meta_data->>'company_name', 'Minha Organização'),
+    '{"personality": "friendly", "active": true}'::jsonb
+  )
   returning id into new_org_id;
 
   -- 2. Create Profile linked to Organization
   insert into public.profiles (id, email, full_name, organization_id, role)
   values (
-    new.id, 
-    new.email, 
-    new.raw_user_meta_data->>'full_name', 
+    new.id,
+    new.email,
+    new.raw_user_meta_data->>'full_name',
     new_org_id,
     'admin' -- First user is Admin
   );
-  
+
   -- 3. Create Default Pipeline
   insert into public.pipelines (organization_id, name, is_default)
   values (new_org_id, 'Funil de Vendas', true)
-  returning id;
-  
+  returning id into new_org_id; -- Reuse variable for pipeline_id temporarily
+
+  -- 4. Create Default Stages
+  insert into public.stages (pipeline_id, name, "order", color)
+  values
+    (new_org_id, 'Novo', 0, 'blue'),
+    (new_org_id, 'Contatado', 1, 'yellow'),
+    (new_org_id, 'Qualificado', 2, 'green'),
+    (new_org_id, 'Proposta', 3, 'purple'),
+    (new_org_id, 'Negociação', 4, 'orange'),
+    (new_org_id, 'Ganho', 5, 'emerald'),
+    (new_org_id, 'Perdido', 6, 'red');
+
   return new;
 end;
 $$ language plpgsql security definer;

@@ -11,14 +11,14 @@ export function useProfile() {
     async function getProfile() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (user) {
         const { data } = await supabase
           .from('profiles')
           .select('*, organizations(*)')
           .eq('id', user.id)
           .single();
-        
+
         setProfile(data);
       }
       setLoading(false);
