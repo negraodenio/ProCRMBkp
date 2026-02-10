@@ -59,36 +59,33 @@ export function createOrgScopedServiceClient(organizationId: string): SupabaseCl
             return queryBuilder;
         }
 
-        // --- WRAP SELECT ---
-        const originalSelect = queryBuilder.select.bind(queryBuilder);
-        queryBuilder.select = function(...args: any[]) {
-            return originalSelect(...args).eq('organization_id', organizationId);
-        };
-
-        // --- WRAP UPDATE ---
-        const originalUpdate = queryBuilder.update.bind(queryBuilder);
-        queryBuilder.update = function(...args: any[]) {
-            return originalUpdate(...args).eq('organization_id', organizationId);
-        };
-
-        // --- WRAP DELETE ---
-        const originalDelete = queryBuilder.delete.bind(queryBuilder);
-        queryBuilder.delete = function(...args: any[]) {
-            return originalDelete(...args).eq('organization_id', organizationId);
-        };
-
-        // --- WRAP INSERT ---
-        const originalInsert = queryBuilder.insert.bind(queryBuilder);
-        queryBuilder.insert = function(values: any, ...args: any[]) {
-            if (Array.isArray(values)) {
-                values = values.map((v: any) => ({ ...v, organization_id: organizationId }));
-            } else {
-                values = { ...values, organization_id: organizationId };
+        return new Proxy(queryBuilder, {
+            get(target, prop, receiver) {
+                const value = Reflect.get(target, prop, receiver);
+                if (typeof value === 'function') {
+                    // Intercept filterable operations
+                    if (prop === 'select' || prop === 'update' || prop === 'delete') {
+                        return (...args: any[]) => {
+                            return value.apply(target, args).eq('organization_id', organizationId);
+                        };
+                    }
+                    // Intercept insert operation
+                    if (prop === 'insert') {
+                        return (values: any, ...args: any[]) => {
+                            if (Array.isArray(values)) {
+                                values = values.map((v: any) => ({ ...v, organization_id: organizationId }));
+                            } else {
+                                values = { ...values, organization_id: organizationId };
+                            }
+                            return value.apply(target, [values, ...args]);
+                        };
+                    }
+                    // Bind other functions to the original target
+                    return value.bind(target);
+                }
+                return value;
             }
-            return originalInsert(values, ...args);
-        };
-
-        return queryBuilder;
+        });
     };
 
     return baseClient;
