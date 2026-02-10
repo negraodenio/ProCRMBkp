@@ -52,17 +52,43 @@ export function createOrgScopedServiceClient(organizationId: string): SupabaseCl
     const originalFrom = baseClient.from.bind(baseClient);
 
     (baseClient as any).from = function(table: string) {
-        const query = originalFrom(table);
+        const queryBuilder = originalFrom(table);
 
-        // If table has organization_id, auto-filter
-        if (ORG_SCOPED_TABLES.has(table)) {
-            console.log(`[OrgScopedClient] Auto-filtering ${table} by org: ${organizationId}`);
-            // Return the query with eq already applied
-            return (query as any).eq('organization_id', organizationId);
+        // If table is NOT in the scoped list, return as is
+        if (!ORG_SCOPED_TABLES.has(table)) {
+            return queryBuilder;
         }
 
-        // For non-org tables (e.g., profiles where we look up by id), pass through
-        return query;
+        // --- WRAP SELECT ---
+        const originalSelect = queryBuilder.select.bind(queryBuilder);
+        queryBuilder.select = function(...args: any[]) {
+            return originalSelect(...args).eq('organization_id', organizationId);
+        };
+
+        // --- WRAP UPDATE ---
+        const originalUpdate = queryBuilder.update.bind(queryBuilder);
+        queryBuilder.update = function(...args: any[]) {
+            return originalUpdate(...args).eq('organization_id', organizationId);
+        };
+
+        // --- WRAP DELETE ---
+        const originalDelete = queryBuilder.delete.bind(queryBuilder);
+        queryBuilder.delete = function(...args: any[]) {
+            return originalDelete(...args).eq('organization_id', organizationId);
+        };
+
+        // --- WRAP INSERT ---
+        const originalInsert = queryBuilder.insert.bind(queryBuilder);
+        queryBuilder.insert = function(values: any, ...args: any[]) {
+            if (Array.isArray(values)) {
+                values = values.map((v: any) => ({ ...v, organization_id: organizationId }));
+            } else {
+                values = { ...values, organization_id: organizationId };
+            }
+            return originalInsert(values, ...args);
+        };
+
+        return queryBuilder;
     };
 
     return baseClient;

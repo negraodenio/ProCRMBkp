@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createOrgScopedServiceClient } from "@/lib/supabase/service-scoped";
+import { createOrgScopedServiceClient, createServiceRoleClient } from "@/lib/supabase/service-scoped";
 import { EvolutionService } from "@/services/evolution";
 import { aiChat, generateEmbedding } from "@/lib/ai/client";
 import { PERSONALITY_PRESETS, PersonalityType, buildSystemPrompt } from "@/lib/bot-personalities";
@@ -100,20 +100,18 @@ export async function POST(req: NextRequest) {
         console.log(`🔍 [Webhook Debug] Final OrgID: ${finalOrgId}`);
         console.log(`🔍 [Webhook Debug] Instance: ${instanceName}`);
 
-        // Create Supabase client directly to avoid wrapper conflicts
-        const { createClient: createSupabaseClient } = await import('@supabase/supabase-js');
-        const directClient = createSupabaseClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
+        console.log("📍 [TRACK_1] Starting Org Lookup");
+        const unscopedClient = createServiceRoleClient();
 
+        console.log("📍 [TRACK_2] Identifying organization");
         // Lookup Org + Bot Settings
-        const { data: org, error: orgError} = await directClient
+        const { data: org, error: orgError} = await unscopedClient
             .from("organizations")
             .select("id, bot_settings")
             .eq("id", finalOrgId)
             .maybeSingle();
 
+        console.log("📍 [TRACK_3] Org lookup complete, creating service client");
         // Now create scoped client for data operations
         const serviceClient = createOrgScopedServiceClient(finalOrgId);
 
@@ -153,7 +151,7 @@ export async function POST(req: NextRequest) {
         }
 
         // 2. Find/Create Contact
-        console.log(`🔍 [Webhook] Searching for contact with phone: ${phone} in Org: ${org.id}`);
+        console.log("📍 [TRACK_4] Searching for contact");
         let { data: contact, error: contactLookupError } = await serviceClient
             .from("contacts")
             .select("id")
@@ -186,7 +184,7 @@ export async function POST(req: NextRequest) {
         console.log(`✅ [Webhook] Contact ready: ${contact?.id}`);
 
         // 3. Find/Create Conversation
-        console.log(`🔍 [Webhook] Searching for open conversation for: ${phone}`);
+        console.log("📍 [TRACK_5] Searching for conversation");
         let { data: conversation, error: convLookupError } = await serviceClient
             .from("conversations")
             .select("id")
@@ -224,7 +222,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "DB Failure - Contact/Conv missing" }, { status: 500 });
         }
 
-        // --- LOOP GUARD & FREQUENCY COOLDOWN ---
+        console.log("📍 [TRACK_6] Checking loop guard");
         const { data: recentMessages } = await serviceClient
             .from("messages")
             .select("content, direction, created_at")
