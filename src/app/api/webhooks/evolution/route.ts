@@ -100,10 +100,8 @@ export async function POST(req: NextRequest) {
         console.log(`🔍 [Webhook Debug] Final OrgID: ${finalOrgId}`);
         console.log(`🔍 [Webhook Debug] Instance: ${instanceName}`);
 
-        console.log("📍 [TRACK_1] Starting Org Lookup");
         const unscopedClient = createServiceRoleClient();
 
-        console.log("📍 [TRACK_2] Identifying organization");
         // Lookup Org + Bot Settings
         const { data: org, error: orgError} = await unscopedClient
             .from("organizations")
@@ -111,7 +109,6 @@ export async function POST(req: NextRequest) {
             .eq("id", finalOrgId)
             .maybeSingle();
 
-        console.log("📍 [TRACK_3] Org lookup complete, creating service client");
         // Now create scoped client for data operations
         const serviceClient = createOrgScopedServiceClient(finalOrgId);
 
@@ -151,7 +148,6 @@ export async function POST(req: NextRequest) {
         }
 
         // 2. Find/Create Contact
-        console.log("📍 [TRACK_4] Searching for contact");
         let { data: contact, error: contactLookupError } = await serviceClient
             .from("contacts")
             .select("id")
@@ -184,7 +180,6 @@ export async function POST(req: NextRequest) {
         console.log(`✅ [Webhook] Contact ready: ${contact?.id}`);
 
         // 3. Find/Create Conversation
-        console.log("📍 [TRACK_5] Searching for conversation");
         let { data: conversation, error: convLookupError } = await serviceClient
             .from("conversations")
             .select("id")
@@ -222,7 +217,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "DB Failure - Contact/Conv missing" }, { status: 500 });
         }
 
-        console.log("📍 [TRACK_6] Checking loop guard");
         const { data: recentMessages } = await serviceClient
             .from("messages")
             .select("content, direction, created_at")
