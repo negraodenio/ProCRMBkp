@@ -6,6 +6,7 @@ import { aiChat, generateEmbedding } from "@/lib/ai/client";
 import { PERSONALITY_PRESETS, PersonalityType, buildSystemPrompt } from "@/lib/bot-personalities";
 
 // This webhook handles incoming messages from Evolution API
+// Cache bust: 2026-02-10T18:11:00Z
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
