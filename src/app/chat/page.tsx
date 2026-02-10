@@ -49,19 +49,32 @@ export default function ChatPage() {
     // 1. Fetch Conversations
     useEffect(() => {
         const fetchConversations = async () => {
-            if (!profile?.organization_id) {
-                setLoading(false);
-                return;
-            }
-            
-            const { data, error } = await supabase
-                .from("conversations")
-                .select("*")
-                .eq("organization_id", profile.organization_id)
-                .order("last_message_at", { ascending: false });
+            try {
+                console.log("🔍 [Chat] Starting fetchConversations for Org:", profile?.organization_id);
+                if (!profile?.organization_id) {
+                    console.warn("⚠️ [Chat] No organization_id in profile");
+                    setLoading(false);
+                    return;
+                }
 
-            if (data) setConversations(data);
-            setLoading(false);
+                const { data, error } = await supabase
+                    .from("conversations")
+                    .select("*")
+                    .eq("organization_id", profile.organization_id)
+                    .order("last_message_at", { ascending: false });
+
+                if (error) {
+                    console.error("❌ [Chat] Error fetching conversations:", error);
+                    toast.error("Erro ao carregar conversas: " + error.message);
+                } else {
+                    console.log(`✅ [Chat] Fetched ${data?.length || 0} conversations`);
+                    setConversations(data || []);
+                }
+            } catch (err) {
+                console.error("❌ [Chat] Exception in fetchConversations:", err);
+            } finally {
+                setLoading(false);
+            }
         };
 
         if (!profileLoading) fetchConversations();
@@ -69,8 +82,8 @@ export default function ChatPage() {
         // 2. Realtime Conversations
         const channel = supabase
             .channel("conversations_changes")
-            .on("postgres_changes" as any, { 
-                event: "*", 
+            .on("postgres_changes" as any, {
+                event: "*",
                 table: "conversations",
                 filter: profile?.organization_id ? `organization_id=eq.${profile.organization_id}` : undefined
             }, (payload: any) => {
@@ -107,10 +120,10 @@ export default function ChatPage() {
         // 4. Realtime Messages
         const channel = supabase
             .channel(`messages_${selectedId}`)
-            .on("postgres_changes" as any, { 
-                event: "INSERT", 
-                table: "messages", 
-                filter: `conversation_id=eq.${selectedId}` 
+            .on("postgres_changes" as any, {
+                event: "INSERT",
+                table: "messages",
+                filter: `conversation_id=eq.${selectedId}`
             }, (payload: any) => {
                 setMessages(prev => [...prev, payload.new as Message]);
             })
@@ -140,11 +153,11 @@ export default function ChatPage() {
 
         const text = inputText;
         const tempId = 'temp-' + Date.now();
-        
+
         try {
             setSending(true);
             setInputText("");
-            
+
             // 1. Optimistic Update
             const optimisticMsg: Message = {
                 id: tempId,
@@ -154,9 +167,9 @@ export default function ChatPage() {
                 status: "sending"
             };
             setMessages(prev => [...prev, optimisticMsg]);
-            
+
             console.log("📤 UI: Sending message (Optimistic)...", { selectedId, textLength: text.length });
-            
+
             const result = await sendMessageAction(selectedId, text);
             console.log("📥 UI: Action result:", result);
 
@@ -167,7 +180,7 @@ export default function ChatPage() {
                 setInputText(text); // Restore text
                 return;
             }
-            
+
             // Update the optimistic message with the real one
             if (result && result.id) {
                 setMessages(prev => prev.map(m => m.id === tempId ? { ...m, id: result.id, status: 'sent' } : m));
@@ -187,17 +200,17 @@ export default function ChatPage() {
     return (
         <div className="flex h-screen bg-[#f8fafc] overflow-hidden">
             <Sidebar />
-            
+
             <div className="flex flex-1 flex-col md:ml-64 relative overflow-hidden">
                 <Header />
-                
+
                 <main className="flex-1 flex overflow-hidden p-4 gap-4">
                     {/* Chat Sidebar */}
                     <div className="w-96 flex flex-col gap-4">
                         <div className="flex flex-col gap-2">
                             <h2 className="font-bold text-xl text-slate-800">Conversas Ativas</h2>
                         </div>
-                        
+
                         <ScrollArea className="flex-1 rounded-3xl bg-white shadow-sm border border-slate-100">
                             {loading || profileLoading ? (
                                 <div className="p-3 space-y-3">
@@ -224,12 +237,12 @@ export default function ChatPage() {
                             ) : (
                                 <div className="p-2 space-y-2">
                                     {conversations.map(chat => (
-                                        <div 
+                                        <div
                                             key={chat.id}
                                             onClick={() => setSelectedId(chat.id)}
                                             className={`p-4 rounded-2xl cursor-pointer transition-all border ${
-                                                selectedId === chat.id 
-                                                    ? 'bg-blue-50/50 border-blue-200 ring-1 ring-blue-200' 
+                                                selectedId === chat.id
+                                                    ? 'bg-blue-50/50 border-blue-200 ring-1 ring-blue-200'
                                                     : 'bg-white border-transparent hover:bg-slate-50 hover:border-slate-100'
                                             }`}
                                         >
@@ -307,7 +320,7 @@ export default function ChatPage() {
                                     <ScrollArea className="h-full p-6">
                                         <div className="space-y-6 pb-6">
                                             {messages.map((msg) => (
-                                                <div 
+                                                <div
                                                     key={msg.id}
                                                     className={`flex flex-col ${msg.direction === 'outbound' ? 'items-end' : 'items-start'}`}
                                                 >
@@ -320,8 +333,8 @@ export default function ChatPage() {
                                                         </span>
                                                     </div>
                                                     <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] border ${
-                                                        msg.direction === 'outbound' 
-                                                            ? 'bg-[#eff6ff] text-slate-700 border-blue-100 rounded-tr-none' 
+                                                        msg.direction === 'outbound'
+                                                            ? 'bg-[#eff6ff] text-slate-700 border-blue-100 rounded-tr-none'
                                                             : 'bg-white text-slate-700 border-slate-100 rounded-tl-none'
                                                     }`}>
                                                         <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
@@ -353,9 +366,9 @@ export default function ChatPage() {
                                                     rows={1}
                                                 />
                                             </div>
-                                            <Button 
-                                                onClick={handleSend} 
-                                                disabled={sending || !inputText.trim()} 
+                                            <Button
+                                                onClick={handleSend}
+                                                disabled={sending || !inputText.trim()}
                                                 className="h-[60px] w-[60px] rounded-2xl bg-emerald-400 hover:bg-emerald-500 shadow-lg shadow-emerald-200/50"
                                             >
                                                 <Send className="h-6 w-6 text-white" />
