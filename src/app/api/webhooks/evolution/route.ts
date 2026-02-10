@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createOrgScopedServiceClient } from "@/lib/supabase/service-scoped";
+import { createOrgScopedServiceClient, createServiceRoleClient } from "@/lib/supabase/service-scoped";
 import { EvolutionService } from "@/services/evolution";
 import { aiChat, generateEmbedding } from "@/lib/ai/client";
 import { PERSONALITY_PRESETS, PersonalityType, buildSystemPrompt } from "@/lib/bot-personalities";
@@ -82,15 +82,18 @@ export async function POST(req: NextRequest) {
         console.log(`🔍 [Webhook Debug] Final OrgID: ${finalOrgId}`);
         console.log(`🔍 [Webhook Debug] Instance: ${instanceName}`);
 
-        // IMPORTANT: Webhooks need to bypass RLS to create contacts/conversations
-        const serviceClient = createOrgScopedServiceClient(finalOrgId);
+        // Use unscoped client for organization lookup
+        const unscopedClient = createServiceRoleClient();
 
         // Lookup Org + Bot Settings
-        const { data: org, error: orgError } = await serviceClient
+        const { data: org, error: orgError } = await unscopedClient
             .from("organizations")
             .select("id, bot_settings")
             .eq("id", finalOrgId)
             .maybeSingle();
+
+        // Now create scoped client for data operations
+        const serviceClient = createOrgScopedServiceClient(finalOrgId);
 
         if (orgError) {
             console.error("❌ [Webhook] Org lookup error:", orgError);
