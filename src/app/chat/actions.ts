@@ -7,7 +7,7 @@ export async function sendMessageAction(conversationId: string, text: string) {
     console.log(`[Action] Starting sendMessageAction for conv: ${conversationId}`);
     try {
         const supabase = await createClient();
-        
+
         // 1. Get User/Org Context
         const { data: authData, error: authError } = await supabase.auth.getUser();
         if (authError || !authData?.user) {
@@ -28,24 +28,20 @@ export async function sendMessageAction(conversationId: string, text: string) {
             .select("*")
             .eq("id", conversationId)
             .maybeSingle();
-        
+
         if (convErr || !conversation) {
             console.error("[Action] Conv Error:", convErr);
             return { error: "Conversa não encontrada" };
         }
 
-        // 3. Derive Instance Name
-        const { data: orgData } = await supabase.from("organizations").select("name").eq("id", profile.organization_id).maybeSingle();
-        const orgName = orgData?.name || "Empresa";
-        const sanitizedName = orgName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "");
-        const shortId = profile.organization_id.split('-')[0];
-        const derivedInstanceName = `${sanitizedName}-${shortId}`;
+        // 3. Derive Instance Name - Standardized
+        const instanceName = `bot-${profile.organization_id}`;
 
-        console.log(`[Action] Attempting send via Evolution: ${derivedInstanceName} to ${conversation.contact_phone}`);
+        console.log(`[Action] Attempting send via Evolution: ${instanceName} to ${conversation.contact_phone}`);
 
         // 4. Send via Evolution
         try {
-            await EvolutionService.sendMessage(derivedInstanceName, conversation.contact_phone, text);
+            await EvolutionService.sendMessage(instanceName, conversation.contact_phone, text);
         } catch (evoErr: any) {
             console.error("[Action] Evolution API Call Exception:", evoErr);
             return { error: `WhatsApp API Error: ${evoErr.message || 'Erro de conexão'}` };
@@ -73,10 +69,10 @@ export async function sendMessageAction(conversationId: string, text: string) {
 
         console.log("[Action] Success!");
         // Return a plain object to ensure serialization
-        return { 
-            success: true, 
+        return {
+            success: true,
             id: newMessage?.id,
-            content: newMessage?.content 
+            content: newMessage?.content
         };
     } catch (err: any) {
         console.error("[Action] CRITICAL UNEXPECTED ERROR:", err);

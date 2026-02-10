@@ -14,13 +14,127 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+type Notification = {
+  id: string;
+  title: string;
+  message: string;
+  time: string;
+  read: boolean;
+  type: "lead" | "message";
+  link?: string;
+};
 
 export function Header() {
   const { setTheme } = useTheme();
   const router = useRouter();
+  const { profile } = useProfile();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationCount, setNotificationCount] = useState(0);
+
+  useEffect(() => {
+    if (!profile?.organization_id) return;
+
+    const supabase = createClient();
+
+    // Fetch recent leads (last 24h)
+    const fetchNotifications = async () => {
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+      // Get new leads
+      const { data: newLeads } = await supabase
+        .from("contacts")
+        .select("id, name, created_at")
+        .eq("organization_id", profile.organization_id)
+        .eq("type", "lead")
+        .gte("created_at", oneDayAgo)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      // Get unread conversations
+      const { data: unreadConvs } = await supabase
+        .from("conversations")
+        .select("id, contact_name, last_message_at, unread_count")
+        .eq("organization_id", profile.organization_id)
+        .gt("unread_count", 0)
+        .order("last_message_at", { ascending: false })
+        .limit(5);
+
+      const notifs: Notification[] = [];
+
+      // Add lead notifications
+      newLeads?.forEach((lead) => {
+        notifs.push({
+          id: `lead-${lead.id}`,
+          title: "Novo Lead",
+          message: `${lead.name} entrou no funil`,
+          time: formatDistanceToNow(new Date(lead.created_at), { locale: ptBR, addSuffix: true }),
+          read: false,
+          type: "lead",
+          link: `/leads/${lead.id}`,
+        });
+      });
+
+      // Add message notifications
+      unreadConvs?.forEach((conv) => {
+        notifs.push({
+          id: `msg-${conv.id}`,
+          title: "Nova Mensagem",
+          message: `${conv.contact_name} enviou ${conv.unread_count} mensagem(ns)`,
+          time: formatDistanceToNow(new Date(conv.last_message_at), { locale: ptBR, addSuffix: true }),
+          read: false,
+          type: "message",
+          link: "/chat",
+        });
+      });
+
+      setNotifications(notifs);
+      setNotificationCount(notifs.length);
+    };
+
+    fetchNotifications();
+
+    // Real-time subscription for new leads
+    const leadsChannel = supabase
+      .channel("new_leads")
+      .on("postgres_changes" as any, {
+        event: "INSERT",
+        table: "contacts",
+        filter: `organization_id=eq.${profile.organization_id}`,
+      }, () => {
+        fetchNotifications();
+      })
+      .subscribe();
+
+    // Real-time subscription for new messages
+    const messagesChannel = supabase
+      .channel("new_messages")
+      .on("postgres_changes" as any, {
+        event: "INSERT",
+        table: "messages",
+        filter: `organization_id=eq.${profile.organization_id}`,
+      }, () => {
+        fetchNotifications();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(leadsChannel);
+      supabase.removeChannel(messagesChannel);
+    };
+  }, [profile?.organization_id]);
+
+  const handleNotificationClick = (notif: Notification) => {
+    if (notif.link) {
+      router.push(notif.link);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -57,16 +171,54 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {/* Notifications com Badge Animado */}
-          <Button variant="ghost" size="icon" className="relative hover:bg-white/10">
-            <Bell className="h-5 w-5" />
-            <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs animate-pulse shadow-glow-warning"
-            >
-              2
-            </Badge>
-          </Button>
+          {/* Notifications Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative hover:bg-white/10">
+                <Bell className="h-5 w-5" />
+                {notificationCount > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs animate-pulse shadow-glow-warning"
+                  >
+                    {notificationCount}
+                  </Badge>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80 glass-card max-h-96 overflow-y-auto">
+              <div className="p-3 border-b border-white/10">
+                <h3 className="font-semibold text-sm">Notificações</h3>
+              </div>
+              {notifications.length === 0 ? (
+                <div className="p-8 text-center text-muted-foreground text-sm">
+                  <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  Nenhuma notificação
+                </div>
+              ) : (
+                <div className="divide-y divide-white/5">
+                  {notifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      className="p-3 hover:bg-white/5 cursor-pointer transition-colors"
+                      onClick={() => handleNotificationClick(notif)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{notif.title}</p>
+                          <p className="text-xs text-muted-foreground line-clamp-2">{notif.message}</p>
+                          <p className="text-xs text-muted-foreground/60 mt-1">{notif.time}</p>
+                        </div>
+                        {!notif.read && (
+                          <div className="h-2 w-2 rounded-full bg-blue-500 mt-1 flex-shrink-0" />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* User Menu */}
           <DropdownMenu>

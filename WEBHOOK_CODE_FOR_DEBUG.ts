@@ -1,3 +1,8 @@
+/**
+ * CÓDIGO DO WEBHOOK DO WHATSAPP (Evolution API) - VERSÃO CORRIGIDA E COM LOGS
+ * Localização original: src/app/api/webhooks/evolution/route.ts
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createOrgScopedServiceClient } from "@/lib/supabase/service-scoped";
@@ -89,19 +94,9 @@ export async function POST(req: NextRequest) {
         const { data: org, error: orgError } = await serviceClient
             .from("organizations")
             .select("id, bot_settings")
-            .eq("id", finalOrgId)
             .maybeSingle();
 
-        if (orgError) {
-            console.error("❌ [Webhook] Org lookup error:", orgError);
-        }
-
-        if (!org) {
-            console.error(`❌ [Webhook] Organization ${finalOrgId} not found in database`);
-            return NextResponse.json({ error: "Organization not found" }, { status: 404 });
-        }
-
-        console.log(`✅ [Webhook] Organization confirmed: ${org.id}`);
+        if (!org) return NextResponse.json({ error: "Organization not found" }, { status: 404 });
 
         const botSettings = org.bot_settings || {};
 
@@ -366,4 +361,3 @@ export async function POST(req: NextRequest) {
 }
 
 // End of file
-
