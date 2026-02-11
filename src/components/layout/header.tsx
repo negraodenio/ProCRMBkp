@@ -127,9 +127,22 @@ export function Header() {
       })
       .subscribe();
 
+    // Real-time subscription for conversation updates (unread_count reset)
+    const convsChannel = supabase
+      .channel("conversation_updates")
+      .on("postgres_changes" as any, {
+        event: "UPDATE",
+        table: "conversations",
+        filter: `organization_id=eq.${profile.organization_id}`,
+      }, () => {
+        fetchNotifications();
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(leadsChannel);
       supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(convsChannel);
     };
   }, [profile?.organization_id]);
 

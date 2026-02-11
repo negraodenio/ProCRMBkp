@@ -11,25 +11,17 @@ export async function updateProfile(formData: FormData) {
         return { error: "Não autorizado" };
     }
 
-    const start_full_name = formData.get("full_name") as string;
-    const email = formData.get("email") as string;
+    const full_name = formData.get("full_name") as string;
     const phone = formData.get("phone") as string;
-    const position = formData.get("position") as string;
     const avatar_url = formData.get("avatar_url") as string;
 
     const updates: any = {
         updated_at: new Date().toISOString(),
     };
 
-    if (start_full_name) updates.start_full_name = start_full_name; // Check column name in DB, usually full_name or name
-    // Actually, let's assume 'full_name' based on common patterns. If it fails, I'll check schema.
-    // Wait, the input name in SettingsPanel was "name".
-
-    if (formData.has("full_name")) updates.full_name = formData.get("full_name");
-    if (formData.has("phone")) updates.phone = formData.get("phone");
-    // Position might not exist in profiles, maybe in a separate table or metadata?
-    // Let's stick to basics.
-    if (formData.has("avatar_url")) updates.avatar_url = formData.get("avatar_url");
+    if (full_name) updates.full_name = full_name;
+    if (phone) updates.phone = phone;
+    if (avatar_url) updates.avatar_url = avatar_url;
 
     const { error } = await supabase
         .from("profiles")
