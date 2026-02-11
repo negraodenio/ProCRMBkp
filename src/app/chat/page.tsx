@@ -109,7 +109,8 @@ export default function ChatPage() {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [supabase, profileLoading, profile?.organization_id]);
+    }, [supabase, profileLoading, profile?.organization_id, profile?.organization_id]);
+
 
     // 3. Fetch Messages when selection changes
     useEffect(() => {
@@ -194,8 +195,10 @@ export default function ChatPage() {
                 content: text,
                 direction: "outbound",
                 created_at: new Date().toISOString(),
-                status: "sending"
+                status: "sending",
+                sender_name: profile?.full_name || "Você"
             };
+
             setMessages(prev => [...prev, optimisticMsg]);
 
             console.log("📤 UI: Sending message (Optimistic)...", { selectedId, textLength: text.length });

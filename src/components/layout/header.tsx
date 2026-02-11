@@ -1,6 +1,7 @@
 "use client";
 
-import { Moon, Sun, Bell, User, Search, LogOut } from "lucide-react";
+import { Moon, Sun, Bell, User, Search, LogOut, Settings, CheckCheck, Trash2 } from "lucide-react";
+
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -152,6 +153,13 @@ export function Header() {
     }
   };
 
+  const clearNotifications = () => {
+    setNotifications([]);
+    setNotificationCount(0);
+    toast.success("Notificações limpas");
+  };
+
+
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
@@ -203,9 +211,21 @@ export function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80 glass-card max-h-96 overflow-y-auto">
-              <div className="p-3 border-b border-white/10">
-                <h3 className="font-semibold text-sm">Notificações</h3>
+              <div className="p-3 border-b border-white/10 flex items-center justify-between bg-card">
+                <h3 className="font-semibold text-sm text-foreground">Notificações</h3>
+                {notifications.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-[10px] text-muted-foreground hover:text-primary"
+                    onClick={clearNotifications}
+                  >
+                    <CheckCheck className="h-3 w-3 mr-1" />
+                    Limpar
+                  </Button>
+                )}
               </div>
+
               {notifications.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground text-sm">
                   <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -261,12 +281,19 @@ export function Header() {
                   <span className="text-[10px] text-muted-foreground truncate">{profile?.email}</span>
                 </div>
               </div>
-              <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href="/settings/profile">Meu Perfil</Link>
+              <DropdownMenuItem asChild className="cursor-pointer gap-2">
+                <Link href="/settings/profile">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  Meu Perfil
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href="/settings/organization">Configurações</Link>
+              <DropdownMenuItem asChild className="cursor-pointer gap-2">
+                <Link href="/settings/organization">
+                  <Settings className="h-4 w-4 text-muted-foreground" />
+                  Configurações
+                </Link>
               </DropdownMenuItem>
+
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-destructive cursor-pointer hover:bg-destructive/10 gap-2"
