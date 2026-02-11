@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, Upload, User } from "lucide-react";
 import { updateProfile } from "@/app/settings/actions";
+import { useRouter } from "next/navigation";
 
 interface ProfileFormProps {
     profile: any;
@@ -18,6 +19,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url);
+    const router = useRouter();
 
     const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         try {
@@ -63,6 +65,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             toast.error(result.error);
         } else {
             toast.success("Perfil atualizado com sucesso!");
+            router.refresh();
         }
         setLoading(false);
     };

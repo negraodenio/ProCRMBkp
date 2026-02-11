@@ -328,7 +328,9 @@ export default function AutomationsPage() {
                                         <CardContent>
                                             <div className="bg-slate-50 rounded-lg p-3 mb-4 text-sm">
                                                 <p className="text-muted-foreground line-clamp-3">
-                                                    {automation.message_template || "Sem mensagem configurada"}
+                                                    {typeof automation.message_template === 'string'
+                                                        ? automation.message_template
+                                                        : JSON.stringify(automation.message_template || "Sem mensagem configurada")}
                                                 </p>
                                             </div>
                                             <div className="flex items-center gap-2">

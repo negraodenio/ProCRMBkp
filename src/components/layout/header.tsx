@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -223,11 +224,28 @@ export function Header() {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="hover:bg-white/10">
-                <User className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="hover:bg-white/10 p-0 overflow-hidden">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={profile?.avatar_url} />
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    {profile?.full_name?.charAt(0) || <User className="h-4 w-4" />}
+                  </AvatarFallback>
+                </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 glass-card">
+            <DropdownMenuContent align="end" className="w-56 glass-card">
+              <div className="flex items-center gap-2 p-3 border-b border-white/10">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={profile?.avatar_url} />
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    {profile?.full_name?.charAt(0) || <User className="h-5 w-5" />}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-sm font-semibold truncate">{profile?.full_name || "Usuário"}</span>
+                  <span className="text-[10px] text-muted-foreground truncate">{profile?.email}</span>
+                </div>
+              </div>
               <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/settings/profile")}>
                 Meu Perfil
               </DropdownMenuItem>

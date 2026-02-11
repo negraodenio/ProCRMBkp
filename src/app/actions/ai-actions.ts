@@ -45,52 +45,59 @@ export async function generateAIContent(toolId: string, leadId: string) {
 
     switch (toolId) {
         case "generate-proposal":
-            systemPrompt = "Você é um especialista em vendas sênior. Gere uma proposta comercial profissional em Markdown.";
-            userPrompt = `Gere uma proposta comercial para o seguinte lead (infira serviços de desenvolvimento web se não estiver claro).
-      Inclua: Escopo, Investimento (crie uma estimativa realista em R$), Prazo e Garantia.
-      Responda APENAS em Português do Brasil.
-      
-      Contexto do Cliente:
+            systemPrompt = "Você é um Consultor de Negócios Sênior especialista em ROI e Propostas de Valor. Gere um Business Case estratégico.";
+            userPrompt = `Gere um Business Case detalhado para o seguinte prospect.
+      Foque em: Diagnóstico do Momento, Proposta de Valor, Estimativa de ROI (realista em R$), Cronograma Estratégico e Próximos Passos.
+      Use uma linguagem executiva e persuasiva. Responda APENAS em Português do Brasil em Markdown.
+
+      Contexto do Prospect:
       ${context}`;
             model = "general";
             break;
 
         case "predictive-analysis":
-            systemPrompt = "Você é um analista de dados de vendas. Analise a probabilidade de fechamento.";
-            userPrompt = `Analise a probabilidade de fechamento para este lead. Retorne uma pontuação (0-100%) e bullet points para Fatores Positivos e Fatores de Atenção.
-      Responda APENAS em Português do Brasil.
-      
-      Contexto do Cliente:
+            systemPrompt = "Você é um cientista de dados especializado em Revenue Operations (RevOps). Analise a propensão de fechamento.";
+            userPrompt = `Analise a propensão de conversão para este prospect. Retorne:
+      1. Score de Propensão (0-100%).
+      2. Vetores de Aceleração (O que ajuda).
+      3. Pontos de Fricção (Barreiras prováveis).
+      4. Recomendação Estratégica.
+      Responda APENAS em Português do Brasil em Markdown.
+
+      Contexto:
       ${context}`;
             model = "general";
             break;
 
         case "categorize-lead":
-            systemPrompt = "Você é um especialista em qualificação de leads. Categorize o lead.";
-            userPrompt = `Categorize este lead como FRIO (Cold), MORN (Warm) ou QUENTE (Hot). Forneça valor potencial e prioridade.
+            systemPrompt = "Você é um especialista em SDR/BDR de alta performance. Realize o Lead Scoring.";
+            userPrompt = `Avalie e classifique este lead com base nos critérios de FIT e INTENÇÃO.
+      Retorne: Classificação (A, B, C), ICP Match (0-100%) e Prioridade de Atendimento.
       Responda APENAS em Português do Brasil.
-      
-      Contexto do Cliente:
+
+      Contexto:
       ${context}`;
             model = "fast";
             break;
 
         case "generate-email":
-            systemPrompt = "Você é um copywriter especialista em e-mails de vendas.";
-            userPrompt = `Escreva um e-mail de follow-up personalizado para este lead. Mantenha um tom profissional e convidativo.
+            systemPrompt = "Você é um copywriter sênior focado em Outbound Marketing e Persuasão.";
+            userPrompt = `Escreva um e-mail de follow-up ultra-personalizado.
+      Use gatilhos de curiosidade e autoridade. Foque no problema do cliente (dor) e não apenas na solução.
       Responda APENAS em Português do Brasil.
-      
-      Contexto do Cliente:
+
+      Contexto:
       ${context}`;
             model = "general";
             break;
 
         case "sentiment-analysis":
-            systemPrompt = "Você é um especialista em análise de sentimento.";
-            userPrompt = `Analise o sentimento deste lead com base no contexto. Retorne um rótulo (Positivo, Neutro, Negativo) e uma pontuação.
+            systemPrompt = "Você é um especialista em Psicologia do Consumidor e Inteligência Emocional.";
+            userPrompt = `Avalie o Perfil Comportamental e o nível de Engajamento deste prospect.
+      Retorne: Termômetro de Engajamento, Clima Relacional (Positivo/Neutro/Risco) e Recomendações de Rapport.
       Responda APENAS em Português do Brasil.
-      
-      Contexto do Cliente:
+
+      Contexto:
       ${context}`;
             model = "sentiment";
             break;
@@ -99,44 +106,49 @@ export async function generateAIContent(toolId: string, leadId: string) {
             systemPrompt = "Você é um coach estratégico de vendas.";
             userPrompt = `Sugira a ÚNICA melhor próxima ação para este lead. Seja específico.
       Responda APENAS em Português do Brasil.
-      
+
       Contexto do Cliente:
       ${context}`;
             model = "general";
             break;
 
         case "objection-handler":
-            systemPrompt = "Você é um mestre em negociação e especialista em vendas. Seu objetivo é ajudar o usuário a superar objeções de vendas.";
-            userPrompt = `O lead está levantando objeções. Com base no contexto abaixo, identifique objeções prováveis e forneça respostas específicas e de alta conversão para superá-las, usando o método Sandler ou técnicas similares.
+            systemPrompt = "Você é um Master Negotiator. Use o método Sandler e técnicas de Reenquadramento (Reframing) para tratar objeções.";
+            userPrompt = `O prospect está apresentando resistência. Identifique as objeções ocultas e forneça:
+            1. Técnica de 'Reverse' (Perguntas para aprofundar a dor).
+            2. Argumentação de Contorno (Focus on Value).
+            3. Call to Action de Fechamento.
             Responda APENAS em Português do Brasil.
-            
-            Contexto do Cliente:
+
+            Contexto:
             ${context}`;
             model = "general";
             break;
 
         case "sales-script":
-            systemPrompt = "Você é um roteirista para equipes de vendas de alta performance.";
-            userPrompt = `Crie um roteiro de cold call ou follow-up para este lead específico. O roteiro deve ser natural, envolvente e focado em conseguir uma reunião ou fechar o negócio. Inclua instruções de tom (ex: [Entusiasmado], [Pausa para efeito]).
+            systemPrompt = "Você é um Arquiteto de Conversas de Vendas. Use a metodologia SPIN Selling.";
+            userPrompt = `Desenvolva um Framework de Conversa para este prospect específico.
+            Divida em: Perguntas de Situação, Problema, Implicação (dor) e Necessidade de Solução.
+            Inclua 'Power Statements' para gerar autoridade imediata.
             Responda APENAS em Português do Brasil.
-            
-            Contexto do Cliente:
+
+            Contexto:
             ${context}`;
-            model = "general"; // Scripting needs good writing
+            model = "general";
             break;
 
         case "meeting-prep":
-            systemPrompt = "Você é um assistente executivo preparando um briefing para uma reunião VIP.";
-            userPrompt = `Tenho uma reunião com este lead. Prepare um briefing abrangente incluindo:
-            1. Pontos de conversa principais baseados no histórico/status.
-            2. Objetivo da reunião.
-            3. Riscos potenciais/red flags.
-            4. Uma agenda personalizada.
+            systemPrompt = "Você é um Consultor de Estratégia Comercial preparando um Dossiê Executivo.";
+            userPrompt = `Prepare um Dossiê Pré-Reunião de alto impacto:
+            1. Pain Points Detectados.
+            2. Stakeholders Prováveis e Interesses.
+            3. Agenda 'Customer-Centric'.
+            4. Possíveis 'Deal Breakers' e como evitá-los.
             Responda APENAS em Português do Brasil.
-            
-            Contexto do Cliente:
+
+            Contexto:
             ${context}`;
-            model = "general"; // Analysis needs 'general' (DeepSeek/Qwen 72B)
+            model = "general";
             break;
 
         default:

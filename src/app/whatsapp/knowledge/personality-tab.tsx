@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PERSONALITY_PRESETS, PersonalityType } from '@/lib/bot-personalities';
 import { updateBotSettings, updateWhatsAppProfile } from './actions';
 import { toast } from 'sonner';
-import { Loader2, Save, Upload, User, Palette, Settings2, Sparkles, RefreshCw } from 'lucide-react';
+import { Loader2, Save, Upload, User, Palette, Settings2, Sparkles, RefreshCw, MessageSquare, Edit } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { createClient } from '@/lib/supabase/client';
 
@@ -129,9 +129,10 @@ export function PersonalityTab({ botSettings: initialSettings, organizationId }:
       {/* Settings Column */}
       <div className="space-y-6">
         <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="basic">Básico</TabsTrigger>
                 <TabsTrigger value="appearance">Visual</TabsTrigger>
+                <TabsTrigger value="webchat">Webchat</TabsTrigger>
                 <TabsTrigger value="behavior">Cérebro</TabsTrigger>
             </TabsList>
 
@@ -259,44 +260,6 @@ export function PersonalityTab({ botSettings: initialSettings, organizationId }:
 
 
 
-                <div className="pt-6 border-t space-y-4">
-                    <div>
-                        <h3 className="text-sm font-semibold flex items-center gap-2">
-                            <Sparkles className="h-4 w-4 text-purple-500" /> Webchat Widget
-                        </h3>
-                        <p className="text-xs text-muted-foreground">Link direto para o chat do seu agente.</p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <Input
-                            readOnly
-                            value={`${typeof window !== 'undefined' ? window.location.origin : ''}/widget/${organizationId}`}
-                            className="bg-slate-50 font-mono text-xs"
-                        />
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => {
-                                const url = `${window.location.origin}/widget/${organizationId}`;
-                                navigator.clipboard.writeText(url);
-                                toast.success("Link copiado!");
-                            }}
-                        >
-                            <Settings2 className="h-4 w-4" /> {/* Using Settings2 as placeholder for Copy if needed, or just text */}
-                            <span className="sr-only">Copiar</span>
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                                window.open(`/widget/${organizationId}`, '_blank');
-                            }}
-                        >
-                            <Sparkles className="h-4 w-4" /> {/* External Link Icon placeholder */}
-                        </Button>
-                    </div>
-                </div>
-
                 <div className="flex items-center justify-between pt-4 border-t">
                     <div className="space-y-0.5">
                         <Label>Remover "Criado com..."</Label>
@@ -306,6 +269,57 @@ export function PersonalityTab({ botSettings: initialSettings, organizationId }:
                         checked={settings.remove_watermark}
                         onCheckedChange={checked => setSettings({...settings, remove_watermark: checked})}
                     />
+                </div>
+            </TabsContent>
+
+            {/* TAB: WEBCHAT */}
+            <TabsContent value="webchat" className="space-y-4 mt-4 glass-card p-6">
+                <div>
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-purple-500" /> Webchat Widget
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Compartilhe ou incorpore o chat no seu site.</p>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label>Link do Widget</Label>
+                        <div className="flex items-center gap-2">
+                            <Input
+                                readOnly
+                                value={`${typeof window !== 'undefined' ? window.location.origin : ''}/widget/${organizationId}`}
+                                className="bg-slate-50 font-mono text-xs"
+                            />
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => {
+                                    const url = `${window.location.origin}/widget/${organizationId}`;
+                                    navigator.clipboard.writeText(url);
+                                    toast.success("Link copiado!");
+                                }}
+                            >
+                                <Settings2 className="h-4 w-4" />
+                                <span className="sr-only">Copiar</span>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                    window.open(`/widget/${organizationId}`, '_blank');
+                                }}
+                            >
+                                <Sparkles className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                        <p className="text-xs text-blue-800 font-medium">✨ Dica:</p>
+                        <p className="text-xs text-blue-700 mt-1">
+                            Você pode usar este link para colocar um botão de chat no seu site, Instagram ou enviar diretamente para seus clientes.
+                        </p>
+                    </div>
                 </div>
             </TabsContent>
 
@@ -391,42 +405,58 @@ export function PersonalityTab({ botSettings: initialSettings, organizationId }:
       {/* Preview Column */}
       <div className="space-y-6">
         <div className="glass-card p-6 space-y-4 sticky top-6">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-                <Settings2 className="h-5 w-5" /> Preview do Chat
-            </h2>
+            <div>
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5 text-purple-500" /> Preview da Resposta
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                    Veja como o robô vai responder com essas configurações:
+                </p>
+            </div>
 
             {/* Simulation Container */}
-            <div className="border rounded-xl overflow-hidden bg-slate-50 shadow-inner h-[500px] flex flex-col">
-                {/* Chat Header */}
-                <div className="bg-white p-4 border-b flex items-center gap-3 shadow-sm">
-                    <Avatar className="h-10 w-10">
-                        <AvatarImage src={settings.bot_avatar || undefined} />
-                        <AvatarFallback>{settings.bot_name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                        <p className="font-semibold text-sm">{settings.bot_name}</p>
-                        <p className="text-xs text-green-500 flex items-center gap-1">
-                            <span className="block h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-                            Online
-                        </p>
-                    </div>
-                </div>
-
+            <div className="border rounded-xl overflow-hidden bg-white shadow-inner min-h-[400px] flex flex-col">
                 {/* Chat Area */}
-                <div className="flex-1 p-4 space-y-4 overflow-y-auto bg-slate-100/50">
+                <div className="flex-1 p-6 space-y-4 overflow-y-auto bg-slate-50/30">
                     {/* Bot Message */}
-                    <div className="flex items-start gap-2">
-                         <Avatar className="h-8 w-8 mt-1">
+                    <div className="flex items-start gap-3">
+                         <Avatar className="h-10 w-10 border-2 border-white shadow-sm shrink-0">
                             <AvatarImage src={settings.bot_avatar || undefined} />
                             <AvatarFallback>{settings.bot_name.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <div
-                            className="p-3 rounded-2xl rounded-tl-none max-w-[80%] text-sm shadow-sm"
-                            style={{ backgroundColor: settings.agent_msg_color, color: settings.agent_msg_color === '#ffffff' ? '#000' : '#fff' }}
-                        >
-                            <p className={settings.agent_msg_color === '#ffffff' ? 'text-slate-800' : 'text-white'}>
-                                {getPreviewMessage()}
-                            </p>
+                        <div className="space-y-2 flex-1">
+                            <div
+                                className="p-4 rounded-2xl rounded-tl-none text-sm shadow-sm relative group"
+                                style={{
+                                    backgroundColor: settings.agent_msg_color,
+                                    color: settings.agent_msg_color === '#ffffff' ? '#1e293b' : '#fff',
+                                    border: settings.agent_msg_color === '#ffffff' ? '1px solid #e2e8f0' : 'none'
+                                }}
+                            >
+                                <textarea
+                                    value={settings.welcome_message || getPreviewMessage()}
+                                    onChange={(e) => setSettings({ ...settings, welcome_message: e.target.value })}
+                                    className="bg-transparent border-none focus:ring-0 w-full resize-none p-0 overflow-hidden leading-relaxed font-medium"
+                                    rows={2}
+                                    placeholder="Digite a mensagem inicial aqui..."
+                                />
+                                <Edit className="absolute -top-1 -right-1 h-3 w-3 opacity-0 group-hover:opacity-40 transition-opacity" />
+                            </div>
+
+                            {/* Badges / Status */}
+                            <div className="flex flex-wrap gap-2 items-center text-[10px] text-muted-foreground px-1">
+                                <span className="flex items-center gap-1">
+                                    Temperatura: {settings.temperature}
+                                </span>
+                                <span>•</span>
+                                <span className="flex items-center gap-1">
+                                    Emojis {settings.use_emojis ? 'ativados' : 'desativados'}
+                                </span>
+                                <span>•</span>
+                                <span className="flex items-center gap-1">
+                                    Auto-reply {settings.auto_reply_enabled ? 'ON' : 'OFF'}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
