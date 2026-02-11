@@ -91,3 +91,56 @@ export async function logoutWhatsApp() {
 
     return { success: true };
 }
+
+export async function updateBotStatus(active: boolean) {
+    const supabase = await createClient();
+    const { data: profile } = await supabase.from('profiles').select('organization_id').single();
+
+    if (!profile?.organization_id) {
+        return { error: "Organization not found" };
+    }
+
+    // Get current settings
+    const { data: org } = await supabase
+        .from('organizations')
+        .select('bot_settings')
+        .eq('id', profile.organization_id)
+        .single();
+
+    const newSettings = {
+        ...(org?.bot_settings || {}),
+        active: active
+    };
+
+    const { error } = await supabase
+        .from('organizations')
+        .update({ bot_settings: newSettings })
+        .eq('id', profile.organization_id);
+
+    if (error) {
+        console.error("Error updating bot status:", error);
+        return { error: error.message };
+    }
+
+    return { success: true, active };
+}
+
+export async function getBotStatus() {
+    const supabase = await createClient();
+    const { data: profile } = await supabase.from('profiles').select('organization_id').single();
+
+    if (!profile?.organization_id) {
+        return { error: "Organization not found" };
+    }
+
+    const { data: org } = await supabase
+        .from('organizations')
+        .select('bot_settings')
+        .eq('id', profile.organization_id)
+        .single();
+
+    return {
+        active: org?.bot_settings?.active !== false,
+        settings: org?.bot_settings || {}
+    };
+}

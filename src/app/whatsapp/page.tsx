@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { QrCode, RefreshCw, LogOut, BookOpen } from "lucide-react";
-import { getQrCode, logoutWhatsApp } from "./actions";
+import { QrCode, RefreshCw, LogOut, BookOpen, Bot, Sparkles } from "lucide-react";
+import { getQrCode, logoutWhatsApp, getBotStatus, updateBotStatus } from "./actions";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
@@ -15,13 +16,24 @@ export default function WhatsAppPage() {
     const [loading, setLoading] = useState(false);
     const [instanceName, setInstanceName] = useState<string>("");
 
+    const [botActive, setBotActive] = useState(true);
+    const [botLoading, setBotLoading] = useState(false);
+
     // Check status on load
     useEffect(() => {
         handleConnect();
+        loadBotStatus();
     }, []);
 
+    const loadBotStatus = async () => {
+        const res = await getBotStatus();
+        if (res.active !== undefined) {
+            setBotActive(res.active);
+        }
+    };
+
     // Mock status for now, ideally fetching from API
-    // const isConnected = !qrCode && !loading && instanceName; 
+    // const isConnected = !qrCode && !loading && instanceName;
 
     const handleConnect = async () => {
         setLoading(true);
@@ -40,7 +52,7 @@ export default function WhatsAppPage() {
                 if (res.webhookUrl) {
                     console.log("Webhook Active:", res.webhookUrl);
                     // Optional: Show to user as confirmation
-                    // toast.success(`Webhook: ${res.webhookUrl}`); 
+                    // toast.success(`Webhook: ${res.webhookUrl}`);
                 }
             }
         } catch (e) {
@@ -58,20 +70,37 @@ export default function WhatsAppPage() {
         toast.success("Desconectado.");
     }
 
+    const handleBotToggle = async (checked: boolean) => {
+        setBotLoading(true);
+        try {
+            const res = await updateBotStatus(checked);
+            if (res.error) {
+                toast.error("Erro ao atualizar robô: " + res.error);
+            } else {
+                setBotActive(checked);
+                toast.success(checked ? "Robô ativado!" : "Robô pausado.");
+            }
+        } catch (e) {
+            toast.error("Erro na comunicação.");
+        } finally {
+            setBotLoading(false);
+        }
+    };
+
     return (
         <div className="flex min-h-screen bg-slate-50/50">
             <Sidebar />
             <div className="flex flex-1 flex-col md:ml-64 transition-all duration-300 ease-in-out">
                 <Header />
                 <main className="flex-1 p-8 max-w-5xl mx-auto w-full">
-                    
+
                     {/* Header Section */}
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight text-slate-900">WhatsApp</h1>
                             <p className="text-slate-500 mt-1">Gerencie sua conexão e treine sua IA.</p>
                         </div>
-                        
+
                         {/* Status Badge */}
                         <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border shadow-sm">
                             <div className={`h-2.5 w-2.5 rounded-full ${instanceName ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
@@ -82,7 +111,7 @@ export default function WhatsAppPage() {
                     </div>
 
                     <div className="grid gap-6 md:grid-cols-12">
-                        
+
                         {/* Connection Card (Main) */}
                         <div className="md:col-span-8">
                             <Card className="h-full border-0 shadow-xl shadow-slate-200/60 ring-1 ring-slate-200 overflow-hidden relative">
@@ -97,7 +126,7 @@ export default function WhatsAppPage() {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="flex flex-col items-center justify-center min-h-[400px] p-8 bg-slate-50/50">
-                                    
+
                                     {!qrCode && !loading && !instanceName && (
                                         <div className="text-center space-y-6 max-w-sm animate-in fade-in zoom-in duration-500">
                                             <div className="mx-auto w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
@@ -163,12 +192,12 @@ export default function WhatsAppPage() {
 
                         {/* RAG / Actions Column */}
                         <div className="md:col-span-4 flex flex-col gap-6">
-                            
+
                             {/* Knowledge Base Card (Prominent) */}
                             <Link href="/whatsapp/knowledge" className="group">
                                 <Card className="border-0 shadow-lg shadow-blue-100 hover:shadow-xl hover:shadow-blue-200 transition-all duration-300 ring-1 ring-blue-100 cursor-pointer overflow-hidden relative h-full">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-blue-500/20 transition-all" />
-                                    
+
                                     <CardHeader>
                                         <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-2 shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform duration-300">
                                             <BookOpen className="h-6 w-6 text-white" />
@@ -185,6 +214,37 @@ export default function WhatsAppPage() {
                                     </CardContent>
                                 </Card>
                             </Link>
+
+                            {/* Bot AI Control Card */}
+                            <Card className="border-0 shadow-lg shadow-indigo-100 ring-1 ring-indigo-100 overflow-hidden relative">
+                                <div className={`absolute top-0 left-0 w-full h-1 ${botActive ? 'bg-emerald-500' : 'bg-orange-500'}`} />
+                                <CardHeader className="pb-3">
+                                    <div className="flex items-center justify-between">
+                                        <CardTitle className="text-lg flex items-center gap-2">
+                                            <Bot className="h-5 w-5 text-indigo-600" />
+                                            Status da IA
+                                        </CardTitle>
+                                        <Switch
+                                            checked={botActive}
+                                            onCheckedChange={handleBotToggle}
+                                            disabled={botLoading}
+                                        />
+                                    </div>
+                                    <CardDescription>
+                                        Controle se o robô deve responder automaticamente.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium ${
+                                        botActive
+                                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                                            : 'bg-orange-50 text-orange-700 border border-orange-100'
+                                    }`}>
+                                        <Sparkles className={`h-4 w-4 ${botActive ? 'animate-pulse' : ''}`} />
+                                        {botActive ? 'Robô Ativo' : 'Robô Pausado'}
+                                    </div>
+                                </CardContent>
+                            </Card>
 
                             {/* Info Card */}
                             <Card className="border-0 shadow-md ring-1 ring-slate-100">

@@ -4,6 +4,8 @@ import { createOrgScopedServiceClient, createServiceRoleClient } from "@/lib/sup
 import { EvolutionService } from "@/services/evolution";
 import { aiChat, generateEmbedding } from "@/lib/ai/client";
 import { PERSONALITY_PRESETS, PersonalityType, buildSystemPrompt } from "@/lib/bot-personalities";
+import { normalizePhone } from "@/lib/utils";
+// cleaned up imports
 
 // This webhook handles incoming messages from Evolution API
 // Cache bust: 2026-02-10T18:11:00Z
@@ -37,10 +39,14 @@ export async function POST(req: NextRequest) {
 
         // Extract Phone and Message
         const remoteJid = messageData.key?.remoteJid || messageData.remoteJid;
-        const fromMe = messageData.key?.fromMe || messageData.fromMe || (messageData.key?.id?.startsWith("BAE5") && messageData.key?.id?.length > 15);
+
+        // Strict fromMe check: ignore messages sent by the bot itself
+        const fromMe = messageData.key?.fromMe === true ||
+                       messageData.fromMe === true ||
+                       (messageData.key?.id?.startsWith("BAE5") && messageData.key?.id?.length > 15);
 
         if (fromMe) {
-            console.log("⏭️ [Webhook] Message from self, ignoring");
+            console.log("⏭️ [Webhook] Message from self (fromMe=true), ignoring to avoid loops");
             return NextResponse.json({ status: "ignored_self" });
         }
 
@@ -56,17 +62,29 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ status: "ignored_group" });
         }
 
-        // Normalize phone: only digits
-        const rawPhone = remoteJid.split("@")[0];
-        const phone = rawPhone.replace(/\D/g, "");
-        const pushName = messageData.pushName || "Desconhecido";
+        // Normalize phone: only digits, stripped of extras, with mandatory BR prefix
+        const phone = normalizePhone(remoteJid);
 
-        // Extract Text Content
+        // Normalize Push Name: use phone if name is generic or missing
+        let pushName = messageData.pushName || "";
+        if (!pushName || pushName === "Desconhecido" || pushName.toLowerCase() === "unknown") {
+            pushName = phone;
+        }
+
+        // Extract Text Content (Conversação ou Legenda de Mídia)
         let text = "";
         if (messageData.message?.conversation) {
             text = messageData.message.conversation;
         } else if (messageData.message?.extendedTextMessage?.text) {
             text = messageData.message.extendedTextMessage.text;
+        } else if (messageData.message?.imageMessage?.caption) {
+            text = messageData.message.imageMessage.caption;
+        } else if (messageData.message?.videoMessage?.caption) {
+            text = messageData.message.videoMessage.caption;
+        } else if (messageData.message?.buttonsResponseMessage?.selectedButtonId) {
+            text = messageData.message.buttonsResponseMessage.selectedDisplayText || messageData.message.buttonsResponseMessage.selectedButtonId;
+        } else if (messageData.message?.templateButtonReplyMessage?.selectedId) {
+            text = messageData.message.templateButtonReplyMessage.selectedDisplayText || messageData.message.templateButtonReplyMessage.selectedId;
         }
 
         if (!text) {
@@ -74,7 +92,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ status: "no_text" });
         }
 
-        console.log(`✅ [Webhook] Processing message from ${phone}: "${text.substring(0, 50)}..."`);
+        console.log(`✅ [Webhook] Processing message from ${pushName} (${phone}): "${text.substring(0, 50)}..."`);
 
         // Extract instance name EARLY for validation and fallback
         const instanceName = body.instance || body.sender || body.instanceName || body.data?.instance || "";
@@ -128,9 +146,12 @@ export async function POST(req: NextRequest) {
         const botSettings = org.bot_settings || {};
 
         // --- FEATURE: AUTO-REPLY ENABLED CHECK ---
-        if (botSettings.auto_reply_enabled === false) {
-            console.log("⏭️ Auto-reply is DISABLED for this organization");
-            return NextResponse.json({ status: "auto_reply_disabled" });
+        // Support both "active" (primary) and "auto_reply_enabled" (legacy/alternative)
+        const isBotActive = botSettings.active !== false && botSettings.auto_reply_enabled !== false;
+
+        if (!isBotActive) {
+            console.log("⏭️ Bot is PAUSED (active=false) for this organization");
+            return NextResponse.json({ status: "bot_paused" });
         }
 
         // --- FEATURE: BUSINESS HOURS CHECK ---
@@ -184,7 +205,7 @@ export async function POST(req: NextRequest) {
         // 3. Find/Create Conversation
         let { data: conversation, error: convLookupError } = await serviceClient
             .from("conversations")
-            .select("id, unread_count")
+            .select("id, unread_count, contact_name, contact_phone")
             .eq("contact_phone", phone)
             .eq("status", "open")
             .maybeSingle();
@@ -219,11 +240,21 @@ export async function POST(req: NextRequest) {
         }
 
         // Update conversation metadata (so it appears at the top of the chat list)
-        await serviceClient.from("conversations").update({
+        const updateData: any = {
             last_message_content: text,
             last_message_at: new Date().toISOString(),
             unread_count: (conversation.unread_count || 0) + 1
-        }).eq("id", conversation.id);
+        };
+
+        // If current name is generic (phone or Desconhecido), and we have a better pushName now, update it
+        if (conversation.contact_name === conversation.contact_phone || conversation.contact_name === "Desconhecido") {
+            if (pushName && pushName !== phone) {
+                updateData.contact_name = pushName;
+                console.log(`[Webhook] Updating conversation name from generic to: ${pushName}`);
+            }
+        }
+
+        await serviceClient.from("conversations").update(updateData).eq("id", conversation.id);
 
         console.log(`✅ [Webhook] Conversation ready and updated: ${conversation?.id}`);
 
@@ -373,7 +404,16 @@ export async function POST(req: NextRequest) {
         });
 
         const replyInstance = instanceName || ("bot-" + org.id);
-        await EvolutionService.sendMessage(replyInstance, remoteJid, aiResponse);
+
+        // FIX: Handle LID (Linked Identity Device)
+        // If the incoming message is from a LID, reply to the LID JID directly.
+        // Otherwise use the standard phone@s.whatsapp.net format.
+        let targetJid = `${phone}@s.whatsapp.net`;
+        if (remoteJid && remoteJid.includes("@lid")) {
+            targetJid = remoteJid;
+        }
+
+        await EvolutionService.sendMessage(replyInstance, targetJid, aiResponse);
 
         // Log Bot Message
         await serviceClient.from("messages").insert({

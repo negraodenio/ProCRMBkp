@@ -39,23 +39,32 @@ export async function POST(req: Request) {
                 const subscriptionId = session.subscription;
 
                 if (orgId && subscriptionId) {
+                    // 1. Update Organization
                     await supabaseAdmin
                         .from("organizations")
                         .update({
                             subscription_status: "active",
-                            subscription_plan: "pro", // Or derive from price ID
+                            subscription_plan: "pro",
                             stripe_customer_id: session.customer
                         })
                         .eq("id", orgId);
 
-                    // Also populate subscriptions table if you want history
-                    await supabaseAdmin.from("subscriptions").insert({
-                        organization_id: orgId,
-                        stripe_subscription_id: subscriptionId,
-                        status: "active",
-                        stripe_price_id: session.line_items?.[0]?.price?.id, // Simplified
-                        current_period_start: new Date().toISOString(), // Approximate
-                    });
+                    // 2. Check for existing subscription (Idempotency)
+                    const { data: existingSub } = await supabaseAdmin
+                        .from("subscriptions")
+                        .select("id")
+                        .eq("stripe_subscription_id", subscriptionId)
+                        .maybeSingle();
+
+                    if (!existingSub) {
+                        await supabaseAdmin.from("subscriptions").insert({
+                            organization_id: orgId,
+                            stripe_subscription_id: subscriptionId,
+                            status: "active",
+                            stripe_price_id: session.line_items?.[0]?.price?.id,
+                            current_period_start: new Date().toISOString(),
+                        });
+                    }
                 }
                 break;
             }

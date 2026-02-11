@@ -1,3 +1,4 @@
+import { normalizePhone } from "@/lib/utils";
 
 const EVOLUTION_API_URL = process.env.NEXT_PUBLIC_EVOLUTION_API_URL;
 const EVOLUTION_API_KEY = process.env.EVOLUTION_API_GLOBAL_KEY;
@@ -21,6 +22,24 @@ type CreateInstanceResponse = {
     };
 };
 
+const TIMEOUT_MS = 15000; // 15 seconds
+
+async function fetchWithTimeout(url: string, options: any = {}) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    try {
+        const response = await fetch(url, {
+            ...options,
+            signal: controller.signal,
+        });
+        clearTimeout(id);
+        return response;
+    } catch (error) {
+        clearTimeout(id);
+        throw error;
+    }
+}
+
 export const EvolutionService = {
     async createInstance(instanceName: string) {
         if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) throw new Error("Missing Config");
@@ -33,7 +52,7 @@ export const EvolutionService = {
         };
 
 
-        const res = await fetch(`${EVOLUTION_API_URL}/instance/create`, {
+        const res = await fetchWithTimeout(`${EVOLUTION_API_URL}/instance/create`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -56,7 +75,7 @@ export const EvolutionService = {
         if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) throw new Error("Missing Config");
 
         try {
-            const res = await fetch(`${EVOLUTION_API_URL}/instance/connect/${instanceName}`, {
+            const res = await fetchWithTimeout(`${EVOLUTION_API_URL}/instance/connect/${instanceName}`, {
                 method: "GET",
                 headers: { "apikey": EVOLUTION_API_KEY }
             });
@@ -64,10 +83,10 @@ export const EvolutionService = {
             if (!res.ok) {
                 // Try fetching instance info to see if it exists/is already connected
                 console.log(`Connect failed for ${instanceName}, checking info...`);
-                const infoRes = await fetch(`${EVOLUTION_API_URL}/instance/info/${instanceName}`, {
+                const infoRes = await fetchWithTimeout(`${EVOLUTION_API_URL}/instance/info/${instanceName}`, {
                     headers: { "apikey": EVOLUTION_API_KEY }
                 });
-                
+
                 if (infoRes.ok) {
                     return await infoRes.json();
                 }
@@ -87,10 +106,21 @@ export const EvolutionService = {
             throw new Error("Evolution API configuration is missing");
         }
 
-        // Ensure JID format
-        const jid = remoteJid.includes("@") ? remoteJid : `${remoteJid}@s.whatsapp.net`;
+        // Ensure JID format and normalize phone (always)
+        let jid = remoteJid;
 
-        const res = await fetch(`${EVOLUTION_API_URL}/message/sendText/${instanceName}`, {
+        // FIX: If it's a Linked Identity Device (LID), use it as is.
+        // Do NOT normalize or append @s.whatsapp.net, as that breaks LIDs.
+        if (remoteJid.includes("@lid")) {
+            jid = remoteJid;
+        } else {
+            const cleanPhone = normalizePhone(remoteJid);
+            jid = `${cleanPhone}@s.whatsapp.net`;
+        }
+
+        console.log(`📡 [Evolution] Sending message to ${jid} (original: ${remoteJid})`);
+
+        const res = await fetchWithTimeout(`${EVOLUTION_API_URL}/message/sendText/${instanceName}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -98,9 +128,9 @@ export const EvolutionService = {
             },
             body: JSON.stringify({
                 number: jid,
-                text: text, // Standard for many v2 versions
+                text: text,
                 textMessage: {
-                    text: text // Standard for some v2.x versions
+                    text: text
                 },
                 options: {
                     delay: 1200,
@@ -113,7 +143,45 @@ export const EvolutionService = {
         if (!res.ok) {
             const errorText = await res.text();
             console.error(`❌ Evolution Send Error (${res.status}):`, errorText);
-            throw new Error(`WhatsApp API Error: ${errorText}`);
+
+            try {
+                // Try to find if there's JSON in the response (sometimes prefixed with noise)
+                const jsonMatch = errorText.match(/\{.*\}/);
+                const errorJson = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+
+                if (errorJson) {
+                    const responseData = errorJson.response;
+
+                    // 1. Handle "Number does not exist" specifically
+                    if (responseData?.message && Array.isArray(responseData.message)) {
+                        const firstMsg = responseData.message[0];
+                        if (firstMsg?.exists === false) {
+                            throw new Error(`O número ${jid.split('@')[0]} não está cadastrado no WhatsApp.`);
+                        }
+                    }
+
+                    // 2. Handle "Instance not found" or disconnected
+                    if (errorJson.error === "Instance not found" || (errorJson.message && typeof errorJson.message === 'string' && errorJson.message.includes("instance_not_found"))) {
+                        throw new Error("WhatsApp desconectado! Conecte novamente no menu WhatsApp.");
+                    }
+
+                    // 3. Fallback to error message from JSON if it's not a generic "Bad Request"
+                    if (errorJson.message || errorJson.error) {
+                         const msg = errorJson.message || errorJson.error;
+                         if (msg !== "Bad Request") {
+                            throw new Error(msg);
+                         }
+                    }
+                }
+            } catch (pErr: any) {
+                // Rethrow OUR custom errors
+                if (pErr.message && (pErr.message.includes("não está cadastrado") || pErr.message.includes("desconectado") || !errorText.includes(pErr.message))) {
+                    throw pErr;
+                }
+            }
+
+            // Fallback for other errors (limit length and clean JSON)
+            throw new Error(errorText.substring(0, 300));
         }
 
         return await res.json();
@@ -124,7 +192,7 @@ export const EvolutionService = {
 
         // For v2.3.x, /webhook/set/ is often the correct endpoint but REQUIRES the 'webhook' object wrapper
         console.log(`Setting webhook for ${instanceName} to ${webhookUrl}`);
-        const res = await fetch(`${EVOLUTION_API_URL}/webhook/set/${instanceName}`, {
+        const res = await fetchWithTimeout(`${EVOLUTION_API_URL}/webhook/set/${instanceName}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -136,11 +204,11 @@ export const EvolutionService = {
                     url: webhookUrl,
                     webhookByEvents: true,
                     events: [
-                        "MESSAGES_UPSERT", 
-                        "MESSAGES_UPDATE", 
+                        "MESSAGES_UPSERT",
+                        "MESSAGES_UPDATE",
                         "SEND_MESSAGE",
                         "CONNECTION_UPDATE",
-                        "QRCODE_UPDATED" 
+                        "QRCODE_UPDATED"
                     ]
                 }
             })
@@ -157,7 +225,7 @@ export const EvolutionService = {
     async deleteInstance(instanceName: string) {
         if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) throw new Error("Missing Config");
 
-        const res = await fetch(`${EVOLUTION_API_URL}/instance/delete/${instanceName}`, {
+        const res = await fetchWithTimeout(`${EVOLUTION_API_URL}/instance/delete/${instanceName}`, {
             method: "DELETE",
             headers: { "apikey": EVOLUTION_API_KEY }
         });

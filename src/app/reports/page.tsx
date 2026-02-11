@@ -20,68 +20,49 @@ import {
   Legend,
 } from "recharts";
 
-const SALES_DATA = [
-  { month: "Jan", value: 45000 },
-  { month: "Fev", value: 52000 },
-  { month: "Mar", value: 61000 },
-  { month: "Abr", value: 58000 },
-  { month: "Mai", value: 72000 },
-  { month: "Jun", value: 68000 },
-];
 
-const LEAD_SOURCES = [
-  { name: "WhatsApp", value: 45, color: "#22c55e" },
-  { name: "Site", value: 30, color: "#3b82f6" },
-  { name: "Instagram", value: 15, color: "#f97316" },
-  { name: "Indicação", value: 10, color: "#eab308" },
-];
+import { getReportsData } from "./actions";
 
 export default function ReportsPage() {
-  const [stats, setStats] = useState({
-    totalLeads: 0,
-    conversionRate: 0,
-    avgTicket: 0,
-  });
+  const [data, setData] = useState<{
+    salesData: { month: string; value: number }[];
+    leadSources: { name: string; value: number; color: string }[];
+    stats: { totalLeads: number; conversionRate: number; avgTicket: number };
+  } | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const supabase = createClient();
-
   useEffect(() => {
-    loadStats();
+    async function loadData() {
+      try {
+        const reportsData = await getReportsData();
+        setData(reportsData);
+      } catch (error) {
+        console.error("Erro ao carregar relatórios:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
   }, []);
 
-  async function loadStats() {
-    setLoading(true);
-
-    const { data: contacts } = await supabase
-      .from("contacts")
-      .select("id, type")
-      .limit(1000);
-
-    const { data: deals } = await supabase
-      .from("deals")
-      .select("id, value, status")
-      .limit(1000);
-
-    const totalLeads = contacts?.filter((c) => c.type === "lead").length || 0;
-    const clients = contacts?.filter((c) => c.type === "client").length || 0;
-    const totalContacts = contacts?.length || 1;
-    const conversionRate = totalContacts > 0 ? (clients / totalContacts) * 100 : 0;
-
-    const closedDeals = deals?.filter((d) => d.status === "won") || [];
-    const avgTicket =
-      closedDeals.length > 0
-        ? closedDeals.reduce((sum, d) => sum + (d.value || 0), 0) / closedDeals.length
-        : 8750;
-
-    setStats({
-      totalLeads: totalLeads || 1,
-      conversionRate: conversionRate || 12.5,
-      avgTicket: avgTicket || 8750,
-    });
-
-    setLoading(false);
+  if (loading || !data) {
+    return (
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <div className="flex flex-1 flex-col md:ml-64">
+          <Header />
+          <main className="flex-1 p-6 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+              <p className="text-muted-foreground animate-pulse">Gerando relatórios em tempo real...</p>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
   }
+
+  const { salesData, leadSources, stats } = data;
 
   return (
     <div className="flex min-h-screen">
@@ -109,7 +90,7 @@ export default function ReportsPage() {
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={SALES_DATA}>
+                      <BarChart data={salesData}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="month" />
                         <YAxis
@@ -147,7 +128,7 @@ export default function ReportsPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={LEAD_SOURCES}
+                          data={leadSources}
                           cx="50%"
                           cy="50%"
                           innerRadius={60}
@@ -156,7 +137,7 @@ export default function ReportsPage() {
                           dataKey="value"
                           label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                         >
-                          {LEAD_SOURCES.map((entry, index) => (
+                          {leadSources.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>

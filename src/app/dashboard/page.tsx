@@ -35,10 +35,13 @@ export default async function DashboardPage() {
     return redirect("/");
   }
 
-  const dashboardData = await getDashboardMetrics(profile.organization_id);
-  const alerts = await getSmartAlerts(profile.organization_id);
-  const funnelData = await getFunnelData(profile.organization_id);
-  const insights = await getRealTimeInsights(profile.organization_id);
+  // Fetch all metrics in parallel to avoid waterfalls
+  const [dashboardData, alerts, funnelData, insights] = await Promise.all([
+    getDashboardMetrics(profile.organization_id),
+    getSmartAlerts(profile.organization_id),
+    getFunnelData(profile.organization_id),
+    getRealTimeInsights(profile.organization_id)
+  ]);
 
   return (
     <div className="flex min-h-screen">

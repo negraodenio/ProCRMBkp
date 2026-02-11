@@ -178,7 +178,7 @@ export default function ChatPage() {
             console.log("📥 UI: Action result:", result);
 
             if (result && result.error) {
-                toast.error("Erro: " + result.error);
+                toast.error(result.error);
                 // Remove optimistic message on error
                 setMessages(prev => prev.filter(m => m.id !== tempId));
                 setInputText(text); // Restore text

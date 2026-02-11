@@ -2,6 +2,7 @@
 
 import { EvolutionService } from "@/services/evolution";
 import { createClient } from "@/lib/supabase/server";
+import { normalizePhone } from "@/lib/utils";
 
 export async function sendIntegratedWhatsAppMessage(phone: string, text: string) {
     const supabase = await createClient();
@@ -16,10 +17,9 @@ export async function sendIntegratedWhatsAppMessage(phone: string, text: string)
     const instanceName = `bot-${profile.organization_id}`;
 
     try {
+        const cleanPhone = normalizePhone(phone);
         // Enviar via Evolution API
-        const response = await EvolutionService.sendMessage(instanceName, phone, text);
-
-        // Registrar log se necessário (webhook já faz isso geralmente, mas podemos logar manual se for outbound)
+        const response = await EvolutionService.sendMessage(instanceName, cleanPhone, text);
 
         return { success: true, response };
     } catch (error: any) {
@@ -30,6 +30,6 @@ export async function sendIntegratedWhatsAppMessage(phone: string, text: string)
             return { success: false, error: "WhatsApp desconectado! Vá até o menu WhatsApp e escaneie o QR Code para conectar." };
         }
 
-        return { success: false, error: error.message };
+        return { success: false, error: error.message || "Erro desconhecido ao enviar mensagem" };
     }
 }

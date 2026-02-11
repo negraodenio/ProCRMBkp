@@ -27,8 +27,7 @@ import { Button } from "@/components/ui/button";
 import { logout } from "@/app/auth/actions";
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Analytics", href: "/dashboard", icon: BarChart3 },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Leads", href: "/leads", icon: Building2 },
   { name: "Pipeline", href: "/pipeline", icon: KanbanSquare },
   { name: "Clientes", href: "/clients", icon: Users },
@@ -39,9 +38,9 @@ const navigation = [
   { name: "Mensagens Automáticas", href: "/automations", icon: Bot },
   { name: "IA Tools", href: "/ai-tools", icon: Sparkles },
   { name: "Usuários", href: "/users", icon: UserCog },
-  { name: "Console", href: "/console", icon: Terminal },
   { name: "Relatórios", href: "/reports", icon: BarChart3 },
   { name: "Estratégias", href: "/strategies", icon: Target },
+  { name: "Console", href: "/console", icon: Terminal },
 ];
 
 import { useProfile } from "@/hooks/use-profile";

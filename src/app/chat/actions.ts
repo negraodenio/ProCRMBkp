@@ -44,7 +44,7 @@ export async function sendMessageAction(conversationId: string, text: string) {
             await EvolutionService.sendMessage(instanceName, conversation.contact_phone, text);
         } catch (evoErr: any) {
             console.error("[Action] Evolution API Call Exception:", evoErr);
-            return { error: `WhatsApp API Error: ${evoErr.message || 'Erro de conexão'}` };
+            return { error: evoErr.message || 'Erro ao enviar mensagem via WhatsApp' };
         }
 
         // 5. Save to Database
