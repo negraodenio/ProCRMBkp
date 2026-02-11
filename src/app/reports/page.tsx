@@ -99,7 +99,7 @@ export default function ReportsPage() {
           {/* Top Header */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Relatórios Comercial</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Relatórios de Vendas (Live)</h1>
               <p className="text-muted-foreground">Visão estratégica de performance e receita.</p>
             </div>
             <div className="flex items-center gap-2">
