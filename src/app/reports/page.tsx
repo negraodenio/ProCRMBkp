@@ -9,8 +9,10 @@ import {
     DollarSign,
     Briefcase,
     Calendar as CalendarIcon,
-    Download
+    Download,
+    AlertTriangle
 } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -46,6 +48,7 @@ export default function ReportsPage() {
   const [data, setData] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
+
   useEffect(() => {
     async function loadData() {
       setLoading(true);
@@ -55,6 +58,9 @@ export default function ReportsPage() {
         setData(reportsData);
       } catch (error) {
         console.error("Erro ao carregar relatórios:", error);
+        toast.error("Erro ao carregar dados", {
+            description: "Não foi possível gerar o relatório. Tente novamente."
+        });
       } finally {
         setLoading(false);
       }
@@ -69,8 +75,7 @@ export default function ReportsPage() {
   const formatCompact = (value: number) =>
     new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 }).format(value);
 
-  // Loading Skeleton or Spinner
-  if (loading && !data) {
+  if (loading) {
     return (
       <div className="flex min-h-screen">
         <Sidebar />
@@ -87,7 +92,32 @@ export default function ReportsPage() {
     );
   }
 
-  const stats = data!;
+  if (!data) {
+    return (
+        <div className="flex min-h-screen">
+        <Sidebar />
+        <div className="flex flex-1 flex-col md:ml-64">
+          <Header />
+          <main className="flex-1 p-6 flex items-center justify-center">
+             <div className="flex flex-col items-center gap-4 text-center">
+               <div className="p-4 bg-red-100 rounded-full text-red-600">
+                    <AlertTriangle className="h-8 w-8" />
+               </div>
+               <h3 className="text-lg font-semibold">Falha ao carregar relatórios</h3>
+               <p className="text-muted-foreground max-w-sm">
+                 Não foi possível obter os dados de vendas. Tente atualizar a página ou verifique sua conexão.
+               </p>
+               <Button onClick={() => window.location.reload()} variant="outline">
+                 Tentar Novamente
+               </Button>
+             </div>
+          </main>
+        </div>
+      </div>
+    )
+  }
+
+  const stats = data;
 
   return (
     <div className="flex min-h-screen bg-slate-50/50">

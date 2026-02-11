@@ -14,11 +14,32 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import { Viewport } from "next";
+
+export const viewport: Viewport = {
+  themeColor: "#0f172a",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, // Prevent zooming on inputs for "app-like" feel
+};
+
+
 export const metadata: Metadata = {
-  title: "ProCRM - Sistema de Gestão de Relacionamento com Clientes",
+  title: "ProCRM - Sistema de Gestão de Relacionamento de Clientes",
   description: "Sistema CRM para gerenciamento de clientes e leads",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "ProCRM",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
     icon: "/favicon.svg",
+    apple: "/favicon.svg", // Ideally a png, but svg works in some contexts
   },
 };
 

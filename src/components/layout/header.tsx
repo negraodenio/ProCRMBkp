@@ -34,6 +34,10 @@ type Notification = {
   link?: string;
 };
 
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sidebar } from "@/components/layout/sidebar";
+import { Menu } from "lucide-react";
+
 export function Header() {
   const { setTheme } = useTheme();
   const router = useRouter();
@@ -179,6 +183,20 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 glass-nav">
       <div className="flex items-center justify-between h-16 px-4 gap-4">
+        {/* Mobile Sidebar Trigger */}
+        <div className="md:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-64 bg-slate-900 border-r border-slate-800">
+               <Sidebar mobile />
+            </SheetContent>
+          </Sheet>
+        </div>
+
         {/* Modern Search - Hidden on mobile */}
         <div className="hidden md:flex flex-1 max-w-md">
           <div className="relative w-full group">

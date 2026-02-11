@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Send, User, Trash2, Tag, Plus, CheckCircle2 } from "lucide-react";
+import { MessageSquare, Send, User, Trash2, Tag, Plus, CheckCircle2, ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -267,15 +267,15 @@ export default function ChatPage() {
             <div className="flex flex-1 flex-col md:ml-64 relative overflow-hidden">
                 <Header />
 
-                <main className="flex-1 flex overflow-hidden p-4 gap-4">
-                    {/* Chat Sidebar */}
-                    <div className="w-96 flex flex-col gap-4">
+                <main className="flex-1 flex flex-col md:flex-row overflow-hidden p-2 md:p-4 gap-2 md:gap-4 md:relative">
+                    {/* Chat Sidebar / List */}
+                    <div className={`${selectedId ? 'hidden md:flex' : 'flex'} w-full md:w-96 flex-col gap-4 h-full`}>
                         <div className="flex flex-col gap-2">
-                            <h2 className="font-bold text-xl text-foreground">Conversas Ativas</h2>
+                            <h2 className="font-bold text-xl text-foreground px-2">Conversas Ativas</h2>
                         </div>
 
                         <ScrollArea className="flex-1 rounded-3xl bg-card shadow-sm border border-border">
-
+                            {/* ... Content ... */}
                             {loading || profileLoading ? (
                                 <div className="p-3 space-y-3">
                                     {[1, 2, 3, 4].map((i) => (
@@ -307,7 +307,7 @@ export default function ChatPage() {
                                             onClick={() => setSelectedId(chat.id)}
                                             className={`p-4 rounded-2xl cursor-pointer transition-all border ${
                                                 selectedId === chat.id
-                                                    ? 'bg-primary/10 border-primary/20 ring-1 ring-primary/20'
+                                                    ? 'bg-primary/10 border-primary/20 ring-1 ring-primary/20 conversation-active'
                                                     : 'bg-card border-transparent hover:bg-muted/50 hover:border-border'
                                             }`}
                                         >
@@ -355,30 +355,40 @@ export default function ChatPage() {
                     </div>
 
                     {/* Chat Window */}
-                    <div className="flex-1 flex flex-col bg-card rounded-3xl shadow-sm border border-border overflow-hidden relative">
+                    <div className={`${!selectedId ? 'hidden md:flex' : 'flex'} flex-1 flex-col bg-card rounded-3xl shadow-sm border border-border overflow-hidden relative h-full`}>
                         {selectedId ? (
                             <>
                                 {/* Chat Header */}
-                                <div className="p-6 border-b flex items-start justify-between bg-card">
-                                    <div className="flex items-start gap-4">
-                                        <div className="bg-muted p-3 rounded-2xl">
-                                            <User className="h-6 w-6 text-muted-foreground" />
+                                <div className="p-4 md:p-6 border-b flex items-start justify-between bg-card z-10 relative shadow-sm">
+                                    <div className="flex items-center gap-3 md:gap-4">
+                                         {/* Mobile Back Button */}
+                                         <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="md:hidden -ml-2 h-8 w-8"
+                                            onClick={() => setSelectedId(null)}
+                                         >
+                                            <ArrowLeft className="h-5 w-5" />
+                                         </Button>
+
+                                        <div className="bg-muted p-2 md:p-3 rounded-2xl">
+                                            <User className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground" />
                                         </div>
                                         <div>
-                                            <div className="flex items-center gap-3 mb-1">
-                                                <h3 className="font-bold text-xl text-foreground">
+                                            <div className="flex items-center gap-2 md:gap-3 mb-1">
+                                                <h3 className="font-bold text-lg md:text-xl text-foreground line-clamp-1">
                                                     {selectedChat?.contact_name || "Contato Novo"}
                                                 </h3>
-                                                <Badge variant="outline" className="text-primary bg-primary/5 border-primary/20 text-[10px] font-bold">
+                                                <Badge variant="outline" className="text-primary bg-primary/5 border-primary/20 text-[10px] font-bold hidden sm:inline-flex">
                                                     {selectedChat?.contact_phone}
                                                 </Badge>
                                             </div>
                                             <div className="flex items-center gap-4 text-sm text-muted-foreground">
                                                 <div className="flex items-center gap-1.5">
-                                                    <Tag className="h-4 w-4" />
-                                                    <span className="font-medium">Etiquetas:</span>
-                                                    <button className="flex items-center gap-1 text-primary hover:underline">
-                                                        <Plus className="h-3 w-3" /> Adicionar
+                                                    <Tag className="h-3 w-3 md:h-4 md:w-4" />
+                                                    <span className="font-medium text-xs md:text-sm">Etiquetas:</span>
+                                                    <button className="flex items-center gap-1 text-primary hover:underline text-xs md:text-sm">
+                                                        <Plus className="h-3 w-3" /> <span className="hidden sm:inline">Adicionar</span>
                                                     </button>
                                                 </div>
                                             </div>
@@ -388,7 +398,7 @@ export default function ChatPage() {
 
                                 {/* Messages Area */}
                                 <div className="flex-1 relative overflow-hidden bg-muted/10">
-                                    <ScrollArea className="h-full p-6">
+                                    <ScrollArea className="h-full p-4 md:p-6">
                                         <div className="space-y-6 pb-6">
                                             {messages.map((msg) => (
                                                 <div
@@ -404,7 +414,7 @@ export default function ChatPage() {
                                                             {format(new Date(msg.created_at), "HH:mm")}
                                                         </span>
                                                     </div>
-                                                    <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] border ${
+                                                    <div className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] border ${
                                                         msg.direction === 'outbound'
                                                             ? 'bg-primary/10 text-foreground border-primary/20 rounded-tr-none'
                                                             : 'bg-background text-foreground border-border rounded-tl-none'
@@ -419,9 +429,9 @@ export default function ChatPage() {
                                 </div>
 
                                 {/* Message Input Area */}
-                                <div className="p-6 border-t bg-card">
+                                <div className="p-3 md:p-6 border-t bg-card">
                                     <div className="flex flex-col gap-3">
-                                        <div className="flex gap-4 items-end">
+                                        <div className="flex gap-2 md:gap-4 items-end">
                                             <div className="flex-1 bg-muted/30 rounded-2xl border border-border px-4 py-2 flex items-center">
                                                 <textarea
                                                     className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 resize-none min-h-[44px] max-h-32 text-foreground"
@@ -441,12 +451,12 @@ export default function ChatPage() {
                                             <Button
                                                 onClick={handleSend}
                                                 disabled={sending || !inputText.trim()}
-                                                className="h-[60px] w-[60px] rounded-2xl bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/20"
+                                                className="h-[50px] w-[50px] md:h-[60px] md:w-[60px] rounded-2xl bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/20"
                                             >
-                                                <Send className="h-6 w-6 text-white" />
+                                                <Send className="h-5 w-5 md:h-6 md:w-6 text-white" />
                                             </Button>
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium ml-1">
+                                        <div className="flex items-center gap-1.5 text-[10px] md:text-xs text-muted-foreground font-medium ml-1">
                                             <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                                             Conectado via Evolution API
                                         </div>

@@ -217,7 +217,7 @@ export async function getAdvancedReportsData(
     lostDealsCount: dealsInPeriod.filter(d => d.status === 'lost').length,
     revenueTrend,
     salesFunnel,
-    salesFunnel,
+
     leadSources,
     leaderboard
   };

@@ -45,7 +45,12 @@ const navigation = [
 
 import { useProfile } from "@/hooks/use-profile";
 
-export function Sidebar() {
+// Export the props interface so it can be used if needed, or just keep it internal
+interface SidebarProps {
+    mobile?: boolean;
+}
+
+export function Sidebar({ mobile }: SidebarProps) {
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
   const { profile, loading } = useProfile();
@@ -65,6 +70,55 @@ export function Sidebar() {
       .toUpperCase()
       .slice(0, 2);
   };
+
+  if (mobile) {
+      return (
+         <div className="flex flex-col h-full bg-slate-950 text-slate-300">
+           {/* Mobile Header */}
+            <div className="flex items-center h-16 px-4 border-b border-slate-800">
+             <div className="flex items-center gap-2">
+                 <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
+                   <LayoutDashboard className="h-4 w-4 text-white" />
+                 </div>
+                 <h1 className="text-xl font-bold text-white">
+                   {loading ? "..." : profile?.organizations?.name || "CRM IA"}
+                 </h1>
+               </div>
+            </div>
+
+            {/* Navigation */}
+            <div className="flex-1 overflow-y-auto py-4">
+               <nav className="space-y-1 px-2">
+                   {navigation.map((item) => {
+                       const Icon = item.icon;
+                       const isActive = pathname === item.href;
+                       return (
+                           <Link
+                               key={item.name}
+                               href={item.href}
+                               className={cn(
+                                   "flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
+                                   isActive ? "bg-primary text-white" : "hover:bg-slate-800 text-slate-400"
+                               )}
+                           >
+                               <Icon className="w-5 h-5 mr-3" />
+                               {item.name}
+                           </Link>
+                       )
+                   })}
+               </nav>
+            </div>
+
+            {/* Logout Footer Mobile */}
+            <div className="p-4 border-t border-slate-800">
+                <Button variant="ghost" className="w-full justify-start text-red-400 hover:text-red-500 hover:bg-slate-900" onClick={handleLogout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sair
+                </Button>
+            </div>
+         </div>
+      )
+  }
 
   return (
     <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 z-50">

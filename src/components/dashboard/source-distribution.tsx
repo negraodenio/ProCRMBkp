@@ -37,6 +37,12 @@ export function SourceDistribution({ data }: SourceDistributionProps) {
         <p className="text-sm text-muted-foreground">Saiba de onde vêm seus leads (WhatsApp, Site, Redes Sociais).</p>
       </CardHeader>
       <CardContent>
+        {Object.keys(data).length === 0 || Object.values(data).every(v => v === 0) ? (
+            <div className="h-[300px] flex flex-col items-center justify-center text-center p-4 border-2 border-dashed border-slate-100 rounded-lg">
+                <p className="text-sm text-muted-foreground font-medium">Sem dados de origem ainda.</p>
+                <p className="text-xs text-slate-400 mt-1">Conecte o WhatsApp para começar a rastrear.</p>
+            </div>
+        ) : (
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
@@ -57,6 +63,7 @@ export function SourceDistribution({ data }: SourceDistributionProps) {
             <Legend />
           </PieChart>
         </ResponsiveContainer>
+        )}
       </CardContent>
     </Card>
   )

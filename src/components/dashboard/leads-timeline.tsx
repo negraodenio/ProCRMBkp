@@ -26,6 +26,12 @@ export function LeadsTimeline({ data }: LeadsTimelineProps) {
         <p className="text-sm text-muted-foreground">Acompanhe a entrada de novos leads e qualificações ao longo do tempo.</p>
       </CardHeader>
       <CardContent>
+        {data.length === 0 || data.every(d => d.new === 0 && d.qualified === 0) ? (
+             <div className="h-[300px] flex flex-col items-center justify-center text-center p-4 border-2 border-dashed border-slate-100 rounded-lg">
+                <p className="text-sm text-muted-foreground font-medium">Nenhum histórico de leads.</p>
+                <p className="text-xs text-slate-400 mt-1">Os dados aparecerão aqui conforme novos leads entrarem.</p>
+            </div>
+        ) : (
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={formattedData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -51,6 +57,7 @@ export function LeadsTimeline({ data }: LeadsTimelineProps) {
             />
           </LineChart>
         </ResponsiveContainer>
+        )}
       </CardContent>
     </Card>
   )
