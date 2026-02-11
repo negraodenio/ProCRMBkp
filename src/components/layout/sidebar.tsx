@@ -32,7 +32,7 @@ const navigation = [
   { name: "Pipeline", href: "/pipeline", icon: KanbanSquare },
   { name: "Clientes", href: "/clients", icon: Users },
   { name: "Propostas", href: "/proposals", icon: FileText },
-  { name: "Templates", href: "/templates", icon: Files },
+  // { name: "Templates", href: "/templates", icon: Files },
   { name: "Conversas", href: "/chat", icon: MessageSquare },
   { name: "WhatsApp", href: "/whatsapp", icon: Smartphone },
   { name: "Mensagens Automáticas", href: "/automations", icon: Bot },
@@ -40,7 +40,7 @@ const navigation = [
   { name: "Usuários", href: "/users", icon: UserCog },
   { name: "Relatórios", href: "/reports", icon: BarChart3 },
   { name: "Estratégias", href: "/strategies", icon: Target },
-  { name: "Console", href: "/console", icon: Terminal },
+  // { name: "Console", href: "/console", icon: Terminal },
 ];
 
 import { useProfile } from "@/hooks/use-profile";
