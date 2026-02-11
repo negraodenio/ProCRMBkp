@@ -79,37 +79,37 @@ export default function ChatPage() {
             }
         };
 
-        if (!profileLoading) {
+        if (!profileLoading && profile?.organization_id) {
             fetchConversations();
+
+            // 2. Realtime Conversations
+            const channel = supabase
+                .channel(`conversations_${profile.organization_id}`)
+                .on("postgres_changes" as any, {
+                    event: "*",
+                    table: "conversations",
+                    filter: `organization_id=eq.${profile.organization_id}`
+                }, (payload: any) => {
+                    console.log("🔄 Realtime Conversation Change:", payload.eventType, payload.new?.id);
+                    if (payload.eventType === "INSERT") {
+                        setConversations(prev => [payload.new as Conversation, ...prev]);
+                    } else if (payload.eventType === "UPDATE") {
+                        setConversations(prev => {
+                            const updated = prev.map(c => c.id === payload.new.id ? { ...c, ...payload.new } : c);
+                            return [...updated].sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
+                        });
+                    } else if (payload.eventType === "DELETE") {
+                        setConversations(prev => prev.filter(c => c.id !== payload.old.id));
+                    }
+                })
+                .subscribe();
+
+            return () => {
+                supabase.removeChannel(channel);
+            };
         }
+    }, [supabase, profileLoading, profile?.organization_id]);
 
-        // 2. Realtime Conversations
-        const channel = supabase
-            .channel(`conversations_${profile.organization_id}`)
-            .on("postgres_changes" as any, {
-                event: "*",
-                table: "conversations",
-                filter: `organization_id=eq.${profile.organization_id}`
-            }, (payload: any) => {
-                console.log("🔄 Realtime Conversation Change:", payload.eventType, payload.new?.id);
-                if (payload.eventType === "INSERT") {
-                    setConversations(prev => [payload.new as Conversation, ...prev]);
-                } else if (payload.eventType === "UPDATE") {
-                    setConversations(prev => {
-                        const updated = prev.map(c => c.id === payload.new.id ? { ...c, ...payload.new } : c);
-                        return [...updated].sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
-                    });
-                } else if (payload.eventType === "DELETE") {
-                    setConversations(prev => prev.filter(c => c.id !== payload.old.id));
-                }
-            })
-            .subscribe();
-
-
-        return () => {
-            supabase.removeChannel(channel);
-        };
-    }, [supabase, profileLoading, profile?.organization_id, profile?.organization_id]);
 
 
     // 3. Fetch Messages when selection changes
