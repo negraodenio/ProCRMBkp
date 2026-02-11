@@ -12,6 +12,7 @@ import {
     DialogTitle,
     DialogTrigger,
     DialogFooter,
+    DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,6 +28,7 @@ import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { useProfile } from "@/hooks/use-profile";
 
 interface Automation {
     id: string;
@@ -50,29 +52,38 @@ const PIPELINE_STAGES = [
     "Perdido",
 ];
 
+const ANY_STATUS_VALUE = "ANY_STATUS";
+
 export default function AutomationsPage() {
+    const [supabase] = useState(() => createClient());
+    const { profile, loading: profileLoading } = useProfile();
     const [open, setOpen] = useState(false);
     const [automations, setAutomations] = useState<Automation[]>([]);
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
-        fromStatus: "",
+        fromStatus: ANY_STATUS_VALUE,
         toStatus: "",
         message: "",
         isActive: true,
     });
 
-    const supabase = createClient();
 
     useEffect(() => {
-        loadAutomations();
-    }, []);
+        if (!profileLoading && profile?.organization_id) {
+            loadAutomations();
+        }
+    }, [supabase, profileLoading, profile?.organization_id]);
+
 
     async function loadAutomations() {
+        if (!profile?.organization_id) return;
         setLoading(true);
         const { data, error } = await supabase
             .from("automation_rules")
             .select("*")
+            .eq("organization_id", profile.organization_id)
             .order("created_at", { ascending: false });
+
 
         if (error) {
             console.error("Error loading automations:", error);
@@ -101,8 +112,9 @@ export default function AutomationsPage() {
             return;
         }
 
-        const name = formData.fromStatus
-            ? `${formData.fromStatus} → ${formData.toStatus}`
+        const fromStatusValue = formData.fromStatus === ANY_STATUS_VALUE ? null : formData.fromStatus;
+        const name = fromStatusValue
+            ? `${fromStatusValue} → ${formData.toStatus}`
             : `Novo em ${formData.toStatus}`;
 
         const { error } = await supabase.from("automation_rules").insert({
@@ -110,7 +122,7 @@ export default function AutomationsPage() {
             name,
             trigger_type: "status_change",
             trigger_entity: "lead",
-            from_status: formData.fromStatus || null,
+            from_status: fromStatusValue,
             to_status: formData.toStatus,
             action_type: "send_whatsapp",
             message_template: formData.message,
@@ -131,7 +143,7 @@ export default function AutomationsPage() {
 
     function resetForm() {
         setFormData({
-            fromStatus: "",
+            fromStatus: ANY_STATUS_VALUE,
             toStatus: "",
             message: "",
             isActive: true,
@@ -191,6 +203,9 @@ export default function AutomationsPage() {
                                             <MessageSquare className="h-5 w-5" />
                                             Nova Mensagem Automática
                                         </DialogTitle>
+                                        <DialogDescription>
+                                            Configure as regras de envio das suas mensagens
+                                        </DialogDescription>
                                     </DialogHeader>
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div className="grid grid-cols-2 gap-4">
@@ -204,7 +219,7 @@ export default function AutomationsPage() {
                                                         <SelectValue placeholder="Selecione o status anterior" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="">Qualquer status</SelectItem>
+                                                        <SelectItem value={ANY_STATUS_VALUE}>Qualquer status</SelectItem>
                                                         {PIPELINE_STAGES.map((stage) => (
                                                             <SelectItem key={stage} value={stage}>
                                                                 {stage}

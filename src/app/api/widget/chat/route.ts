@@ -6,7 +6,7 @@ import { PERSONALITY_PRESETS, PersonalityType, buildSystemPrompt } from "@/lib/b
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { message, orgId, history } = body;
+        const { message, orgId, history, config_override } = body;
 
         if (!message || !orgId) {
             return NextResponse.json({ error: "Missing message or orgId" }, { status: 400 });
@@ -25,7 +25,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Organization not found" }, { status: 404 });
         }
 
-        const botSettings = org.bot_settings || {};
+        // Use override if provided (Preview Mode), otherwise use DB settings
+        const botSettings = config_override || org.bot_settings || {};
 
         // Check if active
         // if (botSettings.active === false) ... (Optional: maybe webchat is always active or follows same rules)

@@ -35,7 +35,9 @@ import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { useProfile } from "@/hooks/use-profile";
 import { inviteUserAction } from "./actions";
+
 
 interface UserProfile {
     id: string;
@@ -56,6 +58,8 @@ const ROLES = [
 const DEPARTMENTS = ["vendas", "marketing", "suporte", "financeiro", "N/A"];
 
 export default function UsersPage() {
+    const [supabase] = useState(() => createClient());
+    const { profile, loading: profileLoading } = useProfile();
     const [open, setOpen] = useState(false);
     const [users, setUsers] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
@@ -66,18 +70,23 @@ export default function UsersPage() {
         department: "vendas",
     });
 
-    const supabase = createClient();
 
     useEffect(() => {
-        loadUsers();
-    }, []);
+        if (!profileLoading && profile?.organization_id) {
+            loadUsers();
+        }
+    }, [supabase, profileLoading, profile?.organization_id]);
+
 
     async function loadUsers() {
+        if (!profile?.organization_id) return;
         setLoading(true);
         const { data, error } = await supabase
             .from("profiles")
             .select("*")
+            .eq("organization_id", profile.organization_id)
             .order("created_at", { ascending: false });
+
 
         if (error) {
             console.error("Error loading users:", error);

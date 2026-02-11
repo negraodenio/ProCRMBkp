@@ -3,14 +3,15 @@ import { ChatWidget } from "@/components/widget/chat-widget";
 import { Metadata } from "next";
 
 interface WidgetPageProps {
-    params: {
+    params: Promise<{
         orgId: string;
-    };
+    }>;
 }
 
 export async function generateMetadata({ params }: WidgetPageProps): Promise<Metadata> {
+    const { orgId } = await params;
     const supabase = createServiceRoleClient();
-    const { data: org } = await supabase.from("organizations").select("name").eq("id", params.orgId).single();
+    const { data: org } = await supabase.from("organizations").select("name").eq("id", orgId).single();
 
     return {
         title: org?.name ? `Chat - ${org.name}` : "Webchat",
@@ -18,13 +19,14 @@ export async function generateMetadata({ params }: WidgetPageProps): Promise<Met
 }
 
 export default async function WidgetPage({ params }: WidgetPageProps) {
+    const { orgId } = await params;
     const supabase = createServiceRoleClient();
 
     // Fetch Organization & Bot Settings
     const { data: org, error } = await supabase
         .from("organizations")
         .select("id, name, bot_settings")
-        .eq("id", params.orgId)
+        .eq("id", orgId)
         .single();
 
     if (error || !org) {

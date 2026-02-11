@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { Loader2, Save, Upload, User, Palette, Settings2, Sparkles, RefreshCw, MessageSquare, Edit } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { createClient } from '@/lib/supabase/client';
+import { ChatWidget } from '@/components/widget/chat-widget';
 
 interface PersonalityTabProps {
   botSettings: any;
@@ -415,68 +416,25 @@ export function PersonalityTab({ botSettings: initialSettings, organizationId }:
             </div>
 
             {/* Simulation Container */}
-            <div className="border rounded-xl overflow-hidden bg-white shadow-inner min-h-[400px] flex flex-col">
-                {/* Chat Area */}
-                <div className="flex-1 p-6 space-y-4 overflow-y-auto bg-slate-50/30">
-                    {/* Bot Message */}
-                    <div className="flex items-start gap-3">
-                         <Avatar className="h-10 w-10 border-2 border-white shadow-sm shrink-0">
-                            <AvatarImage src={settings.bot_avatar || undefined} />
-                            <AvatarFallback>{settings.bot_name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="space-y-2 flex-1">
-                            <div
-                                className="p-4 rounded-2xl rounded-tl-none text-sm shadow-sm relative group"
-                                style={{
-                                    backgroundColor: settings.agent_msg_color,
-                                    color: settings.agent_msg_color === '#ffffff' ? '#1e293b' : '#fff',
-                                    border: settings.agent_msg_color === '#ffffff' ? '1px solid #e2e8f0' : 'none'
-                                }}
-                            >
-                                <textarea
-                                    value={settings.welcome_message || getPreviewMessage()}
-                                    onChange={(e) => setSettings({ ...settings, welcome_message: e.target.value })}
-                                    className="bg-transparent border-none focus:ring-0 w-full resize-none p-0 overflow-hidden leading-relaxed font-medium"
-                                    rows={2}
-                                    placeholder="Digite a mensagem inicial aqui..."
-                                />
-                                <Edit className="absolute -top-1 -right-1 h-3 w-3 opacity-0 group-hover:opacity-40 transition-opacity" />
-                            </div>
+            <div className="border rounded-xl overflow-hidden bg-white shadow-inner min-h-[500px] flex flex-col relative">
+                <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-5 pointer-events-none"></div>
 
-                            {/* Badges / Status */}
-                            <div className="flex flex-wrap gap-2 items-center text-[10px] text-muted-foreground px-1">
-                                <span className="flex items-center gap-1">
-                                    Temperatura: {settings.temperature}
-                                </span>
-                                <span>•</span>
-                                <span className="flex items-center gap-1">
-                                    Emojis {settings.use_emojis ? 'ativados' : 'desativados'}
-                                </span>
-                                <span>•</span>
-                                <span className="flex items-center gap-1">
-                                    Auto-reply {settings.auto_reply_enabled ? 'ON' : 'OFF'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* User Message */}
-                    <div className="flex items-start gap-2 justify-end">
-                        <div
-                            className="p-3 rounded-2xl rounded-tr-none max-w-[80%] text-sm shadow-sm text-white"
-                            style={{ backgroundColor: settings.user_msg_color }}
-                        >
-                           <p>Gostaria de saber mais sobre a {settings.company_name || 'empresa'}.</p>
-                        </div>
-                    </div>
+                {/* Live Chat Widget */}
+                <div className="flex-1 p-4 bg-slate-100 flex items-center justify-center">
+                    <ChatWidget
+                        orgId={organizationId}
+                        botName={settings.bot_name}
+                        botAvatar={settings.bot_avatar}
+                        companyName={settings.company_name}
+                        colors={{
+                            userMsg: settings.user_msg_color,
+                            agentMsg: settings.agent_msg_color
+                        }}
+                        welcomeMessage={settings.welcome_message || getPreviewMessage()}
+                        removeWatermark={settings.remove_watermark}
+                        overrideSettings={settings}
+                    />
                 </div>
-
-                {/* Footer / Branding */}
-                {!settings.remove_watermark && (
-                     <div className="p-2 text-center text-[10px] text-muted-foreground border-t bg-white/50">
-                        Criado utilizando <strong>ProCRM</strong>
-                    </div>
-                )}
             </div>
         </div>
       </div>

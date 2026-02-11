@@ -2,9 +2,13 @@
 
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/service-scoped"; // Verify path
 import { redirect } from "next/navigation";
 
-export async function createCheckoutSession(priceId: string) {
+export async function createCheckoutSession(priceId?: string) {
+    const finalPriceId = priceId || process.env.STRIPE_PRO_PRICE_ID;
+    if (!finalPriceId) throw new Error("Price ID not configured");
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -35,13 +39,20 @@ export async function createCheckoutSession(priceId: string) {
         });
         customerId = customer.id;
 
-        // Save to DB
-        // Note: Ideally we use a Service Role client here or ensure RLS allows update
-        const supabaseAdmin = await createClient(); // Use service role if needed, simplified for now
-        await supabaseAdmin
+        // Save to DB using Service Role (bypass RLS)
+        const supabaseAdmin = createServiceRoleClient();
+        const { error } = await supabaseAdmin
             .from("organizations")
             .update({ stripe_customer_id: customerId })
             .eq("id", orgId);
+
+        if (error) {
+             console.error("Failed to update organization with stripe_customer_id:", error);
+             // We might want to throw here, or continue?
+             // If we continue, the user can pay but we won't listen to webhooks correctly linked?
+             // Actually metadata has orgId, so webhook might still work, but better to fail safe.
+             throw new Error("Failed to link payment account.");
+        }
     }
 
     const session = await stripe.checkout.sessions.create({

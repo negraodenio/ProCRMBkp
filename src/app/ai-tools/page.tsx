@@ -38,7 +38,9 @@ import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { useProfile } from "@/hooks/use-profile";
 import { generateAIContent } from "@/app/actions/ai-actions";
+
 
 interface AITool {
     id: string;
@@ -145,18 +147,25 @@ const AI_TOOLS: AITool[] = [
 ];
 
 export default function AIToolsPage() {
+    const [supabase] = useState(() => createClient());
+    const { profile, loading: profileLoading } = useProfile();
     const [activeModal, setActiveModal] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState("");
     const [selectedLead, setSelectedLead] = useState("");
     const [leads, setLeads] = useState<{ id: string; name: string }[]>([]);
 
-    const supabase = createClient();
 
     async function loadLeads() {
-        const { data } = await supabase.from("contacts").select("id, name").limit(20);
+        if (!profile?.organization_id) return;
+        const { data } = await supabase
+            .from("contacts")
+            .select("id, name")
+            .eq("organization_id", profile.organization_id)
+            .limit(20);
         setLeads(data || []);
     }
+
 
     function openModal(toolId: string) {
         setActiveModal(toolId);

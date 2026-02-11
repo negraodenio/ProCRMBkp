@@ -28,6 +28,8 @@ import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { useProfile } from "@/hooks/use-profile";
+
 
 interface Strategy {
     id: string;
@@ -51,6 +53,8 @@ const TRIGGERS = [
 ];
 
 export default function StrategiesPage() {
+    const [supabase] = useState(() => createClient());
+    const { profile, loading: profileLoading } = useProfile();
     const [open, setOpen] = useState(false);
     const [strategies, setStrategies] = useState<Strategy[]>([]);
     const [loading, setLoading] = useState(true);
@@ -63,18 +67,23 @@ export default function StrategiesPage() {
         isActive: true,
     });
 
-    const supabase = createClient();
 
     useEffect(() => {
-        loadStrategies();
-    }, []);
+        if (!profileLoading && profile?.organization_id) {
+            loadStrategies();
+        }
+    }, [supabase, profileLoading, profile?.organization_id]);
+
 
     async function loadStrategies() {
+        if (!profile?.organization_id) return;
         setLoading(true);
         const { data, error } = await supabase
             .from("marketing_strategies")
             .select("*")
+            .eq("organization_id", profile.organization_id)
             .order("created_at", { ascending: false });
+
 
         if (error) {
             console.error("Error loading strategies:", error);

@@ -18,6 +18,7 @@ interface ChatWidgetProps {
     };
     welcomeMessage: string;
     removeWatermark: boolean;
+    overrideSettings?: any; // For Preview Mode
 }
 
 interface Message {
@@ -32,7 +33,8 @@ export function ChatWidget({
     companyName,
     colors,
     welcomeMessage,
-    removeWatermark
+    removeWatermark,
+    overrideSettings
 }: ChatWidgetProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
@@ -41,7 +43,10 @@ export function ChatWidget({
 
     // Initial Welcome Message
     useEffect(() => {
-        if (welcomeMessage && messages.length === 0) {
+        // Only set welcome message if chat is empty.
+        // If welcomeMessage changes (preview mode), we might want to reset or just leave it.
+        // For now, let's reset if it's the only message.
+        if (messages.length === 0 && welcomeMessage) {
             setMessages([{ role: "assistant", content: welcomeMessage }]);
         }
     }, [welcomeMessage]);
@@ -68,7 +73,8 @@ export function ChatWidget({
                 body: JSON.stringify({
                     message: userMsg,
                     orgId: orgId,
-                    history: messages // Send previous context
+                    history: messages, // Send previous context
+                    config_override: overrideSettings
                 })
             });
 

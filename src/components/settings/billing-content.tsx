@@ -15,12 +15,10 @@ interface BillingContentProps {
 export function BillingContent({ subscription }: BillingContentProps) {
     const [loading, setLoading] = useState(false);
 
-    const PRO_PRICE_ID = "price_H5ggYJDqMN891"; // Replaced with env var in real app
-
     const handleUpgrade = async () => {
         try {
             setLoading(true);
-            await createCheckoutSession(PRO_PRICE_ID);
+            await createCheckoutSession(); // Uses env var on server
         } catch (e: any) {
             toast.error("Erro ao iniciar checkout: " + e.message);
         } finally {

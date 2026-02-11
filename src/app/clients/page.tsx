@@ -28,6 +28,8 @@ import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { useProfile } from "@/hooks/use-profile";
+
 
 interface Client {
     id: string;
@@ -40,6 +42,8 @@ interface Client {
 }
 
 export default function ClientsPage() {
+    const [supabase] = useState(() => createClient());
+    const { profile, loading: profileLoading } = useProfile();
     const [open, setOpen] = useState(false);
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(true);
@@ -51,19 +55,24 @@ export default function ClientsPage() {
         company: "",
     });
 
-    const supabase = createClient();
 
     useEffect(() => {
-        loadClients();
-    }, []);
+        if (!profileLoading && profile?.organization_id) {
+            loadClients();
+        }
+    }, [supabase, profileLoading, profile?.organization_id]);
+
 
     async function loadClients() {
+        if (!profile?.organization_id) return;
         setLoading(true);
         const { data, error } = await supabase
             .from("contacts")
             .select("*")
             .eq("type", "client")
+            .eq("organization_id", profile.organization_id)
             .order("created_at", { ascending: false });
+
 
         if (error) {
             console.error("Error loading clients:", error);
