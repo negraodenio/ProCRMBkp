@@ -23,6 +23,11 @@ export function normalizePhone(phone: string): string {
   // 1. Basic Cleaning
   let cleaned = phone.split("@")[0].split(":")[0].replace(/\D/g, "");
 
+  // Fix: Remove leading '00' (international prefix)
+  if (cleaned.startsWith("00")) {
+    cleaned = cleaned.substring(2);
+  }
+
   // 2. Identify and Force BR Country Code (55)
   // ONLY if it has 10 or 11 digits (DDD + Number)
   // This prevents corrupting international numbers (e.g. 351... from Portugal)

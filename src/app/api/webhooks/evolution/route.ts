@@ -409,8 +409,15 @@ export async function POST(req: NextRequest) {
         // If the incoming message is from a LID, reply to the LID JID directly.
         // Otherwise use the standard phone@s.whatsapp.net format.
         let targetJid = `${phone}@s.whatsapp.net`;
-        if (remoteJid && remoteJid.includes("@lid")) {
-            targetJid = remoteJid;
+
+        // Check for explicit @lid OR length heuristic (15 digits = LID)
+        if ((remoteJid && remoteJid.includes("@lid")) || (phone.length === 15)) {
+             // If phone is 15 digits but remoteJid doesn't have suffix, append @lid
+             if (phone.length === 15 && !remoteJid.includes("@")) {
+                 targetJid = `${phone}@lid`;
+             } else {
+                 targetJid = remoteJid;
+             }
         }
 
         await EvolutionService.sendMessage(replyInstance, targetJid, aiResponse);

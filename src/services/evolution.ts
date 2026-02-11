@@ -107,15 +107,21 @@ export const EvolutionService = {
         }
 
         // Ensure JID format and normalize phone (always)
+        // Ensure JID format and normalize phone (always)
         let jid = remoteJid;
 
         // FIX: If it's a Linked Identity Device (LID), use it as is.
-        // Do NOT normalize or append @s.whatsapp.net, as that breaks LIDs.
         if (remoteJid.includes("@lid")) {
             jid = remoteJid;
         } else {
             const cleanPhone = normalizePhone(remoteJid);
-            jid = `${cleanPhone}@s.whatsapp.net`;
+            // HEURISTIC: If length is 15, it is likely a LID (e.g. 272104062746813)
+            // Standard E.164 numbers are usually max 14 digits.
+            if (cleanPhone.length === 15) {
+                jid = `${cleanPhone}@lid`;
+            } else {
+                jid = `${cleanPhone}@s.whatsapp.net`;
+            }
         }
 
         console.log(`📡 [Evolution] Sending message to ${jid} (original: ${remoteJid})`);
