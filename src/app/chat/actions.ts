@@ -79,3 +79,39 @@ export async function sendMessageAction(conversationId: string, text: string) {
         return { error: `Erro interno crítico: ${err.message || 'Erro desconhecido'}` };
     }
 }
+
+export async function deleteConversationAction(conversationId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { error: "Não autorizado" };
+
+    try {
+        // Verify ownership via organization
+        const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
+
+        if (!profile?.organization_id) return { error: "Organização não encontrada" };
+
+        const { data: conversation } = await supabase
+            .from("conversations")
+            .select("id")
+            .eq("id", conversationId)
+            .eq("organization_id", profile.organization_id)
+            .single();
+
+        if (!conversation) return { error: "Conversa não encontrada ou sem permissão" };
+
+        // Delete messages first (if not cascading)
+        await supabase.from("messages").delete().eq("conversation_id", conversationId);
+
+        // Delete conversation
+        const { error } = await supabase.from("conversations").delete().eq("id", conversationId);
+
+        if (error) throw error;
+
+        return { success: true };
+    } catch (error: any) {
+        console.error("Error deleting conversation:", error);
+        return { error: "Erro ao excluir conversa: " + error.message };
+    }
+}

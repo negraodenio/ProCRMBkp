@@ -12,7 +12,7 @@ import { MessageSquare, Send, User, Trash2, Tag, Plus, CheckCircle2 } from "luci
 import { createClient } from "@/lib/supabase/client";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { sendMessageAction } from "./actions";
+import { sendMessageAction, deleteConversationAction } from "./actions";
 import { useProfile } from "@/hooks/use-profile";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -199,6 +199,35 @@ export default function ChatPage() {
         }
     };
 
+    const handleDelete = async (e: React.MouseEvent, conversationId: string) => {
+        e.stopPropagation(); // Prevent selecting the chat when clicking delete
+
+        if (!confirm("Tem certeza que deseja excluir esta conversa? Todas as mensagens serão perdidas.")) {
+            return;
+        }
+
+        try {
+            // Optimistic update
+            setConversations(prev => prev.filter(c => c.id !== conversationId));
+            if (selectedId === conversationId) {
+                setSelectedId(null);
+            }
+
+            const result = await deleteConversationAction(conversationId);
+
+            if (result.error) {
+                toast.error(result.error);
+                // Re-fetch or revert if possible, but for now just show error
+                // In a real app we might want to revert the optimistic update
+            } else {
+                toast.success("Conversa excluída com sucesso");
+            }
+        } catch (error) {
+            console.error("Error deleting:", error);
+            toast.error("Erro ao excluir conversa");
+        }
+    };
+
     const selectedChat = conversations.find(c => c.id === selectedId);
 
     return (
@@ -276,7 +305,11 @@ export default function ChatPage() {
                                                         Há {formatDistanceToNow(new Date(chat.last_message_at), { locale: ptBR })}
                                                     </div>
                                                 </div>
-                                                <button className="p-1 text-slate-300 hover:text-red-500 transition-colors">
+                                                <button
+                                                    onClick={(e) => handleDelete(e, chat.id)}
+                                                    className="p-1 text-slate-300 hover:text-red-500 transition-colors"
+                                                    title="Excluir conversa"
+                                                >
                                                     <Trash2 className="h-4 w-4" />
                                                 </button>
                                             </div>
