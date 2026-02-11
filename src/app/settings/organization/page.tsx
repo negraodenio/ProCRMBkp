@@ -1,33 +1,40 @@
 import { createClient } from "@/lib/supabase/server";
 import { Separator } from "@/components/ui/separator";
-import { BillingContent } from "@/components/settings/billing-content";
+import { OrgForm } from "@/components/settings/org-form";
 
-export default async function BillingPage() {
+export default async function OrganizationPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) return null;
 
-    const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
+    // Fetch profile to get org id
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("organization_id")
+        .eq("id", user.id)
+        .single();
 
-    if (!profile?.organization_id) return <div>Organização não encontrada</div>;
+    if (!profile?.organization_id) {
+        return <div>Organização não encontrada.</div>;
+    }
 
     const { data: org } = await supabase
         .from("organizations")
-        .select("subscription_plan, subscription_status, stripe_customer_id")
+        .select("*")
         .eq("id", profile.organization_id)
         .single();
 
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-medium">Planos e Faturamento</h3>
+                <h3 className="text-lg font-medium">Organização</h3>
                 <p className="text-sm text-muted-foreground">
-                    Gerencie a assinatura e cobrança da sua organização.
+                    Gerencie os dados da sua empresa.
                 </p>
             </div>
             <Separator />
-            <BillingContent subscription={org} />
+            <OrgForm org={org} />
         </div>
     );
 }

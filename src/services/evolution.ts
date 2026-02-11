@@ -228,6 +228,31 @@ export const EvolutionService = {
         return true;
     },
 
+    async updateProfilePicture(instanceName: string, imageUrl: string) {
+        if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) throw new Error("Missing Config");
+
+        console.log(`Updating profile picture for ${instanceName} with ${imageUrl}`);
+
+        const res = await fetchWithTimeout(`${EVOLUTION_API_URL}/chat/updateProfilePicture/${instanceName}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "apikey": EVOLUTION_API_KEY
+            },
+            body: JSON.stringify({
+                picture: imageUrl
+            })
+        });
+
+        if (!res.ok) {
+            const error = await res.text();
+            console.error("Evolution Update Profile Picture Error:", error);
+            throw new Error(`Failed to update profile picture: ${error}`);
+        }
+
+        return await res.json();
+    },
+
     async deleteInstance(instanceName: string) {
         if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) throw new Error("Missing Config");
 

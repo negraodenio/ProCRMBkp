@@ -152,3 +152,34 @@ export async function updateBotSettings(organizationId: string, settings: any) {
     revalidatePath("/whatsapp/knowledge");
     return { success: true };
 }
+
+export async function updateWhatsAppProfile(organizationId: string, avatarUrl: string) {
+    const supabase = await createClient();
+
+    // Auth check
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        throw new Error("Unauthorized");
+    }
+
+    // Verify user belongs to this organization
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("organization_id")
+        .eq("id", user.id)
+        .single();
+
+    if (profile?.organization_id !== organizationId) {
+        throw new Error("Unauthorized to modify this organization");
+    }
+
+    const instanceName = `bot-${organizationId}`;
+
+    try {
+        await import("@/services/evolution").then(mod => mod.EvolutionService.updateProfilePicture(instanceName, avatarUrl));
+        return { success: true };
+    } catch (error: any) {
+        console.error("Error updating WhatsApp profile:", error);
+        return { error: error.message || "Failed to update WhatsApp profile" };
+    }
+}

@@ -4,13 +4,17 @@ import { useState } from 'react';
 import { PersonalitySelector } from '@/components/ui/personality-selector';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PERSONALITY_PRESETS, PersonalityType } from '@/lib/bot-personalities';
-import { updateBotSettings } from './actions';
+import { updateBotSettings, updateWhatsAppProfile } from './actions';
 import { toast } from 'sonner';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, Upload, User, Palette, Settings2, Sparkles, RefreshCw } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { createClient } from '@/lib/supabase/client';
 
 interface PersonalityTabProps {
   botSettings: any;
@@ -19,7 +23,23 @@ interface PersonalityTabProps {
 
 export function PersonalityTab({ botSettings: initialSettings, organizationId }: PersonalityTabProps) {
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [updatingWhatsapp, setUpdatingWhatsapp] = useState(false);
+
   const [settings, setSettings] = useState({
+    // Basic
+    bot_name: initialSettings?.bot_name || 'Agente IA',
+    company_name: initialSettings?.company_name || '',
+    company_industry: initialSettings?.company_industry || '',
+    company_website: initialSettings?.company_website || '',
+
+    // Appearance
+    bot_avatar: initialSettings?.bot_avatar || null,
+    user_msg_color: initialSettings?.user_msg_color || '#7c3aed', // Primary purple
+    agent_msg_color: initialSettings?.agent_msg_color || '#ffffff',
+    remove_watermark: initialSettings?.remove_watermark || false,
+
+    // Behavior (Existing)
     personality_preset: initialSettings?.personality_preset || 'friendly',
     temperature: initialSettings?.temperature || 0.6,
     max_tokens: initialSettings?.max_tokens || 200,
@@ -28,10 +48,11 @@ export function PersonalityTab({ botSettings: initialSettings, organizationId }:
     use_emojis: initialSettings?.use_emojis ?? true,
     mention_name: initialSettings?.mention_name ?? true,
     custom_instructions: initialSettings?.custom_instructions || '',
+    welcome_message: initialSettings?.welcome_message || '', // New
     business_hours_only: initialSettings?.business_hours_only ?? false,
   });
 
-  const currentPreset = PERSONALITY_PRESETS[settings.personality_preset as PersonalityType];
+  const currentPreset = PERSONALITY_PRESETS[settings.personality_preset as PersonalityType] || PERSONALITY_PRESETS.friendly;
 
   const handleSave = async () => {
     setSaving(true);
@@ -45,249 +66,390 @@ export function PersonalityTab({ botSettings: initialSettings, organizationId }:
     }
   };
 
-  // Preview message baseado na personalidade
+  const handleUpdateWhatsappProfile = async () => {
+      if (!settings.bot_avatar) return;
+      setUpdatingWhatsapp(true);
+      try {
+          const res: any = await updateWhatsAppProfile(organizationId, settings.bot_avatar);
+          if (res.error) throw new Error(res.error);
+          toast.success("Foto do WhatsApp atualizada!");
+      } catch (error: any) {
+          toast.error("Erro ao atualizar WhatsApp: " + error.message);
+      } finally {
+          setUpdatingWhatsapp(false);
+      }
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+      try {
+          setUploading(true);
+          const file = event.target.files?.[0];
+          if (!file) return;
+
+          const supabase = createClient();
+          const fileExt = file.name.split('.').pop();
+          const fileName = `bot-${organizationId}-${Math.random()}.${fileExt}`;
+          const filePath = `${fileName}`;
+
+          const { error: uploadError } = await supabase.storage
+              .from('avatars')
+              .upload(filePath, file);
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+          setSettings(prev => ({ ...prev, bot_avatar: publicUrl }));
+          toast.success("Avatar carregado!");
+      } catch (error: any) {
+          toast.error("Erro ao fazer upload: " + error.message);
+      } finally {
+          setUploading(false);
+      }
+  };
+
+  // Preview message baseado na personalidade e configurações
   const getPreviewMessage = () => {
-    const name = "Cliente";
+    // Se tiver mensagem de boas vindas customizada e for a primeira interação (simulado)
+    if (settings.welcome_message) return settings.welcome_message;
 
     switch (settings.personality_preset) {
       case 'enthusiastic':
-        return `Olá! 🎉 Que ótimo ter você aqui! Como posso te ajudar hoje? Estou super empolgado para atender você! ✨`;
+        return `Olá! 🎉 Sou ${settings.bot_name}, da ${settings.company_name || 'empresa'}. Como posso te ajudar hoje?! ✨`;
       case 'friendly':
-        return `Olá! 😊 Que bom falar com você! Como posso te ajudar?`;
-      case 'neutral':
-        return `Olá. Como posso ajudar?`;
+        return `Olá! 😊 Sou ${settings.bot_name}. Que bom falar com você! Como posso ajudar?`;
       case 'formal':
-        return `Bom dia. Em que posso ser útil ao senhor/senhora?`;
-      case 'casual':
-        return `E aí! 😎 Tá precisando de ajuda com algo?`;
-      case 'technical':
-        return `Saudações. Por favor, descreva o problema ou questão técnica que você está enfrentando.`;
+        return `Olá. Eu sou ${settings.bot_name}. Em que posso ser útil?`;
       default:
-        return `Olá! ${settings.use_emojis ? '😊' : ''} Como posso ajudar?`;
+        return `Olá! ${settings.use_emojis ? '😊' : ''} Sou ${settings.bot_name}. Como posso ajudar?`;
     }
   };
 
   return (
-    <div className="space-y-8">
-      {/* Personality Presets */}
-      <div className="glass-card p-6 space-y-4">
-        <div>
-          <h2 className="text-xl font-semibold">🎭 Tom de Voz</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Escolha como seu robô deve se comunicar com os clientes
-          </p>
-        </div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Settings Column */}
+      <div className="space-y-6">
+        <Tabs defaultValue="basic" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="basic">Básico</TabsTrigger>
+                <TabsTrigger value="appearance">Visual</TabsTrigger>
+                <TabsTrigger value="behavior">Cérebro</TabsTrigger>
+            </TabsList>
 
-        <PersonalitySelector
-          selected={settings.personality_preset as PersonalityType}
-          onChange={(preset) => setSettings({ ...settings, personality_preset: preset })}
-        />
+            {/* TAB: BASIC */}
+            <TabsContent value="basic" className="space-y-4 mt-4 glass-card p-6">
+                <div>
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                        <User className="h-5 w-5" /> Identidade
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Quem é o seu agente?</p>
+                </div>
 
-        {/* Description of selected preset */}
-        <div className="p-4 bg-muted/30 rounded-lg">
-          <p className="text-sm text-muted-foreground">
-            <strong className="text-foreground">{currentPreset.emoji} {currentPreset.name}:</strong>
-            {' '}{currentPreset.system_prompt.substring(0, 150)}...
-          </p>
-        </div>
+                <div className="space-y-3">
+                    <div className="space-y-1">
+                        <Label>Nome do Agente</Label>
+                        <Input
+                            value={settings.bot_name}
+                            onChange={e => setSettings({...settings, bot_name: e.target.value})}
+                            placeholder="Ex: Laura Terroir"
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <Label>Nome da Empresa</Label>
+                        <Input
+                            value={settings.company_name}
+                            onChange={e => setSettings({...settings, company_name: e.target.value})}
+                            placeholder="Ex: Vinhos LTDA"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <Label>Setor</Label>
+                            <Input
+                                value={settings.company_industry}
+                                onChange={e => setSettings({...settings, company_industry: e.target.value})}
+                                placeholder="Ex: Varejo"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label>Site</Label>
+                            <Input
+                                value={settings.company_website}
+                                onChange={e => setSettings({...settings, company_website: e.target.value})}
+                                placeholder="www.exemplo.com"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </TabsContent>
+
+            {/* TAB: APPEARANCE */}
+            <TabsContent value="appearance" className="space-y-4 mt-4 glass-card p-6">
+                 <div>
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                        <Palette className="h-5 w-5" /> Aparência
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Como seu agente aparece no chat.</p>
+                </div>
+
+                <div className="flex items-center gap-6">
+                    <Avatar className="h-20 w-20 border-2 border-slate-100">
+                        <AvatarImage src={settings.bot_avatar || undefined} />
+                        <AvatarFallback className="text-xl">{settings.bot_name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="bot-avatar-upload" className="cursor-pointer inline-flex">
+                            <div className="flex items-center gap-2 bg-white px-3 py-2 border rounded-md hover:bg-slate-50 transition-colors text-xs font-medium">
+                                {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                                Carregar Imagem
+                            </div>
+                            <input
+                                id="bot-avatar-upload"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleAvatarUpload}
+                                disabled={uploading}
+                            />
+                        </Label>
+                        <p className="text-[10px] text-muted-foreground">Recomendado: 256x256px</p>
+
+                        {settings.bot_avatar && (
+                             <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 text-xs gap-1"
+                                onClick={handleUpdateWhatsappProfile}
+                                disabled={updatingWhatsapp}
+                            >
+                                {updatingWhatsapp ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                                Atualizar Foto no WhatsApp
+                            </Button>
+                        )}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label>Cor da Mensagem (Usuário)</Label>
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="color"
+                                value={settings.user_msg_color}
+                                onChange={e => setSettings({...settings, user_msg_color: e.target.value})}
+                                className="h-9 w-9 p-1 rounded border cursor-pointer"
+                            />
+                            <span className="text-xs font-mono">{settings.user_msg_color}</span>
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Cor da Mensagem (Agente)</Label>
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="color"
+                                value={settings.agent_msg_color}
+                                onChange={e => setSettings({...settings, agent_msg_color: e.target.value})}
+                                className="h-9 w-9 p-1 rounded border cursor-pointer"
+                            />
+                            <span className="text-xs font-mono">{settings.agent_msg_color}</span>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div className="pt-6 border-t space-y-4">
+                    <div>
+                        <h3 className="text-sm font-semibold flex items-center gap-2">
+                            <Sparkles className="h-4 w-4 text-purple-500" /> Webchat Widget
+                        </h3>
+                        <p className="text-xs text-muted-foreground">Link direto para o chat do seu agente.</p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <Input
+                            readOnly
+                            value={`${typeof window !== 'undefined' ? window.location.origin : ''}/widget/${organizationId}`}
+                            className="bg-slate-50 font-mono text-xs"
+                        />
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => {
+                                const url = `${window.location.origin}/widget/${organizationId}`;
+                                navigator.clipboard.writeText(url);
+                                toast.success("Link copiado!");
+                            }}
+                        >
+                            <Settings2 className="h-4 w-4" /> {/* Using Settings2 as placeholder for Copy if needed, or just text */}
+                            <span className="sr-only">Copiar</span>
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                                window.open(`/widget/${organizationId}`, '_blank');
+                            }}
+                        >
+                            <Sparkles className="h-4 w-4" /> {/* External Link Icon placeholder */}
+                        </Button>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t">
+                    <div className="space-y-0.5">
+                        <Label>Remover "Criado com..."</Label>
+                        <p className="text-xs text-muted-foreground">White label (apenas Pro)</p>
+                    </div>
+                    <Switch
+                        checked={settings.remove_watermark}
+                        onCheckedChange={checked => setSettings({...settings, remove_watermark: checked})}
+                    />
+                </div>
+            </TabsContent>
+
+            {/* TAB: BEHAVIOR */}
+            <TabsContent value="behavior" className="space-y-6 mt-4 glass-card p-6">
+                <div>
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                        <Sparkles className="h-5 w-5" /> Comportamento
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Personalidade e inteligência.</p>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label>Tom de Voz</Label>
+                        <PersonalitySelector
+                            selected={settings.personality_preset as PersonalityType}
+                            onChange={(preset) => setSettings({ ...settings, personality_preset: preset })}
+                        />
+                        <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                            {currentPreset.emoji} {currentPreset.system_prompt.substring(0, 100)}...
+                        </p>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Mensagem Inicial (Boas Vindas)</Label>
+                        <Input
+                            value={settings.welcome_message}
+                            onChange={e => setSettings({...settings, welcome_message: e.target.value})}
+                            placeholder="Ex: Olá, eu sou a Laura! Como posso ajudar?"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Criatividade ({settings.temperature})</Label>
+                        <Slider
+                            value={[settings.temperature]}
+                            onValueChange={([value]) => setSettings({ ...settings, temperature: value })}
+                            min={0}
+                            max={1}
+                            step={0.1}
+                        />
+                        <div className="flex justify-between text-[10px] text-muted-foreground">
+                            <span>Robótica</span>
+                            <span>Criativa</span>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Instruções Adicionais</Label>
+                        <Textarea
+                            value={settings.custom_instructions}
+                            onChange={(e) => setSettings({ ...settings, custom_instructions: e.target.value })}
+                            placeholder="Regras específicas de negócio..."
+                            className="min-h-[100px]"
+                        />
+                    </div>
+                </div>
+            </TabsContent>
+        </Tabs>
+
+         {/* Save Button */}
+        <Button
+            className="w-full"
+            size="lg"
+            onClick={handleSave}
+            disabled={saving}
+        >
+            {saving ? (
+            <>
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                Salvando...
+            </>
+            ) : (
+            <>
+                <Save className="h-5 w-5 mr-2" />
+                Salvar Alterações
+            </>
+            )}
+        </Button>
       </div>
 
-      {/* Advanced Controls */}
-      <div className="glass-card p-6 space-y-6">
-        <h2 className="text-xl font-semibold">⚙️ Configurações Avançadas</h2>
+      {/* Preview Column */}
+      <div className="space-y-6">
+        <div className="glass-card p-6 space-y-4 sticky top-6">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Settings2 className="h-5 w-5" /> Preview do Chat
+            </h2>
 
-        {/* Temperature */}
-        <div className="space-y-3">
-          <div>
-            <Label>Criatividade (Temperatura)</Label>
-            <p className="text-xs text-muted-foreground mt-1">
-              Controla o quão criativa e variada serão as respostas
-            </p>
-          </div>
+            {/* Simulation Container */}
+            <div className="border rounded-xl overflow-hidden bg-slate-50 shadow-inner h-[500px] flex flex-col">
+                {/* Chat Header */}
+                <div className="bg-white p-4 border-b flex items-center gap-3 shadow-sm">
+                    <Avatar className="h-10 w-10">
+                        <AvatarImage src={settings.bot_avatar || undefined} />
+                        <AvatarFallback>{settings.bot_name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                        <p className="font-semibold text-sm">{settings.bot_name}</p>
+                        <p className="text-xs text-green-500 flex items-center gap-1">
+                            <span className="block h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                            Online
+                        </p>
+                    </div>
+                </div>
 
-          <div className="space-y-2">
-            <Slider
-              value={[settings.temperature]}
-              onValueChange={([value]) => setSettings({ ...settings, temperature: value })}
-              min={0}
-              max={1}
-              step={0.1}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Consistente</span>
-              <span className="font-semibold text-primary">
-                {settings.temperature.toFixed(1)}
-              </span>
-              <span>Criativo</span>
+                {/* Chat Area */}
+                <div className="flex-1 p-4 space-y-4 overflow-y-auto bg-slate-100/50">
+                    {/* Bot Message */}
+                    <div className="flex items-start gap-2">
+                         <Avatar className="h-8 w-8 mt-1">
+                            <AvatarImage src={settings.bot_avatar || undefined} />
+                            <AvatarFallback>{settings.bot_name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div
+                            className="p-3 rounded-2xl rounded-tl-none max-w-[80%] text-sm shadow-sm"
+                            style={{ backgroundColor: settings.agent_msg_color, color: settings.agent_msg_color === '#ffffff' ? '#000' : '#fff' }}
+                        >
+                            <p className={settings.agent_msg_color === '#ffffff' ? 'text-slate-800' : 'text-white'}>
+                                {getPreviewMessage()}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* User Message */}
+                    <div className="flex items-start gap-2 justify-end">
+                        <div
+                            className="p-3 rounded-2xl rounded-tr-none max-w-[80%] text-sm shadow-sm text-white"
+                            style={{ backgroundColor: settings.user_msg_color }}
+                        >
+                           <p>Gostaria de saber mais sobre a {settings.company_name || 'empresa'}.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Footer / Branding */}
+                {!settings.remove_watermark && (
+                     <div className="p-2 text-center text-[10px] text-muted-foreground border-t bg-white/50">
+                        Criado utilizando <strong>ProCRM</strong>
+                    </div>
+                )}
             </div>
-          </div>
-        </div>
-
-        {/* Max Tokens */}
-        <div className="space-y-3">
-          <div>
-            <Label>Comprimento das Respostas</Label>
-            <p className="text-xs text-muted-foreground mt-1">
-              Tamanho médio das mensagens do robô
-            </p>
-          </div>
-
-          <div className="flex gap-3">
-            <button
-              onClick={() => setSettings({ ...settings, max_tokens: 100 })}
-              className={`flex-1 p-3 rounded-lg border-2 transition-all ${
-                settings.max_tokens === 100
-                  ? 'border-primary bg-primary/10'
-                  : 'border-white/10 hover:border-white/20'
-              }`}
-            >
-              <div className="text-sm font-medium">Curto</div>
-              <div className="text-xs text-muted-foreground">~100 tokens</div>
-            </button>
-            <button
-              onClick={() => setSettings({ ...settings, max_tokens: 200 })}
-              className={`flex-1 p-3 rounded-lg border-2 transition-all ${
-                settings.max_tokens === 200
-                  ? 'border-primary bg-primary/10'
-                  : 'border-white/10 hover:border-white/20'
-              }`}
-            >
-              <div className="text-sm font-medium">Médio</div>
-              <div className="text-xs text-muted-foreground">~200 tokens</div>
-            </button>
-            <button
-              onClick={() => setSettings({ ...settings, max_tokens: 400 })}
-              className={`flex-1 p-3 rounded-lg border-2 transition-all ${
-                settings.max_tokens === 400
-                  ? 'border-primary bg-primary/10'
-                  : 'border-white/10 hover:border-white/20'
-              }`}
-            >
-              <div className="text-sm font-medium">Longo</div>
-              <div className="text-xs text-muted-foreground">~400 tokens</div>
-            </button>
-          </div>
-        </div>
-
-        {/* Custom Instructions */}
-        <div className="space-y-3">
-          <div>
-            <Label>Instruções Personalizadas</Label>
-            <p className="text-xs text-muted-foreground mt-1">
-              Adicione regras específicas para o seu robô seguir
-            </p>
-          </div>
-
-          <Textarea
-            value={settings.custom_instructions}
-            onChange={(e) => setSettings({ ...settings, custom_instructions: e.target.value })}
-            placeholder="Ex: Sempre mencione o prazo de entrega. Nunca fale sobre preços, redirecione para consultor."
-            className="min-h-[120px] input-modern"
-          />
-        </div>
-
-        {/* Switches */}
-        <div className="space-y-4 pt-4 border-t">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Resposta Automática</Label>
-              <p className="text-xs text-muted-foreground">
-                Bot responde mensagens automaticamente
-              </p>
-            </div>
-            <Switch
-              checked={settings.auto_reply_enabled}
-              onCheckedChange={(checked) => setSettings({ ...settings, auto_reply_enabled: checked })}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Usar Emojis</Label>
-              <p className="text-xs text-muted-foreground">
-                Permite uso de emojis nas respostas
-              </p>
-            </div>
-            <Switch
-              checked={settings.use_emojis}
-              onCheckedChange={(checked) => setSettings({ ...settings, use_emojis: checked })}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Mencionar Nome do Cliente</Label>
-              <p className="text-xs text-muted-foreground">
-                Usar nome do contato nas conversas
-              </p>
-            </div>
-            <Switch
-              checked={settings.mention_name}
-              onCheckedChange={(checked) => setSettings({ ...settings, mention_name: checked })}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Apenas Horário Comercial</Label>
-              <p className="text-xs text-muted-foreground">
-                Responder apenas em horário de trabalho (9h-18h)
-              </p>
-            </div>
-            <Switch
-              checked={settings.business_hours_only}
-              onCheckedChange={(checked) => setSettings({ ...settings, business_hours_only: checked })}
-            />
-          </div>
         </div>
       </div>
-
-      {/* Preview */}
-      <div className="glass-card p-6 space-y-4">
-        <h2 className="text-xl font-semibold">💬 Preview da Resposta</h2>
-        <p className="text-sm text-muted-foreground">
-          Veja como o robô vai responder com essas configurações:
-        </p>
-
-        <div className="bg-gradient-to-br from-primary/10 to-secondary/10 p-6 rounded-lg border border-white/10">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-white font-bold">
-              🤖
-            </div>
-            <div className="flex-1 space-y-2">
-              <p className="text-sm font-medium text-foreground">
-                {getPreviewMessage()}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Temperatura: {settings.temperature.toFixed(1)} •
-                {settings.use_emojis ? ' Emojis ativados' : ' Sem emojis'} •
-                {settings.auto_reply_enabled ? ' Auto-reply ON' : ' Auto-reply OFF'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Save Button */}
-      <Button
-        className="gradient-primary w-full shadow-glow-primary"
-        size="lg"
-        onClick={handleSave}
-        disabled={saving}
-      >
-        {saving ? (
-          <>
-            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-            Salvando...
-          </>
-        ) : (
-          <>
-            <Save className="h-5 w-5 mr-2" />
-            💾 Salvar Configurações
-          </>
-        )}
-      </Button>
     </div>
   );
 }

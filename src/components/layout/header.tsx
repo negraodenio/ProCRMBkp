@@ -228,8 +228,12 @@ export function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 glass-card">
-              <DropdownMenuItem className="cursor-pointer">Meu Perfil</DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">Configurações</DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/settings/profile")}>
+                Meu Perfil
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/settings/organization")}>
+                Configurações
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-destructive cursor-pointer hover:bg-destructive/10 gap-2"
