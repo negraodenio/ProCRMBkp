@@ -33,7 +33,9 @@ type Message = {
     direction: "inbound" | "outbound";
     created_at: string;
     status: string;
+    sender_name?: string;
 };
+
 
 export default function ChatPage() {
     const [supabase] = useState(() => createClient());
@@ -83,22 +85,26 @@ export default function ChatPage() {
 
         // 2. Realtime Conversations
         const channel = supabase
-            .channel("conversations_changes")
+            .channel(`conversations_${profile.organization_id}`)
             .on("postgres_changes" as any, {
                 event: "*",
                 table: "conversations",
-                filter: profile?.organization_id ? `organization_id=eq.${profile.organization_id}` : undefined
+                filter: `organization_id=eq.${profile.organization_id}`
             }, (payload: any) => {
+                console.log("🔄 Realtime Conversation Change:", payload.eventType, payload.new?.id);
                 if (payload.eventType === "INSERT") {
                     setConversations(prev => [payload.new as Conversation, ...prev]);
                 } else if (payload.eventType === "UPDATE") {
                     setConversations(prev => {
                         const updated = prev.map(c => c.id === payload.new.id ? { ...c, ...payload.new } : c);
-                        return updated.sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
+                        return [...updated].sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
                     });
+                } else if (payload.eventType === "DELETE") {
+                    setConversations(prev => prev.filter(c => c.id !== payload.old.id));
                 }
             })
             .subscribe();
+
 
         return () => {
             supabase.removeChannel(channel);
@@ -125,13 +131,33 @@ export default function ChatPage() {
         const channel = supabase
             .channel(`messages_${selectedId}`)
             .on("postgres_changes" as any, {
-                event: "INSERT",
+                event: "*", // Listen to all events including updates and deletes
                 table: "messages",
                 filter: `conversation_id=eq.${selectedId}`
             }, (payload: any) => {
-                setMessages(prev => [...prev, payload.new as Message]);
+                if (payload.eventType === "INSERT") {
+                    setMessages(prev => {
+                        // Avoid duplicates if optimistic update already added it
+                        if (prev.find(m => m.id === payload.new.id)) return prev;
+                        return [...prev, payload.new as Message];
+                    });
+                } else if (payload.eventType === "UPDATE") {
+                    setMessages(prev => prev.map(m => m.id === payload.new.id ? { ...m, ...payload.new } : m));
+                }
             })
             .subscribe();
+
+        // 5. Mark as Read logic
+        const markAsRead = async () => {
+            const { error } = await supabase
+                .from("conversations")
+                .update({ unread_count: 0 })
+                .eq("id", selectedId);
+
+            if (error) console.error("Error marking as read:", error);
+        };
+        markAsRead();
+
 
         return () => { supabase.removeChannel(channel); };
     }, [selectedId, supabase]);
@@ -231,7 +257,8 @@ export default function ChatPage() {
     const selectedChat = conversations.find(c => c.id === selectedId);
 
     return (
-        <div className="flex h-screen bg-[#f8fafc] overflow-hidden">
+        <div className="flex h-screen bg-background overflow-hidden text-foreground">
+
             <Sidebar />
 
             <div className="flex flex-1 flex-col md:ml-64 relative overflow-hidden">
@@ -241,24 +268,26 @@ export default function ChatPage() {
                     {/* Chat Sidebar */}
                     <div className="w-96 flex flex-col gap-4">
                         <div className="flex flex-col gap-2">
-                            <h2 className="font-bold text-xl text-slate-800">Conversas Ativas</h2>
+                            <h2 className="font-bold text-xl text-foreground">Conversas Ativas</h2>
                         </div>
 
-                        <ScrollArea className="flex-1 rounded-3xl bg-white shadow-sm border border-slate-100">
+                        <ScrollArea className="flex-1 rounded-3xl bg-card shadow-sm border border-border">
+
                             {loading || profileLoading ? (
                                 <div className="p-3 space-y-3">
                                     {[1, 2, 3, 4].map((i) => (
-                                        <div key={i} className="p-4 rounded-2xl bg-white border border-slate-50 animate-pulse">
+                                        <div key={i} className="p-4 rounded-2xl bg-card border border-border/50 animate-pulse">
                                             <div className="flex items-start gap-3">
-                                                <div className="bg-slate-100 h-10 w-10 rounded-xl" />
+                                                <div className="bg-muted h-10 w-10 rounded-xl" />
                                                 <div className="flex-1 space-y-2">
-                                                    <div className="h-3 bg-slate-100 rounded-full w-24" />
-                                                    <div className="h-2 bg-slate-50 rounded-full w-full" />
-                                                    <div className="h-2 bg-slate-50 rounded-full w-2/3" />
+                                                    <div className="h-3 bg-muted rounded-full w-24" />
+                                                    <div className="h-2 bg-muted/50 rounded-full w-full" />
+                                                    <div className="h-2 bg-muted/50 rounded-full w-2/3" />
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
+
                                 </div>
                             ) : conversations.length === 0 ? (
                                 <div className="p-12 text-center space-y-4">
@@ -275,36 +304,38 @@ export default function ChatPage() {
                                             onClick={() => setSelectedId(chat.id)}
                                             className={`p-4 rounded-2xl cursor-pointer transition-all border ${
                                                 selectedId === chat.id
-                                                    ? 'bg-blue-50/50 border-blue-200 ring-1 ring-blue-200'
-                                                    : 'bg-white border-transparent hover:bg-slate-50 hover:border-slate-100'
+                                                    ? 'bg-primary/10 border-primary/20 ring-1 ring-primary/20'
+                                                    : 'bg-card border-transparent hover:bg-muted/50 hover:border-border'
                                             }`}
                                         >
+
                                             <div className="flex items-start gap-3">
-                                                <div className="bg-slate-100 p-2 rounded-xl text-blue-500">
+                                                <div className="bg-muted p-2 rounded-xl text-primary">
                                                     <MessageSquare className="h-5 w-5" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex justify-between items-center mb-0.5">
-                                                        <span className="font-bold text-slate-800 truncate block">
+                                                        <span className="font-bold text-foreground truncate block">
                                                             {chat.contact_name || "Contato Novo"}
                                                         </span>
                                                         {chat.unread_count > 0 && (
-                                                            <Badge variant="default" className="bg-blue-600 h-5 px-1.5 min-w-[20px] justify-center text-[10px]">
+                                                            <Badge variant="default" className="bg-primary h-5 px-1.5 min-w-[20px] justify-center text-[10px]">
                                                                 {chat.unread_count}
                                                             </Badge>
                                                         )}
                                                     </div>
-                                                    <div className="text-xs text-blue-500 font-medium mb-1">
+                                                    <div className="text-xs text-primary font-medium mb-1">
                                                         {chat.contact_phone}
                                                     </div>
-                                                    <p className="text-xs text-slate-500 line-clamp-1 italic mb-1">
+                                                    <p className="text-xs text-muted-foreground line-clamp-1 italic mb-1">
                                                         {chat.last_message_content || "..."}
                                                     </p>
-                                                    <div className="text-[10px] text-slate-400 flex items-center gap-1">
+                                                    <div className="text-[10px] text-muted-foreground flex items-center gap-1">
                                                         <CheckCircle2 className="h-3 w-3" />
                                                         Há {formatDistanceToNow(new Date(chat.last_message_at), { locale: ptBR })}
                                                     </div>
                                                 </div>
+
                                                 <button
                                                     onClick={(e) => handleDelete(e, chat.id)}
                                                     className="p-1 text-slate-300 hover:text-red-500 transition-colors"
@@ -321,29 +352,29 @@ export default function ChatPage() {
                     </div>
 
                     {/* Chat Window */}
-                    <div className="flex-1 flex flex-col bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden relative">
+                    <div className="flex-1 flex flex-col bg-card rounded-3xl shadow-sm border border-border overflow-hidden relative">
                         {selectedId ? (
                             <>
                                 {/* Chat Header */}
-                                <div className="p-6 border-b flex items-start justify-between bg-white">
+                                <div className="p-6 border-b flex items-start justify-between bg-card">
                                     <div className="flex items-start gap-4">
-                                        <div className="bg-slate-50 p-3 rounded-2xl">
-                                            <User className="h-6 w-6 text-slate-400" />
+                                        <div className="bg-muted p-3 rounded-2xl">
+                                            <User className="h-6 w-6 text-muted-foreground" />
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-3 mb-1">
-                                                <h3 className="font-bold text-xl text-slate-800">
+                                                <h3 className="font-bold text-xl text-foreground">
                                                     {selectedChat?.contact_name || "Contato Novo"}
                                                 </h3>
-                                                <Badge variant="outline" className="text-blue-600 bg-blue-50 border-blue-100 text-[10px] font-bold">
+                                                <Badge variant="outline" className="text-primary bg-primary/5 border-primary/20 text-[10px] font-bold">
                                                     {selectedChat?.contact_phone}
                                                 </Badge>
                                             </div>
-                                            <div className="flex items-center gap-4 text-sm text-slate-500">
+                                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
                                                 <div className="flex items-center gap-1.5">
                                                     <Tag className="h-4 w-4" />
                                                     <span className="font-medium">Etiquetas:</span>
-                                                    <button className="flex items-center gap-1 text-blue-600 hover:underline">
+                                                    <button className="flex items-center gap-1 text-primary hover:underline">
                                                         <Plus className="h-3 w-3" /> Adicionar
                                                     </button>
                                                 </div>
@@ -353,7 +384,7 @@ export default function ChatPage() {
                                 </div>
 
                                 {/* Messages Area */}
-                                <div className="flex-1 relative overflow-hidden bg-slate-50/30">
+                                <div className="flex-1 relative overflow-hidden bg-muted/10">
                                     <ScrollArea className="h-full p-6">
                                         <div className="space-y-6 pb-6">
                                             {messages.map((msg) => (
@@ -362,17 +393,18 @@ export default function ChatPage() {
                                                     className={`flex flex-col ${msg.direction === 'outbound' ? 'items-end' : 'items-start'}`}
                                                 >
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <span className="text-[11px] font-bold text-slate-800">
-                                                            {msg.direction === 'outbound' ? 'Você' : (selectedChat?.contact_name || 'Cliente')}
+                                                        <span className="text-[11px] font-bold text-foreground">
+                                                            {msg.direction === 'outbound' ? (msg.sender_name || 'Você') : (selectedChat?.contact_name || 'Cliente')}
                                                         </span>
-                                                        <span className="text-[10px] text-slate-400">
+
+                                                        <span className="text-[10px] text-muted-foreground">
                                                             {format(new Date(msg.created_at), "HH:mm")}
                                                         </span>
                                                     </div>
                                                     <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] border ${
                                                         msg.direction === 'outbound'
-                                                            ? 'bg-[#eff6ff] text-slate-700 border-blue-100 rounded-tr-none'
-                                                            : 'bg-white text-slate-700 border-slate-100 rounded-tl-none'
+                                                            ? 'bg-primary/10 text-foreground border-primary/20 rounded-tr-none'
+                                                            : 'bg-background text-foreground border-border rounded-tl-none'
                                                     }`}>
                                                         <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                                                     </div>
@@ -384,12 +416,12 @@ export default function ChatPage() {
                                 </div>
 
                                 {/* Message Input Area */}
-                                <div className="p-6 border-t bg-white">
+                                <div className="p-6 border-t bg-card">
                                     <div className="flex flex-col gap-3">
                                         <div className="flex gap-4 items-end">
-                                            <div className="flex-1 bg-slate-50 rounded-2xl border border-slate-200 px-4 py-2 flex items-center">
+                                            <div className="flex-1 bg-muted/30 rounded-2xl border border-border px-4 py-2 flex items-center">
                                                 <textarea
-                                                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 resize-none min-h-[44px] max-h-32"
+                                                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 resize-none min-h-[44px] max-h-32 text-foreground"
                                                     placeholder="Digite sua mensagem..."
                                                     value={inputText}
                                                     onChange={(e) => setInputText(e.target.value)}
@@ -406,12 +438,12 @@ export default function ChatPage() {
                                             <Button
                                                 onClick={handleSend}
                                                 disabled={sending || !inputText.trim()}
-                                                className="h-[60px] w-[60px] rounded-2xl bg-emerald-400 hover:bg-emerald-500 shadow-lg shadow-emerald-200/50"
+                                                className="h-[60px] w-[60px] rounded-2xl bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/20"
                                             >
                                                 <Send className="h-6 w-6 text-white" />
                                             </Button>
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium ml-1">
+                                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium ml-1">
                                             <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                                             Conectado via Evolution API
                                         </div>
@@ -419,22 +451,23 @@ export default function ChatPage() {
                                 </div>
                             </>
                         ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center text-center p-12 bg-slate-50/20">
-                                <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6">
-                                    <MessageSquare className="h-10 w-10 text-blue-500" />
+                            <div className="flex-1 flex flex-col items-center justify-center text-center p-12 bg-muted/5">
+                                <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                                    <MessageSquare className="h-10 w-10 text-primary" />
                                 </div>
                                 <div className="max-w-md space-y-4">
-                                    <h2 className="text-2xl font-bold text-slate-800">Conversas WhatsApp</h2>
-                                    <p className="text-slate-500 leading-relaxed italic border-l-4 border-blue-200 pl-4 py-2 bg-blue-50/50 rounded-r-xl text-sm">
+                                    <h2 className="text-2xl font-bold text-foreground">Conversas WhatsApp</h2>
+                                    <p className="text-muted-foreground leading-relaxed italic border-l-4 border-primary/30 pl-4 py-2 bg-primary/5 rounded-r-xl text-sm">
                                         "A comunicação eficiente é o segredo de um CRM de sucesso."
                                     </p>
-                                    <p className="text-sm text-slate-400 pt-6">
+                                    <p className="text-sm text-muted-foreground pt-6">
                                         Selecione uma conversa ao lado para começar ou aguarde novas mensagens dos seus clientes.
                                     </p>
                                 </div>
                             </div>
                         )}
                     </div>
+
                 </main>
             </div>
         </div>

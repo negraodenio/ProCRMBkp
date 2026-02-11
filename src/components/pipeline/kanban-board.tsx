@@ -263,7 +263,8 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                         const totalValue = stageDeals.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0);
 
                         return (
-                            <div key={stage.id} className="flex flex-col w-72 min-w-[288px] bg-slate-50 rounded-xl overflow-hidden shadow-sm border">
+                            <div key={stage.id} className="flex flex-col w-72 min-w-[288px] bg-muted/30 rounded-xl overflow-hidden shadow-sm border border-border">
+
                                 {/* Colored Header */}
                                 <div
                                     className={getStageClassName(stage)}
@@ -354,18 +355,21 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                                         <div
                                             ref={provided.innerRef}
                                             {...provided.droppableProps}
-                                            className={`flex-1 p-3 space-y-3 min-h-[200px] ${snapshot.isDraggingOver ? "bg-blue-50" : ""
+                                            className={`flex-1 p-3 space-y-3 min-h-[200px] transition-colors ${snapshot.isDraggingOver ? "bg-primary/5" : ""
                                                 }`}
                                         >
+
                                             {stageDeals.length === 0 ? (
                                                 <div className="flex flex-col gap-3 py-4">
-                                                    <div className="h-24 rounded-lg border-2 border-dashed border-slate-200 flex items-center justify-center bg-white/50">
+                                                    <div className="h-24 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-card/50">
+
                                                         <p className="text-center text-[10px] uppercase tracking-wider text-slate-400 font-medium">
                                                             Aguardando leads
                                                         </p>
                                                     </div>
-                                                    <div className="h-24 rounded-lg border border-slate-100 bg-white/20 opacity-40"></div>
-                                                    <div className="h-24 rounded-lg border border-slate-100 bg-white/20 opacity-20"></div>
+                                                    <div className="h-24 rounded-lg border border-border bg-card/20 opacity-40"></div>
+                                                    <div className="h-24 rounded-lg border border-border bg-card/20 opacity-20"></div>
+
                                                 </div>
                                             ) : (
                                                 stageDeals.map((deal, index) => (
@@ -398,9 +402,10 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                     <div className="flex flex-col w-72 min-w-[288px]">
                         <Button
                             variant="outline"
-                            className="h-full min-h-[200px] border-dashed border-2 hover:bg-slate-50"
+                            className="h-full min-h-[200px] border-dashed border-2 hover:bg-muted/50 border-border"
                             onClick={() => setNewStageDialogOpen(true)}
                         >
+
                             <Plus className="h-6 w-6 mr-2" />
                             Nova Etapa
                         </Button>

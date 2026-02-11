@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useProfile } from "@/hooks/use-profile";
@@ -246,11 +248,11 @@ export function Header() {
                   <span className="text-[10px] text-muted-foreground truncate">{profile?.email}</span>
                 </div>
               </div>
-              <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/settings/profile")}>
-                Meu Perfil
+              <DropdownMenuItem asChild className="cursor-pointer">
+                <Link href="/settings/profile">Meu Perfil</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/settings/organization")}>
-                Configurações
+              <DropdownMenuItem asChild className="cursor-pointer">
+                <Link href="/settings/organization">Configurações</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

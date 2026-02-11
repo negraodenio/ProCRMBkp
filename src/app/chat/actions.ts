@@ -16,7 +16,7 @@ export async function sendMessageAction(conversationId: string, text: string) {
         }
         const user = authData.user;
 
-        const { data: profile, error: profErr } = await supabase.from("profiles").select("organization_id").eq("id", user.id).maybeSingle();
+        const { data: profile, error: profErr } = await supabase.from("profiles").select("organization_id, full_name").eq("id", user.id).maybeSingle();
         if (profErr || !profile) {
             console.error("[Action] Profile Error:", profErr);
             return { error: "Perfil ou organização não encontrados" };
@@ -53,8 +53,10 @@ export async function sendMessageAction(conversationId: string, text: string) {
             organization_id: profile.organization_id,
             content: text,
             direction: "outbound",
-            status: "sent"
+            status: "sent",
+            sender_name: profile.full_name || "Atendente"
         }).select().maybeSingle();
+
 
         if (msgError) {
             console.error("[Action] DB Insert Error:", msgError);
