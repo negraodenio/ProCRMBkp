@@ -23,6 +23,7 @@ export function LeadsTimeline({ data }: LeadsTimelineProps) {
     <Card>
       <CardHeader>
         <CardTitle className="text-lg font-semibold">Evolução de Leads (Últimos 30 dias)</CardTitle>
+        <p className="text-sm text-muted-foreground">Acompanhe a entrada de novos leads e qualificações ao longo do tempo.</p>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>

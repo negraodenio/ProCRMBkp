@@ -19,6 +19,7 @@ export function RealTimeInsights({ hotLeads, coldLeads, closingDeals, revenueAtR
           <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
           Insights em Tempo Real
         </CardTitle>
+        <p className="text-sm text-muted-foreground">Alertas e oportunidades que requerem sua atenção imediata.</p>
       </CardHeader>
       <CardContent className="space-y-3">
         {/* Leads Quentes */}

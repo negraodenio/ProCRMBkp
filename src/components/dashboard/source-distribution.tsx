@@ -34,6 +34,7 @@ export function SourceDistribution({ data }: SourceDistributionProps) {
     <Card>
       <CardHeader>
         <CardTitle className="text-lg font-semibold">Leads por Origem</CardTitle>
+        <p className="text-sm text-muted-foreground">Saiba de onde vêm seus leads (WhatsApp, Site, Redes Sociais).</p>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>

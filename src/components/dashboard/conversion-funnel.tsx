@@ -24,6 +24,7 @@ export function ConversionFunnel({ stages }: ConversionFunnelProps) {
           <CardTitle>Funil de Conversão</CardTitle>
           <TrendingDown className="h-5 w-5 text-muted-foreground" />
         </div>
+        <p className="text-sm text-muted-foreground">Visualize a eficiência do seu processo comercial etapa por etapa.</p>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
