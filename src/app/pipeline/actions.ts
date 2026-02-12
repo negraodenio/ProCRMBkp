@@ -100,3 +100,20 @@ export async function deleteStage(stageId: string) {
     revalidatePath('/pipeline')
     return { success: true }
 }
+
+export async function deleteDeal(dealId: string) {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('deals')
+        .delete()
+        .eq('id', dealId)
+
+    if (error) {
+        console.error('Error deleting deal:', error)
+        return { success: false, error: error.message }
+    }
+
+    revalidatePath('/pipeline')
+    return { success: true }
+}

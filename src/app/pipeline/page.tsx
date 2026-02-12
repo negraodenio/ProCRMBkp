@@ -63,7 +63,7 @@ export default async function PipelinePage() {
                 <Header />
                 <main className="flex-1 p-6 bg-slate-50 dark:bg-background">
                     <div className="space-y-4 mb-6">
-                        <h1 className="text-3xl font-bold">Pipeline de Vendas</h1>
+                        <h1 className="text-3xl font-bold">Kanban</h1>
                         <div className="bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 rounded-lg p-3 flex items-center gap-2">
                             <span className="text-blue-500">📋</span>
                             <span className="text-blue-700 dark:text-blue-300 text-sm">

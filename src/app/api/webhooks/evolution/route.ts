@@ -393,10 +393,20 @@ export async function POST(req: NextRequest) {
             }
         );
 
+        // Map history for AI (skip the current message which was already logged)
+        const chatHistory = (recentMessages || [])
+            .filter(m => m.content !== text) // Avoid duplicating current message if it was just inserted
+            .reverse()
+            .map(m => ({
+                role: (m.direction === "inbound" ? "user" : "assistant") as "user" | "assistant",
+                content: m.content
+            }));
+
         const aiResponse = await aiChat({
             messages: [
                 { role: "system", content: systemPrompt },
-                { role: "user", content: `<user_input>${text}</user_input>` }
+                ...chatHistory,
+                { role: "user", content: text }
             ],
             model: "fast",
             temperature: botSettings.temperature ?? 0.6,

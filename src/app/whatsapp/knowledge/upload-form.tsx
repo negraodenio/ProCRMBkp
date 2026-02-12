@@ -57,17 +57,17 @@ export function UploadForm() {
     }
 
     return (
-        <form 
+        <form
             onSubmit={(e) => {
                 e.preventDefault();
                 handleSubmit(new FormData(e.currentTarget));
-            }} 
+            }}
             className="space-y-4 border p-4 rounded-lg bg-muted/30"
         >
             <div className="space-y-2">
-                <Label htmlFor="file">Novo Documento (PDF ou TXT)</Label>
+                <Label htmlFor="file">Novo Documento (TXT ou MD)</Label>
                 <div className="flex gap-2">
-                    <Input id="file" name="file" type="file" required accept=".pdf,.txt,.md" className="bg-background" disabled={loading} />
+                    <Input id="file" name="file" type="file" required accept=".txt,.md" className="bg-background" disabled={loading} />
                     <Button type="submit" disabled={loading}>
                         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
                         {loading ? "Enviando..." : "Enviar"}
@@ -94,7 +94,7 @@ export function UploadForm() {
 
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <FileType className="h-3 w-3" />
-                    O robô aprenderá com este conteúdo para responder no WhatsApp.
+                    Envie apenas arquivos de texto (.txt) para garantir 100% de leitura.
                 </p>
             </div>
         </form>

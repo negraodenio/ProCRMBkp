@@ -88,7 +88,7 @@ export default function WhatsAppPage() {
     };
 
     return (
-        <div className="flex min-h-screen bg-slate-50/50">
+        <div className="flex min-h-screen bg-background">
             <Sidebar />
             <div className="flex flex-1 flex-col md:ml-64 transition-all duration-300 ease-in-out">
                 <Header />
@@ -102,7 +102,7 @@ export default function WhatsAppPage() {
                         </div>
 
                         {/* Status Badge */}
-                        <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border shadow-sm">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-card rounded-full border shadow-sm">
                             <div className={`h-2.5 w-2.5 rounded-full ${instanceName ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
                             <span className="text-sm font-medium text-slate-600">
                                 {instanceName ? 'Online' : 'Desconectado'}
@@ -125,7 +125,7 @@ export default function WhatsAppPage() {
                                         Escaneie o QR Code para conectar seu número.
                                     </CardDescription>
                                 </CardHeader>
-                                <CardContent className="flex flex-col items-center justify-center min-h-[400px] p-8 bg-slate-50/50">
+                                <CardContent className="flex flex-col items-center justify-center min-h-[400px] p-8 bg-muted/20">
 
                                     {!qrCode && !loading && !instanceName && (
                                         <div className="text-center space-y-6 max-w-sm animate-in fade-in zoom-in duration-500">
@@ -155,7 +155,7 @@ export default function WhatsAppPage() {
                                         <div className="flex flex-col items-center space-y-6 animate-in fade-in zoom-in duration-300">
                                             <div className="relative group">
                                                 <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-                                                <div className="relative bg-white p-2 rounded-xl border shadow-sm">
+                                                <div className="relative bg-white p-2 rounded-xl border shadow-sm shadow-indigo-200/50">
                                                     <img src={qrCode} alt="QR Code" width={260} height={260} className="rounded-lg" />
                                                 </div>
                                             </div>
@@ -178,7 +178,7 @@ export default function WhatsAppPage() {
                                             <div>
                                                 <h3 className="text-xl font-bold text-slate-900">Tudo conectado!</h3>
                                                 <p className="text-slate-500 mt-2">
-                                                    Instância: <span className="font-mono bg-slate-100 px-2 py-1 rounded text-slate-700 text-xs">{instanceName}</span>
+                                                    Instância: <span className="font-mono bg-muted px-2 py-1 rounded text-foreground text-xs">{instanceName}</span>
                                                 </p>
                                             </div>
                                             <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={handleDisconnect}>

@@ -44,6 +44,7 @@ interface Automation {
 }
 
 const PIPELINE_STAGES = [
+    "Primeiro Contato",
     "Prospecção",
     "Qualificação",
     "Proposta",
@@ -101,11 +102,6 @@ export default function AutomationsPage() {
             toast.error("Selecione o novo status");
             return;
         }
-
-        const { data: profile } = await supabase
-            .from("profiles")
-            .select("organization_id")
-            .single();
 
         if (!profile?.organization_id) {
             toast.error("Organização não encontrada");
@@ -177,7 +173,7 @@ export default function AutomationsPage() {
     }
 
     return (
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen bg-background">
             <Sidebar />
             <div className="flex flex-1 flex-col md:ml-64">
                 <Header />
@@ -341,7 +337,7 @@ export default function AutomationsPage() {
                                             </div>
                                         </CardHeader>
                                         <CardContent>
-                                            <div className="bg-slate-50 rounded-lg p-3 mb-4 text-sm">
+                                            <div className="bg-muted/50 rounded-lg p-3 mb-4 text-sm">
                                                 <p className="text-muted-foreground line-clamp-3">
                                                     {typeof automation.message_template === 'string'
                                                         ? automation.message_template

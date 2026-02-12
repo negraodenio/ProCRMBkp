@@ -117,3 +117,19 @@ export async function deleteConversationAction(conversationId: string) {
         return { error: "Erro ao excluir conversa: " + error.message };
     }
 }
+
+export async function toggleAIAction(conversationId: string, enabled: boolean) {
+    const supabase = await createClient();
+    try {
+        const { error } = await supabase
+            .from("conversations")
+            .update({ ai_enabled: enabled })
+            .eq("id", conversationId);
+
+        if (error) throw error;
+        return { success: true };
+    } catch (error: any) {
+        console.error("Error toggling AI:", error);
+        return { error: "Erro ao configurar IA: " + error.message };
+    }
+}

@@ -66,7 +66,7 @@ security invoker -- Ensures it respects RLS
 as $$
 begin
   return query
-  select
+  select distinct on (d.content)
     d.id,
     d.content,
     d.metadata,
@@ -74,7 +74,7 @@ begin
   from public.documents d
   where d.organization_id = org_id
   and 1 - (d.embedding <=> query_embedding) > match_threshold
-  order by (d.embedding <=> query_embedding) asc -- Using cosine distance directly for index benefit
+  order by d.content, (d.embedding <=> query_embedding) asc
   limit match_count;
 end;
 $$;

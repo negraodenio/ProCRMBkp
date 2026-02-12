@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { DealCard } from "./deal-card";
-import { updateDealStage, updateDeal, createStage, updateStage, deleteStage } from "@/app/pipeline/actions";
+import { updateDealStage, updateDeal, createStage, updateStage, deleteStage, deleteDeal } from "@/app/pipeline/actions";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
@@ -110,6 +110,22 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
             toast.error("Erro inesperado ao salvar.");
         } finally {
             setIsSavingDeal(false);
+        }
+    };
+
+    const handleDeleteDeal = async (dealId: string) => {
+        if (!confirm("Tem certeza que deseja excluir este lead?")) return;
+
+        try {
+            const result = await deleteDeal(dealId);
+            if (result.success) {
+                setDeals(deals.filter(d => d.id !== dealId));
+                toast.success("Lead excluído com sucesso!");
+            } else {
+                toast.error("Erro ao excluir: " + result.error);
+            }
+        } catch (e) {
+            toast.error("Erro inesperado ao excluir.");
         }
     };
 
@@ -384,6 +400,8 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                                                                     deal={deal}
                                                                     isDragging={snapshot.isDragging}
                                                                     onEdit={openEditDeal}
+                                                                    onDelete={handleDeleteDeal}
+                                                                    stageColor={stage.color}
                                                                 />
                                                             </div>
                                                         )}

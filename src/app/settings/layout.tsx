@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-[#f8fafc]">
+    <div className="flex min-h-screen bg-background">
       <Sidebar />
       <div className="flex flex-1 flex-col md:ml-64 relative">
         <Header />

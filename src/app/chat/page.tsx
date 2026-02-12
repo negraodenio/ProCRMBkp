@@ -8,14 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Send, User, Trash2, Tag, Plus, CheckCircle2, ArrowLeft } from "lucide-react";
+import { MessageSquare, Send, User, Trash2, Tag, Plus, CheckCircle2, ArrowLeft, Brain } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { sendMessageAction, deleteConversationAction } from "./actions";
+import { sendMessageAction, deleteConversationAction, toggleAIAction } from "./actions";
 import { useProfile } from "@/hooks/use-profile";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 type Conversation = {
     id: string;
@@ -25,6 +27,7 @@ type Conversation = {
     last_message_at: string;
     unread_count: number;
     status: string;
+    ai_enabled: boolean;
 };
 
 type Message = {
@@ -257,6 +260,24 @@ export default function ChatPage() {
         }
     };
 
+    const handleToggleAI = async (conversationId: string, enabled: boolean) => {
+        try {
+            // Optimistic update
+            setConversations(prev => prev.map(c => c.id === conversationId ? { ...c, ai_enabled: enabled } : c));
+
+            const result = await toggleAIAction(conversationId, enabled);
+            if (result.error) {
+                toast.error("Erro ao configurar IA: talvez a coluna ai_enabled precise ser criada no banco.");
+                // Revert
+                setConversations(prev => prev.map(c => c.id === conversationId ? { ...c, ai_enabled: !enabled } : c));
+            } else {
+                toast.success(`IA ${enabled ? 'ativada' : 'desativada'} para esta conversa`);
+            }
+        } catch (error) {
+            toast.error("Erro ao configurar IA");
+        }
+    };
+
     const selectedChat = conversations.find(c => c.id === selectedId);
 
     return (
@@ -392,6 +413,30 @@ export default function ChatPage() {
                                                     </button>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    {/* AI Toggle */}
+                                    <div className="flex flex-col items-center gap-2 px-4 py-2 bg-muted/30 rounded-2xl border border-border/50">
+                                        <div className="flex items-center gap-2">
+                                            {selectedChat?.ai_enabled ? (
+                                                <Brain className="h-4 w-4 text-emerald-500 animate-pulse" />
+                                            ) : (
+                                                <Brain className="h-4 w-4 text-muted-foreground opacity-50" />
+                                            )}
+                                            <Label htmlFor="ai-toggle" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                                IA Status
+                                            </Label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className={`text-[10px] font-medium ${!selectedChat?.ai_enabled ? 'text-primary' : 'text-muted-foreground'}`}>OFF</span>
+                                            <Switch
+                                                id="ai-toggle"
+                                                checked={selectedChat?.ai_enabled ?? true}
+                                                onCheckedChange={(checked) => handleToggleAI(selectedChat!.id, checked)}
+                                                className="scale-75 data-[state=checked]:bg-emerald-500"
+                                            />
+                                            <span className={`text-[10px] font-medium ${selectedChat?.ai_enabled ? 'text-emerald-500' : 'text-muted-foreground'}`}>ON</span>
                                         </div>
                                     </div>
                                 </div>
