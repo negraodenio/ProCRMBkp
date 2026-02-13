@@ -152,5 +152,15 @@ export function buildSystemPrompt(
 4. Vá direto para a resposta da última pergunta do usuário.
 5. Seja fluido e natural, como uma conversa contínua.`;
 
+  // --- STRICT RAG ENFORCEMENT (User requested "Senior" level strictness) ---
+  if (context) {
+      basePrompt += `\n\n🛡️ PROTOCOLO DE CONFIANÇA (SENIOR LEVEL):
+1. VOCÊ ESTÁ PROIBIDO DE USAR CONHECIMENTO EXTERNO.
+2. SUA ÚNICA FONTE DE VERDADE É O BLOCO <context> ACIMA.
+3. Se a resposta não estiver EXPLICITAMENTE no contexto, você DEVE responder: "Desculpe, não tenho essa informação nos meus manuais de treinamento."
+4. NÃO INVENTE, NÃO SUPONHA, NÃO COMPLETE com conhecimento geral.
+5. Ao encontrar campos estruturados no contexto (ex: "Área:", "Orientações:"), use o conteúdo exato desses campos na sua resposta.`;
+  }
+
   return basePrompt;
 }

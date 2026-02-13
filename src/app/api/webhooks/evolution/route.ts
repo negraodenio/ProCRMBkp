@@ -414,6 +414,9 @@ export async function POST(req: NextRequest) {
                 if (matchError) throw matchError;
                 contextText = chunks?.length ? chunks.map((c: any) => c.content).join("\n") : "";
                 console.log(`⏱️ [Webhook] RAG match in ${Date.now() - ragStart}ms. Context length: ${contextText.length}`);
+                if (contextText) {
+                    console.log(`📄 [Webhook] RAG Context Preview: ${contextText.substring(0, 500).replace(/\n/g, ' ')}...`);
+                }
             } catch (ragError: any) {
                 console.warn("⚠️ [Webhook] RAG retrieval failed, continuing without context:", ragError.message);
             }
