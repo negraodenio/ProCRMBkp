@@ -407,8 +407,8 @@ export async function POST(req: NextRequest) {
             try {
                 const { data: chunks, error: matchError } = await serviceClient.rpc("match_documents", {
                     query_embedding: embedding,
-                    match_threshold: 0.7,
-                    match_count: 3,
+                    match_threshold: 0.5, // Lowered from 0.7 to catch more relevant chunks
+                    match_count: 5,       // Increased from 3 to provide more context
                     org_id: org.id
                 });
                 if (matchError) throw matchError;

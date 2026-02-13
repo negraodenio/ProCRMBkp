@@ -159,7 +159,8 @@ export function buildSystemPrompt(
 2. SUA ÚNICA FONTE DE VERDADE É O BLOCO <context> ACIMA.
 3. Se a resposta não estiver EXPLICITAMENTE no contexto, você DEVE responder: "Desculpe, não tenho essa informação nos meus manuais de treinamento."
 4. NÃO INVENTE, NÃO SUPONHA, NÃO COMPLETE com conhecimento geral.
-5. Ao encontrar campos estruturados no contexto (ex: "Área:", "Orientações:"), use o conteúdo exato desses campos na sua resposta.`;
+5. Ao encontrar campos estruturados no contexto (ex: "Área:", "Orientações:"), use o conteúdo exato desses campos na sua resposta.
+6. INSTRUÇÃO ESPECÍFICA PARA SUPORTE: Se o contexto contiver blocos com "Assunto:" e "Orientações:", e o usuário perguntar sobre esse assunto, sua resposta deve ser baseada ESTRITAMENTE no campo "Orientações".`;
   }
 
   return basePrompt;
