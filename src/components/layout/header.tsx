@@ -1,6 +1,6 @@
 "use client";
 
-import { Moon, Sun, Bell, User, Search, LogOut, Settings, CheckCheck, Trash2 } from "lucide-react";
+import { Moon, Sun, Bell, User, Search, LogOut, Settings, CheckCheck, Trash2, Loader2 } from "lucide-react";
 
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,8 @@ import { toast } from "sonner";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { logout } from "@/app/auth/actions";
+import { useTransition } from "react";
 
 type Notification = {
   id: string;
@@ -42,7 +44,7 @@ export function Header() {
   const { setTheme } = useTheme();
   const router = useRouter();
   const { profile } = useProfile();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
 
@@ -164,20 +166,16 @@ export function Header() {
   };
 
 
-  const handleLogout = async () => {
-    try {
-      setIsLoggingOut(true);
-      const supabase = createClient();
-      await supabase.auth.signOut();
-      toast.success("Logout realizado com sucesso!");
-      router.push("/login");
-      router.refresh();
-    } catch (error) {
-      console.error("Erro ao fazer logout:", error);
-      toast.error("Erro ao fazer logout");
-    } finally {
-      setIsLoggingOut(false);
-    }
+  const handleLogout = () => {
+    startTransition(async () => {
+      try {
+        await logout();
+        toast.success("Logout realizado com sucesso!");
+      } catch (error) {
+        console.error("Erro ao fazer logout:", error);
+        toast.error("Erro ao fazer logout");
+      }
+    });
   };
 
   return (
@@ -316,10 +314,19 @@ export function Header() {
               <DropdownMenuItem
                 className="text-destructive cursor-pointer hover:bg-destructive/10 gap-2"
                 onClick={handleLogout}
-                disabled={isLoggingOut}
+                disabled={isPending}
               >
-                <LogOut className="h-4 w-4" />
-                {isLoggingOut ? "Saindo..." : "Sair"}
+                {isPending ? (
+                   <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saindo...
+                   </>
+                ) : (
+                  <>
+                    <LogOut className="h-4 w-4" />
+                    Sair
+                  </>
+                )}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

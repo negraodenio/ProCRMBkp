@@ -21,6 +21,7 @@ import {
   LogOut,
   Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -57,7 +58,13 @@ export function Sidebar({ mobile }: SidebarProps) {
 
   const handleLogout = () => {
     startTransition(async () => {
-      await logout();
+      try {
+        await logout();
+        toast.success("Logout realizado com sucesso!");
+      } catch (error) {
+        console.error("Erro ao fazer logout:", error);
+        toast.error("Erro ao fazer logout");
+      }
     });
   };
 

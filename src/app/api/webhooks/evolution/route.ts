@@ -453,8 +453,14 @@ export async function POST(req: NextRequest) {
                     content: m.content
                 }));
 
+            // --- STRATEGY: Grounded Temperature ---
+            // If we have RAG context, we force a low temperature to avoid "hallucination/creativity"
+            // If no context, we use the user's creative preference.
+            const userTemperature = botSettings.temperature ?? 0.6;
+            const finalTemperature = contextText ? 0.3 : userTemperature;
+
             const chatStart = Date.now();
-            console.log(`🤖 [Webhook] Calling AI Chat (model: fast)...`);
+            console.log(`🤖 [Webhook] Calling AI Chat (model: fast, temp: ${finalTemperature})...`);
             aiResponse = await aiChat({
                 messages: [
                     { role: "system", content: systemPrompt },
@@ -462,7 +468,7 @@ export async function POST(req: NextRequest) {
                     { role: "user", content: text }
                 ],
                 model: "fast",
-                temperature: botSettings.temperature ?? 0.6,
+                temperature: finalTemperature,
                 max_tokens: botSettings.max_tokens ?? 250
             });
             console.log(`⏱️ [Webhook] AI Response generated in ${Date.now() - chatStart}ms. Length: ${aiResponse.length}`);

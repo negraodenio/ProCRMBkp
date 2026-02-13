@@ -140,6 +140,38 @@ REGRA DE CORREÇÃO:
   }
 } as const;
 
+export const POLICY_GLOBAL_RAG = `
+REGRAS GLOBAIS (OBRIGATÓRIO):
+1) Idioma: responda em pt-BR.
+
+2) Fonte de verdade:
+- Se existir o bloco <context>, ele é a ÚNICA fonte de verdade para fatos (receitas, preços, políticas, regras, procedimentos).
+- É PROIBIDO usar conhecimento externo para completar lacunas.
+
+3) Evidência obrigatória:
+- Antes de responder, encontre no <context> pelo menos 1 evidência.
+- Inclua 1 citação curta do <context> entre aspas ("...") que sustente sua resposta.
+
+4) Se não houver evidência / contexto insuficiente:
+- NÃO invente.
+- Responda com uma destas opções:
+  (a) 1 pergunta objetiva de clarificação, OU
+  (b) "Não encontrei isso no manual. Posso chamar um humano para te ajudar?"
+- Nunca dê listas “genéricas” quando o contexto não trouxer itens.
+
+5) Perguntas abertas (inventário):
+- Se o usuário perguntar "o que você sabe" / "quais opções", liste APENAS itens que aparecem explicitamente no <context> (ex.: Assunto/Sub-assunto/títulos).
+- Depois pergunte qual item a pessoa quer.
+
+6) Formato e conversa:
+- Respostas curtas (2–6 linhas), a menos que o usuário peça "passo a passo".
+- Se houver passos no contexto, responda em lista numerada.
+- Não repita cumprimentos/apresentação se já aconteceu.
+
+7) Saída obrigatória (anti-conversa-morta):
+- Termine sempre com 1 próximo passo: UMA pergunta curta OU um CTA concreto.
+`.trim();
+
 export type PersonalityType = keyof typeof PERSONALITY_PRESETS;
 
 /**
@@ -173,17 +205,13 @@ export function buildSystemPrompt(
     basePrompt += `\n\nNÃO use emojis nas respostas.`;
   }
 
-  // REGRA DE OURO: RAG & Respostas Curtas (Global)
-  basePrompt += `\n\nDIRETRIZES DE RESPOSTA (OBRIGATÓRIO):
-1. SÓ RESPONDA o que estiver no CONTEXTO (RAG) abaixo.
-2. NÃO INVENTE respostas. Se a informação não estiver no contexto, diga exatamente: "Não fui treinado a responder essa pergunta."
-3. RESPOSTAS CURTAS: Seja o mais breve e direto possível.
-4. FOCO NO CLIENTE: Adapte o tom mas mantenha a fidelidade aos dados.`;
+  // REGRA DE OURO: RAG Global Policy
+  basePrompt += `\n\n${POLICY_GLOBAL_RAG}`;
 
   // Adicionar contexto RAG
   if (context) {
     basePrompt += `\n\nCONTEXTO (Documentos da empresa):\n<context>\n${context}\n</context>`;
-    basePrompt += `\n\nPRIORIDADE MÁXIMA (REGRA DE OURO): Use as informações do CONTEXTO acima para responder ao cliente. O Contexto é a sua ÚNICA fonte de verdade sobre preços e políticas. ADAPTE a resposta para o cliente atual ("${contactName}"), mas NÃO invente dados que não estão no contexto.`;
+    basePrompt += `\n\nPRIORIDADE MÁXIMA: Use EXCLUSIVAMENTE as informações do CONTEXTO acima.`;
   }
 
   // Instruções de segurança (sempre)
@@ -196,23 +224,6 @@ export function buildSystemPrompt(
 3. NÃO diga "Olá ${contactName}" ou "Meu nome é..." se isso já foi dito.
 4. Vá direto para a resposta da última pergunta do usuário.
 5. Seja fluido e natural, como uma conversa contínua.`;
-
-  // --- STRICT RAG ENFORCEMENT (User requested "Senior" level strictness) ---
-  // --- STRICT RAG ENFORCEMENT (GLOBAL FOR ALL PRESETS) ---
-  if (context) {
-      basePrompt += `\n\n🛡️ PROTOCOLO DE CONFIANÇA (GLOBAL):
-1. VOCÊ ESTÁ PROIBIDO DE USAR CONHECIMENTO EXTERNO PARA PREÇOS, PRODUTOS OU REGRAS.
-2. SUA ÚNICA FONTE DE VERDADE É O BLOCO <context> ACIMA.
-3. Se o cliente perguntar algo específico (preço, prazo) e NÃO estiver no contexto, responda: "Preciso verificar essa informação específica com um especialista."
-4. NÃO INVENTE, NÃO SUPONHA.
-5. Ao encontrar campos estruturados (ex: "Orientações:"), use o conteúdo exato.
-
-🛡️ PROTEÇÃO CONTRA LOOP E DUPLICAÇÃO:
-1. ANTES de responder, LEIA as últimas 3 mensagens do histórico abaixo.
-2. SE você já cumprimentou ("Olá", "Tudo bem"), NÃO CUMPRIMENTE DE NOVO. Vá direto ao assunto.
-3. SE o cliente repetiu a mesma pergunta, mude a forma de responder, seja mais direto.
-4. SE a conversa estiver andando em círculos, sugira: "Posso chamar um humano para te ajudar?"`;
-  }
 
   return basePrompt;
 }
