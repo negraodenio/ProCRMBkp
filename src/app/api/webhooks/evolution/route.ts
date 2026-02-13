@@ -422,9 +422,11 @@ export async function POST(req: NextRequest) {
             }
 
             // 5.3 Build Prompt & Chat
-            const presetKey = (botSettings.personality_preset || "friendly") as PersonalityType;
+            // Use "instruction_follower" as default for better RAG reliability
+            const personalityKey = (botSettings?.personality_preset || "instruction_follower") as PersonalityType;
+            const selectedPersonality = PERSONALITY_PRESETS[personalityKey] || PERSONALITY_PRESETS.instruction_follower;
             const systemPrompt = buildSystemPrompt(
-                PERSONALITY_PRESETS[presetKey],
+                selectedPersonality,
                 botSettings.custom_instructions || "",
                 contextText,
                 pushName,
