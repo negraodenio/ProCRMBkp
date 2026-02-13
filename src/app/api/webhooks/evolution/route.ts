@@ -205,7 +205,7 @@ export async function POST(req: NextRequest) {
         // 3. Find/Create Conversation
         let { data: conversation, error: convLookupError } = await serviceClient
             .from("conversations")
-            .select("id, unread_count, contact_name, contact_phone, ai_enabled")
+            .select("*")
             .eq("contact_phone", phone)
             .eq("status", "open")
             .maybeSingle();
@@ -222,8 +222,7 @@ export async function POST(req: NextRequest) {
                     organization_id: org.id,
                     contact_phone: phone,
                     contact_name: pushName,
-                    status: "open",
-                    ai_enabled: true // Default to true for new conversations
+                    status: "open"
                 })
                 .select()
                 .maybeSingle();
@@ -377,14 +376,26 @@ export async function POST(req: NextRequest) {
 
         // 5. RAG & AI Reply
         const embedding = await generateEmbedding(text);
-        const { data: chunks } = await serviceClient.rpc("match_documents", {
-            query_embedding: embedding,
-            match_threshold: 0.7,
-            match_count: 3,
-            org_id: org.id
-        });
 
-        const contextText = chunks?.length ? chunks.map((c: any) => c.content).join("\n") : "";
+        // SAFE RAG: Try to fetch context, but don't crash if it fails (e.g. migration missing)
+        let contextText = "";
+        try {
+            console.log("🔍 [Webhook] Attempting RAG match...");
+            const { data: chunks, error: matchError } = await serviceClient.rpc("match_documents", {
+                query_embedding: embedding,
+                match_threshold: 0.7,
+                match_count: 3,
+                org_id: org.id
+            });
+
+            if (matchError) throw matchError;
+
+            contextText = chunks?.length ? chunks.map((c: any) => c.content).join("\n") : "";
+            console.log(`✅ [Webhook] RAG Success. Context length: ${contextText.length}`);
+        } catch (ragError: any) {
+            console.error("⚠️ [Webhook] RAG Failed (continuing without context):", ragError.message);
+            contextText = "";
+        }
 
         // --- PERSONALITY CONFIGURATION ---
         const presetKey = (botSettings.personality_preset || "friendly") as PersonalityType;
@@ -410,17 +421,6 @@ export async function POST(req: NextRequest) {
                 content: m.content
             }));
 
-        const aiResponse = await aiChat({
-            messages: [
-                { role: "system", content: systemPrompt },
-                ...chatHistory,
-                { role: "user", content: text }
-            ],
-            model: "fast",
-            temperature: botSettings.temperature ?? 0.6,
-            max_tokens: botSettings.max_tokens ?? 250
-        });
-
         const replyInstance = instanceName || ("bot-" + org.id);
 
         // FIX: Handle LID (Linked Identity Device)
@@ -437,6 +437,19 @@ export async function POST(req: NextRequest) {
                  targetJid = remoteJid;
              }
         }
+
+        console.log(`🤖 [Webhook] Generating AI response...`);
+        const aiResponse = await aiChat({
+            messages: [
+                { role: "system", content: systemPrompt },
+                ...chatHistory,
+                { role: "user", content: text }
+            ],
+            model: "fast",
+            temperature: botSettings.temperature ?? 0.6,
+            max_tokens: botSettings.max_tokens ?? 250
+        });
+        console.log(`✅ [Webhook] AI Response generated. Length: ${aiResponse.length}`);
 
         await EvolutionService.sendMessage(replyInstance, targetJid, aiResponse);
 
