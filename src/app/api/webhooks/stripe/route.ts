@@ -13,7 +13,13 @@ const supabaseAdmin = createClient(
   { auth: { persistSession: false } }
 );
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
+
+if (!process.env.RESEND_API_KEY) {
+  console.warn("⚠️ RESEND_API_KEY is missing. Emails will not be sent.");
+}
 
 // ============================================
 // MAPA DE PLANOS — Price IDs do Stripe
@@ -33,6 +39,7 @@ function getPlanFromPriceId(priceId: string) {
 // ============================================
 async function sendWelcomeEmail(email: string, planName: string) {
   try {
+    if (!resend) return;
     await resend.emails.send({
       from: "CRMia <noreply@crmia.eu>",
       to: email,
@@ -76,6 +83,7 @@ async function sendWelcomeEmail(email: string, planName: string) {
 
 async function sendPaymentFailedEmail(email: string) {
   try {
+    if (!resend) return;
     await resend.emails.send({
       from: "CRMia <noreply@crmia.eu>",
       to: email,
@@ -117,6 +125,7 @@ async function sendPaymentFailedEmail(email: string) {
 
 async function sendCancellationEmail(email: string) {
   try {
+    if (!resend) return;
     await resend.emails.send({
       from: "CRMia <noreply@crmia.eu>",
       to: email,
