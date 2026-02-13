@@ -52,36 +52,36 @@ export default function ChatPage() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // 1. Fetch Conversations
-    useEffect(() => {
-        const fetchConversations = async () => {
-            try {
-                console.log("🔍 [Chat] Starting fetchConversations for Org:", profile?.organization_id);
-                if (!profile?.organization_id) {
-                    console.warn("⚠️ [Chat] No organization_id in profile");
-                    setLoading(false);
-                    return;
-                }
-
-                const { data, error } = await supabase
-                    .from("conversations")
-                    .select("*")
-                    .eq("organization_id", profile.organization_id)
-                    .order("last_message_at", { ascending: false });
-
-                if (error) {
-                    console.error("❌ [Chat] Error fetching conversations:", error);
-                    toast.error("Erro ao carregar conversas: " + error.message);
-                } else {
-                    console.log(`✅ [Chat] Fetched ${data?.length || 0} conversations`);
-                    setConversations(data || []);
-                }
-            } catch (err) {
-                console.error("❌ [Chat] Exception in fetchConversations:", err);
-            } finally {
+    const fetchConversations = async () => {
+        try {
+            console.log("🔍 [Chat] Starting fetchConversations for Org:", profile?.organization_id);
+            if (!profile?.organization_id) {
+                console.warn("⚠️ [Chat] No organization_id in profile");
                 setLoading(false);
+                return;
             }
-        };
 
+            const { data, error } = await supabase
+                .from("conversations")
+                .select("*")
+                .eq("organization_id", profile.organization_id)
+                .order("last_message_at", { ascending: false });
+
+            if (error) {
+                console.error("❌ [Chat] Error fetching conversations:", error);
+                toast.error("Erro ao carregar conversas: " + error.message);
+            } else {
+                console.log(`✅ [Chat] Fetched ${data?.length || 0} conversations`);
+                setConversations(data || []);
+            }
+        } catch (err) {
+            console.error("❌ [Chat] Exception in fetchConversations:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         if (!profileLoading && profile?.organization_id) {
             fetchConversations();
 
@@ -116,32 +116,32 @@ export default function ChatPage() {
 
 
     // 3. Fetch Messages when selection changes
+    const fetchMessages = async (id: string) => {
+        if (!id) return;
+        const { data } = await supabase
+            .from("messages")
+            .select("*")
+            .eq("conversation_id", id)
+            .order("created_at", { ascending: true });
+
+        if (data) setMessages(data as Message[]);
+    };
+
     useEffect(() => {
         if (!selectedId) return;
 
-        const fetchMessages = async () => {
-            const { data } = await supabase
-                .from("messages")
-                .select("*")
-                .eq("conversation_id", selectedId)
-                .order("created_at", { ascending: true });
-
-            if (data) setMessages(data as Message[]);
-        };
-
-        fetchMessages();
+        fetchMessages(selectedId);
 
         // 4. Realtime Messages
         const channel = supabase
             .channel(`messages_${selectedId}`)
             .on("postgres_changes" as any, {
-                event: "*", // Listen to all events including updates and deletes
+                event: "*",
                 table: "messages",
                 filter: `conversation_id=eq.${selectedId}`
             }, (payload: any) => {
                 if (payload.eventType === "INSERT") {
                     setMessages(prev => {
-                        // Avoid duplicates if optimistic update already added it
                         if (prev.find(m => m.id === payload.new.id)) return prev;
                         return [...prev, payload.new as Message];
                     });
@@ -171,8 +171,8 @@ export default function ChatPage() {
     useEffect(() => {
         const interval = setInterval(() => {
             console.log("⏱️ Polling for updates...");
-            loadConversations();
-            if (selectedId) loadMessages(selectedId);
+            fetchConversations();
+            if (selectedId) fetchMessages(selectedId);
         }, 5000);
 
         return () => clearInterval(interval);

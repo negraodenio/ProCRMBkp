@@ -254,7 +254,7 @@ export function LeadList() {
     toast.success("Lead criado e adicionado ao Pipeline!");
     resetForm();
     setOpen(false);
-    loadLeads();
+    loadLeads(1, true);
   }
 
   function handleEditLead(lead: Lead) {
