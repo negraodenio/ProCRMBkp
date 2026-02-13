@@ -144,10 +144,10 @@ export async function POST(req: NextRequest) {
         console.log(`✅ [Webhook] Organization confirmed: ${org.id} (${org.name})`);
 
         const botSettings = org.bot_settings || {};
-
-        // --- FEATURE: AUTO-REPLY ENABLED CHECK ---
-        // Support both "active" (primary) and "auto_reply_enabled" (legacy/alternative)
         const isBotActive = botSettings.active !== false && botSettings.auto_reply_enabled !== false;
+
+        console.log(`🔍 [Webhook Debug] BotSettings for Org ${org.id}:`, JSON.stringify(botSettings));
+        console.log(`🔍 [Webhook Debug] isBotActive: ${isBotActive}`);
 
         if (!isBotActive) {
             console.log("⏭️ Bot is PAUSED (active=false) for this organization");
@@ -273,6 +273,7 @@ export async function POST(req: NextRequest) {
 
         // --- FEATURE: CONVERSATION-LEVEL AI ENABLED CHECK ---
         const isAIEnabledForConversation = conversation.ai_enabled !== false;
+        console.log(`🔍 [Webhook Debug] AI Enabled for Conv ${conversation.id}: ${isAIEnabledForConversation} (current value: ${conversation.ai_enabled})`);
 
         if (!isAIEnabledForConversation) {
             console.log(`⏭️ AI is DISABLED for this specific conversation: ${conversation.id}. Skipping auto-reply.`);
