@@ -288,25 +288,40 @@ export async function POST(req: NextRequest) {
             .select("content, direction, created_at")
             .eq("conversation_id", conversation.id)
             .order("created_at", { ascending: false })
-            .limit(5);
+            .limit(6); // Fetch 6 to account for the one we just inserted
 
-        if (recentMessages && recentMessages.length > 0) {
-            const last = recentMessages[0];
+        if (recentMessages && recentMessages.length > 1) { // Changed to > 1 because we just inserted 1
             const now = new Date().getTime();
+
+            // Skip index 0 (the message we just inserted)
+            const historicalMessages = recentMessages.slice(1);
+            const last = historicalMessages[0];
             const lastTime = new Date(last.created_at).getTime();
 
-            if (now - lastTime < 3000) return NextResponse.json({ status: "ignored_cooldown" });
+            // 1. Cooldown Check (e.g. 3s between messages)
+            if (now - lastTime < 3000) {
+                console.log(`[Webhook Debug] Cooldown triggered. Last message was ${now - lastTime}ms ago.`);
+                return NextResponse.json({ status: "ignored_cooldown" });
+            }
 
-            const outboundCount = recentMessages.filter(m => m.direction === "outbound").length;
-            const oldestInBatchTime = new Date(recentMessages[recentMessages.length - 1].created_at).getTime();
+            // 2. Loop Frequency (ignore if bot responded 3+ times in 15s)
+            const outboundCount = historicalMessages.filter(m => m.direction === "outbound").length;
+            const oldestInBatchTime = new Date(historicalMessages[historicalMessages.length - 1].created_at).getTime();
 
             if (outboundCount >= 3 && (now - oldestInBatchTime < 15000)) {
+                console.log(`[Webhook Debug] Loop frequency triggered. Outbound count: ${outboundCount}`);
                 return NextResponse.json({ status: "ignored_loop_frequency" });
             }
 
+            // 3. Duplicate Content (ignore if same user text within 10s)
             if (last.content === text && (now - lastTime < 10000)) {
+                console.log(`[Webhook Debug] Duplicate content detected within 10s.`);
                 return NextResponse.json({ status: "ignored_duplicate" });
             }
+
+            console.log(`🔍 [Webhook Debug] Cooldown checks passed. Last message: ${now - lastTime}ms ago.`);
+        } else {
+            console.log(`🔍 [Webhook Debug] Cooldown passed (First message in conversation).`);
         }
 
         // 4.5 Create Deal (Lead) if not exists
