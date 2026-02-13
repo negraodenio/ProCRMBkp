@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, Search, Phone, Mail, MessageCircle, Edit, Trash2, User, Building2, Sparkles, Send, Loader2, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -314,6 +314,9 @@ export function LeadList() {
     }
   };
 
+  const searchParams = useSearchParams();
+  const activeFilter = searchParams.get("filter");
+
   const filteredLeads = leads.filter((lead) => {
     const matchesSearch =
       lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -321,7 +324,15 @@ export function LeadList() {
       lead.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.phone?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "all" || lead.status === filterStatus;
-    return matchesSearch && matchesStatus;
+
+    let matchesSpecialFilter = true;
+    if (activeFilter === "hot") {
+      matchesSpecialFilter = (lead.score || 0) >= 70;
+    } else if (activeFilter === "cold") {
+      matchesSpecialFilter = (lead.score || 0) < 30; // Score < 30 for cold
+    }
+
+    return matchesSearch && matchesStatus && matchesSpecialFilter;
   });
 
   const formatDate = (date: string) => {
@@ -431,6 +442,16 @@ export function LeadList() {
             </form>
           </DialogContent>
         </Dialog>
+        {activeFilter && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push("/leads")}
+            className="text-xs h-8"
+          >
+            Limpar Filtro ({activeFilter === "hot" ? "Quentes" : "Frios"})
+          </Button>
+        )}
       </div>
 
       {/* Search and Filters */}

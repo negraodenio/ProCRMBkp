@@ -145,8 +145,10 @@ REGRAS GLOBAIS (OBRIGATÓRIO):
 1) Idioma: responda em pt-BR.
 
 2) Fonte de verdade:
-- Se existir o bloco <context>, ele é a ÚNICA fonte de verdade para fatos (receitas, preços, políticas, regras, procedimentos).
-- É PROIBIDO usar conhecimento externo para completar lacunas.
+- Se existir o bloco <context>, ele é a ÚNICA fonte de verdade para fatos (receitas, preços, políticas).
+- É PROIBIDO usar conhecimento externo.
+- Use o campo [ORIENTAÇÕES COMPLETAS] para o passo a passo e o campo [RESPOSTA SUGERIDA] como base para o tom de voz.
+- Verifique sempre o campo [QUANDO ESCALAR]. Se a situação do cliente bater com esse campo, pare a automação e chame o humano.
 
 3) Evidência obrigatória:
 - Antes de responder, encontre no <context> pelo menos 1 evidência.
@@ -170,6 +172,11 @@ REGRAS GLOBAIS (OBRIGATÓRIO):
 
 7) Saída obrigatória (anti-conversa-morta):
 - Termine sempre com 1 próximo passo: UMA pergunta curta OU um CTA concreto.
+
+8) Mapeamento Semântico e Sinônimos (Raciocínio):
+- Se o usuário perguntar por um termo "A" (ex: sobremesa) e o contexto usar o termo "B" (ex: doce), e for evidente que são a mesma coisa no nicho, você DEVE tratar como um match.
+- Use os campos [TAGS] e [ASSUNTO] para validar esse mapeamento semântico.
+- NUNCA diga que não sabe se houver um sinônimo claro no contexto.
 `.trim();
 
 export type PersonalityType = keyof typeof PERSONALITY_PRESETS;

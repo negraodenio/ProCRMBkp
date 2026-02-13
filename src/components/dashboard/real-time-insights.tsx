@@ -24,7 +24,7 @@ export function RealTimeInsights({ hotLeads, coldLeads, closingDeals, revenueAtR
       </CardHeader>
       <CardContent className="space-y-3">
         {/* Leads Quentes */}
-        <Link href="/leads">
+        <Link href="/leads?filter=hot">
           <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-colors cursor-pointer">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-green-100 rounded">
@@ -41,7 +41,7 @@ export function RealTimeInsights({ hotLeads, coldLeads, closingDeals, revenueAtR
 
         {/* Leads Frios */}
         {coldLeads > 0 && (
-          <Link href="/leads">
+          <Link href="/leads?filter=cold">
             <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-200 hover:bg-orange-100 transition-colors cursor-pointer">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-orange-100 rounded">
