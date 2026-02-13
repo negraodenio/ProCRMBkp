@@ -326,10 +326,10 @@ export default function ChatPage() {
                                 </div>
                             ) : conversations.length === 0 ? (
                                 <div className="p-12 text-center space-y-4">
-                                    <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
-                                        <MessageSquare className="h-8 w-8 text-slate-400" />
+                                    <div className="bg-muted w-16 h-16 rounded-full flex items-center justify-center mx-auto">
+                                        <MessageSquare className="h-8 w-8 text-muted-foreground" />
                                     </div>
-                                    <p className="text-sm text-slate-500">Nenhuma conversa encontrada. Aguardando mensagens...</p>
+                                    <p className="text-sm text-muted-foreground">Nenhuma conversa encontrada. Aguardando mensagens...</p>
                                 </div>
                             ) : (
                                 <div className="p-2 space-y-2">
@@ -373,7 +373,7 @@ export default function ChatPage() {
 
                                                 <button
                                                     onClick={(e) => handleDelete(e, chat.id)}
-                                                    className="p-1 text-slate-300 hover:text-red-500 transition-colors"
+                                                    className="p-1 text-muted-foreground/40 hover:text-red-500 transition-colors"
                                                     title="Excluir conversa"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
@@ -526,7 +526,7 @@ export default function ChatPage() {
                                 </div>
                                 <div className="max-w-md space-y-4">
                                     <h2 className="text-2xl font-bold text-foreground">Conversas WhatsApp</h2>
-                                    <p className="text-muted-foreground leading-relaxed italic border-l-4 border-primary/30 pl-4 py-2 bg-primary/5 rounded-r-xl text-sm">
+                                    <p className="text-muted-foreground leading-relaxed italic border-l-4 border-primary/30 pl-4 py-2 bg-primary/10 rounded-r-xl text-sm">
                                         "A comunicação eficiente é o segredo de um CRM de sucesso."
                                     </p>
                                     <p className="text-sm text-muted-foreground pt-6">

@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { generateEmbedding } from "@/lib/ai/client";
 import { VECTOR_CONFIG } from "@/lib/ai/config";
 import { splitTextWithOverlap } from "@/lib/ai/chunking";
+import { canonicalizeTxt } from "@/lib/rag/canonicalize";
+import { scoreDocument } from "@/lib/rag/scoring";
 import { revalidatePath } from "next/cache";
 
 export async function uploadDocument(formData: FormData) {
@@ -50,14 +52,38 @@ export async function uploadDocument(formData: FormData) {
         return { error: "File content is empty or too short." };
     }
 
+    // --- RAG V3 PIPELINE START ---
+    console.log(`[Upload] Starting V3 Pipeline for ${file.name}...`);
+
+    // 1. CANONICALIZE
+    const canonicalResult = canonicalizeTxt(textContent, file.name);
+
+    // 2. SCORE
+    const scoringResult = scoreDocument(canonicalResult);
+    console.log(`[Upload] Score: ${scoringResult.score} (${scoringResult.status})`);
+
+    // 3. SAVE REPORT
+    const { error: reportError } = await supabase.from("training_reports").insert({
+        organization_id: profile.organization_id,
+        filename: file.name,
+        score: scoringResult.score,
+        status: scoringResult.status,
+        stats: canonicalResult.report.stats,
+        flags: scoringResult.flags,
+        report_json: { canonical: canonicalResult.report, scoring: scoringResult.breakdown }
+    });
+
+    if (reportError) console.error("[Upload] Failed to save report:", reportError);
+
+    // 4. DECISION GATE
+    // We always use the canonical text as it's cleaner, but the score tells us if it's "Quarantine" quality.
+    const textToIndex = canonicalResult.canonical_text;
+
+    // --- RAG V3 PIPELINE END ---
+
     // 3. Chunking (Smart Sliding Window)
     // Uses 1000 chars with 200 overlap to keep context across boundaries
-    // We import dynamically or use the function directly if imported at top (better)
-    // Let's assume we imported it. If not, I'll add the import in a separate step or just include the logic?
-    // Wait, I created the file. I should import it.
-
-    // For now, I'll use the imported function.
-    const chunks = splitTextWithOverlap(textContent, { chunkSize: 1000, overlap: 200 });
+    const chunks = splitTextWithOverlap(textToIndex, { chunkSize: 1000, overlap: 200 });
 
     let insertedCount = 0;
 

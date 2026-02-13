@@ -7,9 +7,9 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
-      <div className="flex flex-1 flex-col md:ml-64 relative">
+      <div className="flex flex-1 flex-col md:ml-64 relative bg-background">
         <Header />
-        <main className="flex-1 p-6 space-y-6 max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-6 space-y-6 max-w-7xl mx-auto w-full bg-background">
             <div className="space-y-0.5">
                 <h2 className="text-2xl font-bold tracking-tight">Configurações</h2>
                 <p className="text-muted-foreground">

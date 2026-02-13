@@ -141,59 +141,57 @@ export default function ReportsPage() {
           </div>
 
           {/* KPI Cards */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="shadow-sm">
+            <Card className="shadow-sm border-border">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
-                <DollarSign className="h-4 w-4 text-emerald-600" />
+                <DollarSign className="h-4 w-4 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-emerald-600">{formatCurrency(stats.totalRevenue)}</div>
+                <div className="text-2xl font-bold text-primary">{formatCurrency(stats.totalRevenue)}</div>
                 <p className="text-xs text-muted-foreground">
                   {stats.wonDealsCount} vendas no período
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm">
+            <Card className="shadow-sm border-border">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Pipeline Ativo</CardTitle>
-                <Briefcase className="h-4 w-4 text-blue-600" />
+                <Briefcase className="h-4 w-4 text-primary/80" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-600">{formatCurrency(stats.activePipeline)}</div>
+                <div className="text-2xl font-bold text-primary/80">{formatCurrency(stats.activePipeline)}</div>
                 <p className="text-xs text-muted-foreground">
                   Em negociação aberta
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm">
+            <Card className="shadow-sm border-border">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Ticket Médio</CardTitle>
-                <TrendingUp className="h-4 w-4 text-purple-600" />
+                <TrendingUp className="h-4 w-4 text-primary/70" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-purple-600">{formatCurrency(stats.avgTicket)}</div>
+                <div className="text-2xl font-bold text-primary/70">{formatCurrency(stats.avgTicket)}</div>
                 <p className="text-xs text-muted-foreground">
                   Por venda fechada
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm">
+            <Card className="shadow-sm border-border">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Conversão</CardTitle>
-                <Users className="h-4 w-4 text-amber-600" />
+                <Users className="h-4 w-4 text-primary/60" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-amber-600">{stats.conversionRate.toFixed(1)}%</div>
+                <div className="text-2xl font-bold text-primary/60">{stats.conversionRate.toFixed(1)}%</div>
                 <p className="text-xs text-muted-foreground">
                   {stats.wonDealsCount} ganhos de {stats.totalLeads} leads
                 </p>
               </CardContent>
             </Card>
-          </div>
 
           {/* Main Charts Row */}
           <div className="grid gap-4 md:grid-cols-7">
@@ -229,16 +227,21 @@ export default function ReportsPage() {
                                     axisLine={false}
                                     tickFormatter={(value) => `R$${formatCompact(value)}`}
                                 />
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-muted" />
                                 <Tooltip
                                     formatter={(value: number) => formatCurrency(value)}
-                                    labelStyle={{ color: "#374151" }}
-                                    contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+                                    // labelStyle={{ color: "#374151" }}
+                                    contentStyle={{
+                                        borderRadius: "var(--radius)",
+                                        border: "1px solid var(--border)",
+                                        backgroundColor: "var(--card)",
+                                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)"
+                                    }}
                                 />
                                 <Area
                                     type="monotone"
                                     dataKey="value"
-                                    stroke="#10b981"
+                                    stroke="var(--primary)"
                                     strokeWidth={3}
                                     fillOpacity={1}
                                     fill="url(#colorRevenue)"
@@ -333,18 +336,18 @@ export default function ReportsPage() {
                    {stats.leaderboard.length > 0 ? (
                        <div className="space-y-4">
                            {stats.leaderboard.map((user, index) => (
-                               <div key={user.userId} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                               <div key={user.userId} className="flex items-center justify-between p-3 bg-muted/40 rounded-lg hover:bg-muted/60 transition-colors border border-border/50">
                                    <div className="flex items-center gap-3">
                                        <div className={`
                                            flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm
-                                           ${index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                                             index === 1 ? 'bg-slate-200 text-slate-700' :
-                                             index === 2 ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-500'}
+                                           ${index === 0 ? 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400' :
+                                             index === 1 ? 'bg-muted text-muted-foreground' :
+                                             index === 2 ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400' : 'bg-muted/50 text-muted-foreground/50'}
                                        `}>
                                            {index + 1}
                                        </div>
                                        <div>
-                                           <p className="font-medium text-sm text-slate-900">{user.name}</p>
+                                           <p className="font-medium text-sm text-foreground">{user.name}</p>
                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                                 <span>{user.deals} vendas</span>
                                                 {/* <span>• {user.email}</span> */}
@@ -352,8 +355,8 @@ export default function ReportsPage() {
                                        </div>
                                    </div>
                                    <div className="text-right">
-                                       <p className="font-bold text-sm text-slate-900">{formatCurrency(user.value)}</p>
-                                       {index === 0 && <span className="text-[10px] text-yellow-600 font-medium">🏆 Top 1</span>}
+                                       <p className="font-bold text-sm text-foreground">{formatCurrency(user.value)}</p>
+                                       {index === 0 && <span className="text-[10px] text-yellow-600 dark:text-yellow-400 font-medium">🏆 Top 1</span>}
                                    </div>
                                </div>
                            ))}

@@ -97,14 +97,14 @@ export default function WhatsAppPage() {
                     {/* Header Section */}
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight text-slate-900">WhatsApp</h1>
-                            <p className="text-slate-500 mt-1">Gerencie sua conexão e treine sua IA.</p>
+                            <h1 className="text-3xl font-bold tracking-tight text-foreground">WhatsApp</h1>
+                            <p className="text-muted-foreground mt-1">Gerencie sua conexão e treine sua IA.</p>
                         </div>
 
                         {/* Status Badge */}
                         <div className="flex items-center gap-2 px-4 py-2 bg-card rounded-full border shadow-sm">
-                            <div className={`h-2.5 w-2.5 rounded-full ${instanceName ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
-                            <span className="text-sm font-medium text-slate-600">
+                            <div className={`h-2.5 w-2.5 rounded-full ${instanceName ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/30'}`} />
+                            <span className="text-sm font-medium text-muted-foreground">
                                 {instanceName ? 'Online' : 'Desconectado'}
                             </span>
                         </div>
@@ -114,7 +114,7 @@ export default function WhatsAppPage() {
 
                         {/* Connection Card (Main) */}
                         <div className="md:col-span-8">
-                            <Card className="h-full border-0 shadow-xl shadow-slate-200/60 ring-1 ring-slate-200 overflow-hidden relative">
+                            <Card className="h-full border-0 shadow-xl shadow-primary/5 ring-1 ring-border overflow-hidden relative">
                                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-600" />
                                 <CardHeader className="pb-4">
                                     <CardTitle className="flex items-center gap-2 text-xl">
@@ -129,14 +129,14 @@ export default function WhatsAppPage() {
 
                                     {!qrCode && !loading && !instanceName && (
                                         <div className="text-center space-y-6 max-w-sm animate-in fade-in zoom-in duration-500">
-                                            <div className="mx-auto w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
-                                                <QrCode className="h-8 w-8 text-indigo-600" />
+                                            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                                                <QrCode className="h-8 w-8 text-primary" />
                                             </div>
-                                            <h3 className="text-lg font-semibold text-slate-900">Nenhuma conexão ativa</h3>
-                                            <p className="text-slate-500">
+                                            <h3 className="text-lg font-semibold text-foreground">Nenhuma conexão ativa</h3>
+                                            <p className="text-muted-foreground">
                                                 Clique no botão abaixo para gerar um novo QR Code e conectar seu WhatsApp.
                                             </p>
-                                            <Button onClick={handleConnect} size="lg" className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200">
+                                            <Button onClick={handleConnect} size="lg" className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20">
                                                 Gerar QR Code
                                             </Button>
                                         </div>
@@ -144,22 +144,22 @@ export default function WhatsAppPage() {
 
                                     {loading && (
                                         <div className="flex flex-col items-center animate-pulse gap-4">
-                                            <div className="p-4 rounded-full bg-indigo-50">
-                                                <RefreshCw className="h-10 w-10 animate-spin text-indigo-600" />
+                                            <div className="p-4 rounded-full bg-primary/10">
+                                                <RefreshCw className="h-10 w-10 animate-spin text-primary" />
                                             </div>
-                                            <p className="text-sm font-medium text-slate-600">Iniciando Evolution API...</p>
+                                            <p className="text-sm font-medium text-muted-foreground">Iniciando Evolution API...</p>
                                         </div>
                                     )}
 
                                     {qrCode && (
                                         <div className="flex flex-col items-center space-y-6 animate-in fade-in zoom-in duration-300">
                                             <div className="relative group">
-                                                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-                                                <div className="relative bg-white p-2 rounded-xl border shadow-sm shadow-indigo-200/50">
+                                                <div className="absolute -inset-1 bg-gradient-to-r from-primary to-indigo-500 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                                                <div className="relative bg-background p-2 rounded-xl border shadow-sm">
                                                     <img src={qrCode} alt="QR Code" width={260} height={260} className="rounded-lg" />
                                                 </div>
                                             </div>
-                                            <p className="text-sm text-slate-500 text-center max-w-[250px]">
+                                            <p className="text-sm text-muted-foreground text-center max-w-[250px]">
                                                 Abra o WhatsApp &gt; Configurações &gt; Aparelhos Conectados &gt; Conectar
                                             </p>
                                             <Button variant="outline" onClick={handleConnect} size="sm">
@@ -176,8 +176,8 @@ export default function WhatsAppPage() {
                                                 </div>
                                             </div>
                                             <div>
-                                                <h3 className="text-xl font-bold text-slate-900">Tudo conectado!</h3>
-                                                <p className="text-slate-500 mt-2">
+                                                <h3 className="text-xl font-bold text-foreground">Tudo conectado!</h3>
+                                                <p className="text-muted-foreground mt-2">
                                                     Instância: <span className="font-mono bg-muted px-2 py-1 rounded text-foreground text-xs">{instanceName}</span>
                                                 </p>
                                             </div>
@@ -247,9 +247,9 @@ export default function WhatsAppPage() {
                             </Card>
 
                             {/* Info Card */}
-                            <Card className="border-0 shadow-md ring-1 ring-slate-100">
+                            <Card className="border-0 shadow-md ring-1 ring-border">
                                 <CardHeader className="pb-2">
-                                    <CardTitle className="text-base text-slate-700">Detalhes</CardTitle>
+                                    <CardTitle className="text-base text-muted-foreground">Detalhes</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="flex justify-between items-center text-sm border-b pb-2">

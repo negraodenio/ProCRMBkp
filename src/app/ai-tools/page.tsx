@@ -131,7 +131,7 @@ const AI_TOOLS: AITool[] = [
         description: "Roteiro estratégico para abordagens de alta performance",
         buttonText: "Ver Framework",
         icon: Mic,
-        color: "text-slate-700",
+        color: "text-primary/70",
         borderColor: "border-t-slate-600",
     },
     {
@@ -218,7 +218,7 @@ export default function AIToolsPage() {
                         {/* Header */}
                         <div>
                             <h1 className="text-3xl font-bold flex items-center gap-2">
-                                <Sparkles className="h-8 w-8 text-purple-600" />
+                                <Sparkles className="h-8 w-8 text-primary" />
                                 Sales Intelligence Center
                             </h1>
                             <p className="text-muted-foreground">
@@ -313,7 +313,7 @@ export default function AIToolsPage() {
                             Fechar
                         </Button>
                         <Button
-                            className="bg-blue-600 hover:bg-blue-700"
+                            className="bg-primary hover:bg-primary/90"
                             onClick={() => executeAI(activeModal!)}
                             disabled={loading || !selectedLead}
                         >

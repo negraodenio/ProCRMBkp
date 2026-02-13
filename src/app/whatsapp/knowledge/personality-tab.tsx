@@ -196,13 +196,13 @@ export function PersonalityTab({ botSettings: initialSettings, organizationId }:
                 </div>
 
                 <div className="flex items-center gap-6">
-                    <Avatar className="h-20 w-20 border-2 border-slate-100">
+                    <Avatar className="h-20 w-20 border-2 border-border">
                         <AvatarImage src={settings.bot_avatar || undefined} />
-                        <AvatarFallback className="text-xl">{settings.bot_name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback className="text-xl bg-muted text-foreground">{settings.bot_name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col gap-2">
                         <Label htmlFor="bot-avatar-upload" className="cursor-pointer inline-flex">
-                            <div className="flex items-center gap-2 bg-white px-3 py-2 border rounded-md hover:bg-slate-50 transition-colors text-xs font-medium">
+                            <div className="flex items-center gap-2 bg-muted/50 px-3 py-2 border rounded-md hover:bg-muted transition-colors text-xs font-medium">
                                 {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
                                 Carregar Imagem
                             </div>
@@ -289,7 +289,7 @@ export function PersonalityTab({ botSettings: initialSettings, organizationId }:
                             <Input
                                 readOnly
                                 value={`${typeof window !== 'undefined' ? window.location.origin : ''}/widget/${organizationId}`}
-                                className="bg-slate-50 font-mono text-xs"
+                                className="bg-muted/30 font-mono text-xs"
                             />
                             <Button
                                 variant="outline"
@@ -315,9 +315,9 @@ export function PersonalityTab({ botSettings: initialSettings, organizationId }:
                         </div>
                     </div>
 
-                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                        <p className="text-xs text-blue-800 font-medium">✨ Dica:</p>
-                        <p className="text-xs text-blue-700 mt-1">
+                    <div className="bg-primary/5 p-4 rounded-lg border border-primary/10">
+                        <p className="text-xs text-primary font-medium">✨ Dica:</p>
+                        <p className="text-xs text-primary/80 mt-1">
                             Você pode usar este link para colocar um botão de chat no seu site, Instagram ou enviar diretamente para seus clientes.
                         </p>
                     </div>
@@ -416,11 +416,11 @@ export function PersonalityTab({ botSettings: initialSettings, organizationId }:
             </div>
 
             {/* Simulation Container */}
-            <div className="border rounded-xl overflow-hidden bg-white shadow-inner min-h-[500px] flex flex-col relative">
+            <div className="border rounded-xl overflow-hidden bg-background shadow-inner min-h-[500px] flex flex-col relative">
                 <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-5 pointer-events-none"></div>
 
                 {/* Live Chat Widget */}
-                <div className="flex-1 p-4 bg-slate-100 flex items-center justify-center">
+                <div className="flex-1 p-4 bg-muted/40 flex items-center justify-center">
                     <ChatWidget
                         orgId={organizationId}
                         botName={settings.bot_name}
