@@ -440,6 +440,14 @@ export async function POST(req: NextRequest) {
             const chatHistory = (recentMessages || [])
                 .filter(m => m.content !== text)
                 .reverse()
+                // SANITIZATION: Remove history where the bot introduced itself to avoid "Hello loop"
+                .filter(m => {
+                    if (m.direction === "outbound") {
+                        const isGreeting = m.content.includes("Meu nome é") || m.content.includes("Sou a IA");
+                        return !isGreeting;
+                    }
+                    return true;
+                })
                 .map((m: { content: string; direction: string }) => ({
                     role: (m.direction === "inbound" ? "user" : "assistant") as "user" | "assistant",
                     content: m.content
