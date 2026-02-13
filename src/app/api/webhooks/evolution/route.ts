@@ -390,63 +390,89 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // 5. RAG & AI Reply
-        const embedding = await generateEmbedding(text);
+        // 5. Intelligence Section (RAG + AI)
+        console.log(`🧠 [Webhook] Starting intelligence flow for: "${text.substring(0, 30)}..."`);
+        const startTime = Date.now();
+        let aiResponse = "";
 
-        // SAFE RAG: Try to fetch context, but don't crash if it fails (e.g. migration missing)
-        let contextText = "";
         try {
-            console.log("🔍 [Webhook] Attempting RAG match...");
-            const { data: chunks, error: matchError } = await serviceClient.rpc("match_documents", {
-                query_embedding: embedding,
-                match_threshold: 0.7,
-                match_count: 3,
-                org_id: org.id
+            // 5.1 Generate Embedding
+            const embStart = Date.now();
+            const embedding = await generateEmbedding(text);
+            console.log(`⏱️ [Webhook] Embedding generated in ${Date.now() - embStart}ms`);
+
+            // 5.2 RAG Match
+            const ragStart = Date.now();
+            let contextText = "";
+            try {
+                const { data: chunks, error: matchError } = await serviceClient.rpc("match_documents", {
+                    query_embedding: embedding,
+                    match_threshold: 0.7,
+                    match_count: 3,
+                    org_id: org.id
+                });
+                if (matchError) throw matchError;
+                contextText = chunks?.length ? chunks.map((c: any) => c.content).join("\n") : "";
+                console.log(`⏱️ [Webhook] RAG match in ${Date.now() - ragStart}ms. Context length: ${contextText.length}`);
+            } catch (ragError: any) {
+                console.warn("⚠️ [Webhook] RAG retrieval failed, continuing without context:", ragError.message);
+            }
+
+            // 5.3 Build Prompt & Chat
+            const presetKey = (botSettings.personality_preset || "friendly") as PersonalityType;
+            const systemPrompt = buildSystemPrompt(
+                PERSONALITY_PRESETS[presetKey],
+                botSettings.custom_instructions || "",
+                contextText,
+                pushName,
+                {
+                    mention_name: botSettings.mention_name,
+                    use_emojis: botSettings.use_emojis
+                }
+            );
+
+            // Fetch recent messages for AI context (messages only)
+            const chatHistory = (recentMessages || [])
+                .filter(m => m.content !== text)
+                .reverse()
+                .map((m: { content: string; direction: string }) => ({
+                    role: (m.direction === "inbound" ? "user" : "assistant") as "user" | "assistant",
+                    content: m.content
+                }));
+
+            const chatStart = Date.now();
+            console.log(`🤖 [Webhook] Calling AI Chat (model: fast)...`);
+            aiResponse = await aiChat({
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    ...chatHistory,
+                    { role: "user", content: text }
+                ],
+                model: "fast",
+                temperature: botSettings.temperature ?? 0.6,
+                max_tokens: botSettings.max_tokens ?? 250
             });
+            console.log(`⏱️ [Webhook] AI Response generated in ${Date.now() - chatStart}ms. Length: ${aiResponse.length}`);
 
-            if (matchError) throw matchError;
-
-            contextText = chunks?.length ? chunks.map((c: any) => c.content).join("\n") : "";
-            console.log(`✅ [Webhook] RAG Success. Context length: ${contextText.length}`);
-        } catch (ragError: any) {
-            console.error("⚠️ [Webhook] RAG Failed (continuing without context):", ragError.message);
-            contextText = "";
+        } catch (intelError: any) {
+            console.error("❌ [Webhook] Intelligence Flow Failed:", intelError.message);
+            // Fallback: If AI fails but we haven't crashed, provide a polite safety response
+            aiResponse = "Desculpe, tive um problema técnico momentâneo para processar sua solicitação. Pode repetir, por favor?";
         }
 
-        // --- PERSONALITY CONFIGURATION ---
-        const presetKey = (botSettings.personality_preset || "friendly") as PersonalityType;
-        const preset = PERSONALITY_PRESETS[presetKey];
+        const totalTime = Date.now() - startTime;
+        console.log(`🏁 [Webhook] Intelligence flow finished in ${totalTime}ms`);
 
-        const systemPrompt = buildSystemPrompt(
-            preset,
-            botSettings.custom_instructions || "",
-            contextText,
-            pushName,
-            {
-                mention_name: botSettings.mention_name,
-                use_emojis: botSettings.use_emojis
-            }
-        );
+        if (!aiResponse) {
+             console.error("❌ [Webhook] No AI response generated (and no fallback). Skipping send.");
+             return NextResponse.json({ status: "no_response_generated" });
+        }
 
-        // Map history for AI (skip the current message which was already logged)
-        const chatHistory = (recentMessages || [])
-            .filter(m => m.content !== text) // Avoid duplicating current message if it was just inserted
-            .reverse()
-            .map((m: { content: string; direction: string }) => ({
-                role: (m.direction === "inbound" ? "user" : "assistant") as "user" | "assistant",
-                content: m.content
-            }));
-
+        // 6. Send Message
         const replyInstance = instanceName || ("bot-" + org.id);
-
-        // FIX: Handle LID (Linked Identity Device)
-        // If the incoming message is from a LID, reply to the LID JID directly.
-        // Otherwise use the standard phone@s.whatsapp.net format.
         let targetJid = `${phone}@s.whatsapp.net`;
 
-        // Check for explicit @lid OR length heuristic (15 digits = LID)
         if ((remoteJid && remoteJid.includes("@lid")) || (phone.length === 15)) {
-             // If phone is 15 digits but remoteJid doesn't have suffix, append @lid
              if (phone.length === 15 && !remoteJid.includes("@")) {
                  targetJid = `${phone}@lid`;
              } else {
@@ -454,19 +480,7 @@ export async function POST(req: NextRequest) {
              }
         }
 
-        console.log(`🤖 [Webhook] Generating AI response...`);
-        const aiResponse = await aiChat({
-            messages: [
-                { role: "system", content: systemPrompt },
-                ...chatHistory,
-                { role: "user", content: text }
-            ],
-            model: "fast",
-            temperature: botSettings.temperature ?? 0.6,
-            max_tokens: botSettings.max_tokens ?? 250
-        });
-        console.log(`✅ [Webhook] AI Response generated. Length: ${aiResponse.length}`);
-
+        console.log(`📡 [Webhook] Message ready to send to ${targetJid}.`);
         await EvolutionService.sendMessage(replyInstance, targetJid, aiResponse);
 
         // Log Bot Message
