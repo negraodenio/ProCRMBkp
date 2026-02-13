@@ -1,6 +1,6 @@
 import { AI_CONFIG, VECTOR_CONFIG } from "./config";
 
-// ... (previous imports/types remain same) 
+// ... (previous imports/types remain same)
 
 // Validation runtime (defense in depth)
 export function validateEmbedding(vector: number[]): void {
@@ -34,6 +34,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
             input: text,
             encoding_format: "float"
         }),
+        signal: AbortSignal.timeout(10000), // 10s timeout for embeddings
     });
 
     if (!response.ok) {
@@ -87,6 +88,7 @@ async function callProvider(
             max_tokens: request.max_tokens || 1000,
             stream: false,
         }),
+        signal: AbortSignal.timeout(30000), // 30s timeout for chat completions
     });
 
     if (!response.ok) {
@@ -113,8 +115,11 @@ export async function aiChat(request: AIRequest) {
         // console.log(`[AI] Trying Primary: ${modelConfig.primary}`);
         return await callProvider("siliconFlow", modelConfig.primary, request);
     } catch (error: any) {
-        const isRetryable = error.message.includes("RETRYABLE_ERROR") ||
-            error.message.includes("fetch failed"); // Network errors
+        const isRetryable =
+            error.message.includes("RETRYABLE_ERROR") ||
+            error.message.includes("fetch failed") ||
+            error.name === "AbortError" ||
+            error.message.includes("aborted"); // Network or Timeout errors
 
         if (isRetryable) {
             console.warn(`[AI] Primary failed (${error.message}). Switching to Fallback...`);

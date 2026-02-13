@@ -61,34 +61,35 @@ export async function uploadDocument(formData: FormData) {
 
     let insertedCount = 0;
 
-    // 4. Generate Embeddings & Store
+    // 4. Generate Embeddings & Store (Batch Processing)
     try {
-        for (const chunk of chunks) {
-            // Check chunk length max (SiliconFlow usually 512-4096 tokens)
-            // Truncate if super long (just in case)
-            const safeChunk = chunk.substring(0, VECTOR_CONFIG.maxChunkLength);
+        const batchSize = 5;
+        for (let i = 0; i < chunks.length; i += batchSize) {
+            const batch = chunks.slice(i, i + batchSize);
 
-            // Enrich content with filename context
-            const enrichedContent = `[Documento: ${file.name}]\n${safeChunk}`;
+            await Promise.all(batch.map(async (chunk) => {
+                const safeChunk = chunk.substring(0, VECTOR_CONFIG.maxChunkLength);
+                const enrichedContent = `[Documento: ${file.name}]\n${safeChunk}`;
 
-            const embedding = await generateEmbedding(enrichedContent);
+                const embedding = await generateEmbedding(enrichedContent);
 
-            // console.log(`[Debug] Chunk embedding length: ${embedding.length}`);
+                const { error: insertError } = await supabase.from("documents").insert({
+                    organization_id: profile.organization_id,
+                    content: enrichedContent,
+                    metadata: {
+                        filename: file.name,
+                        size: file.size,
+                        chunk_strategy: "sliding_window_v1"
+                    },
+                    embedding: embedding
+                });
 
-            const { error: insertError } = await supabase.from("documents").insert({
-                organization_id: profile.organization_id,
-                content: enrichedContent,
-                metadata: { filename: file.name, size: file.size, chunk_strategy: "sliding_window_v1" },
-                embedding: embedding
-            });
-
-            if (insertError) {
-                console.error("Insert Error:", insertError);
-                // Don't throw immediately, try to continue? No, better to fail fast or log.
-                // throw new Error("Failed to save document chunk");
-            } else {
-                insertedCount++;
-            }
+                if (insertError) {
+                    console.error("Insert Error:", insertError);
+                } else {
+                    insertedCount++;
+                }
+            }));
         }
     } catch (error: any) {
         return { error: "Embedding/Save Error: " + error.message };

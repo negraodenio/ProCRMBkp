@@ -205,7 +205,7 @@ export async function POST(req: NextRequest) {
         // 3. Find/Create Conversation
         let { data: conversation, error: convLookupError } = await serviceClient
             .from("conversations")
-            .select("id, unread_count, contact_name, contact_phone")
+            .select("id, unread_count, contact_name, contact_phone, ai_enabled")
             .eq("contact_phone", phone)
             .eq("status", "open")
             .maybeSingle();
@@ -222,7 +222,8 @@ export async function POST(req: NextRequest) {
                     organization_id: org.id,
                     contact_phone: phone,
                     contact_name: pushName,
-                    status: "open"
+                    status: "open",
+                    ai_enabled: true // Default to true for new conversations
                 })
                 .select()
                 .maybeSingle();
@@ -232,6 +233,11 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json({ error: "Failed to create conversation", details: createConvError.message }, { status: 500 });
             }
             conversation = newConv;
+        }
+
+        if (!conversation) {
+            console.error("❌ [Webhook] Critical failure: conversation remains null after creation attempt");
+            return NextResponse.json({ error: "DB Failure - Conv missing" }, { status: 500 });
         }
 
         if (!contact || !conversation) {
@@ -256,8 +262,27 @@ export async function POST(req: NextRequest) {
 
         await serviceClient.from("conversations").update(updateData).eq("id", conversation.id);
 
+        // 4. Log Message
+        console.log(`[Webhook] Inserting message for Conversation: ${conversation.id}, Org: ${org.id}`);
+        await serviceClient.from("messages").insert({
+            conversation_id: conversation.id,
+            organization_id: org.id,
+            content: text,
+            direction: "inbound",
+            status: "delivered"
+        });
+
+        // --- FEATURE: CONVERSATION-LEVEL AI ENABLED CHECK ---
+        const isAIEnabledForConversation = conversation.ai_enabled !== false;
+
+        if (!isAIEnabledForConversation) {
+            console.log(`⏭️ AI is DISABLED for this specific conversation: ${conversation.id}. Skipping auto-reply.`);
+            return NextResponse.json({ status: "ai_disabled_for_conversation" });
+        }
+
         console.log(`✅ [Webhook] Conversation ready and updated: ${conversation?.id}`);
 
+        // Fetch recent messages for loop detection and AI context
         const { data: recentMessages } = await serviceClient
             .from("messages")
             .select("content, direction, created_at")
@@ -283,23 +308,6 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json({ status: "ignored_duplicate" });
             }
         }
-
-        // 4. Log Message
-        console.log(`[Webhook] Inserting message for Conversation: ${conversation.id}, Org: ${org.id}`);
-        const { error: msgError } = await serviceClient.from("messages").insert({
-            conversation_id: conversation.id,
-            organization_id: org.id,
-            content: text,
-            direction: "inbound",
-            status: "delivered"
-        });
-
-        if (msgError) {
-            console.error("❌ [Webhook] Error inserting message:", msgError);
-            return NextResponse.json({ error: "Failed to log message", details: msgError.message }, { status: 500 });
-        }
-
-        console.log("✅ [Webhook] Inbound message logged successfully");
 
         // 4.5 Create Deal (Lead) if not exists
         const { data: existingDeals } = await serviceClient
@@ -397,7 +405,7 @@ export async function POST(req: NextRequest) {
         const chatHistory = (recentMessages || [])
             .filter(m => m.content !== text) // Avoid duplicating current message if it was just inserted
             .reverse()
-            .map(m => ({
+            .map((m: { content: string; direction: string }) => ({
                 role: (m.direction === "inbound" ? "user" : "assistant") as "user" | "assistant",
                 content: m.content
             }));

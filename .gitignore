@@ -40,3 +40,8 @@ default_cassette.yaml
 .vscode/*.log
 stripe-completion.bash
 stripe-completion.zsh
+
+# Secret files
+ID Preço.txt
+stripe-cli-1.35.0/
+pkg/

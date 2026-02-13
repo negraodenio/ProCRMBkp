@@ -105,30 +105,59 @@ export function LeadList() {
   const [waMessage, setWaMessage] = useState("");
   const [isSendingWA, setIsSendingWA] = useState(false);
 
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const ITEMS_PER_PAGE = 20;
+
   const supabase = createClient();
 
   useEffect(() => {
-    if (profile) loadLeads();
+    if (profile) {
+        setPage(0);
+        setLeads([]);
+        loadLeads(0, true);
+    }
   }, [profile]);
 
-  async function loadLeads() {
+  async function loadLeads(pageNumber: number, isInitial: boolean = false) {
     if (!profile?.organization_id) return;
-    setLoading(true);
+
+    if (isInitial) setLoading(true);
+    else setLoadingMore(true);
+
+    const from = pageNumber * ITEMS_PER_PAGE;
+    const to = from + ITEMS_PER_PAGE - 1;
+
     const { data, error } = await supabase
       .from("contacts")
       .select("*")
       .eq("type", "lead")
       .eq("organization_id", profile.organization_id)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .range(from, to);
 
     if (error) {
       console.error("Error loading leads:", error);
       toast.error("Erro ao carregar leads");
     } else {
-      setLeads(data || []);
+      if (isInitial) {
+          setLeads(data || []);
+      } else {
+          setLeads(prev => [...prev, ...(data || [])]);
+      }
+      setHasMore(data?.length === ITEMS_PER_PAGE);
     }
+
     setLoading(false);
+    setLoadingMore(false);
   }
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    loadLeads(nextPage);
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -166,7 +195,7 @@ export function LeadList() {
       resetForm();
       setOpen(false);
       setEditingLeadId(null);
-      loadLeads();
+      loadLeads(0, true);
       return;
     }
 
@@ -253,7 +282,7 @@ export function LeadList() {
       toast.error("Erro ao excluir lead");
     } else {
       toast.success("Lead excluído!");
-      loadLeads();
+      loadLeads(0, true);
     }
   }
 
@@ -590,6 +619,24 @@ export function LeadList() {
           ))
         )}
       </div>
+
+      {hasMore && !loading && (
+        <div className="flex justify-center pt-8 pb-12">
+            <Button
+                variant="outline"
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="min-w-[200px]"
+            >
+                {loadingMore ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Carregando mais...
+                    </>
+                ) : "Carregar Mais Leads"}
+            </Button>
+        </div>
+      )}
 
       {/* Integrated WhatsApp Modal */}
       <Dialog open={!!selectedLeadForWhatsApp} onOpenChange={(open) => !open && setSelectedLeadForWhatsApp(null)}>

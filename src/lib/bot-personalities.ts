@@ -128,10 +128,17 @@ export function buildSystemPrompt(
     basePrompt += `\n\nNÃO use emojis nas respostas.`;
   }
 
+  // REGRA DE OURO: RAG & Respostas Curtas (Global)
+  basePrompt += `\n\nDIRETRIZES DE RESPOSTA (OBRIGATÓRIO):
+1. SÓ RESPONDA o que estiver no CONTEXTO (RAG) abaixo.
+2. NÃO INVENTE respostas. Se a informação não estiver no contexto, diga exatamente: "Não fui treinado a responder essa pergunta."
+3. RESPOSTAS CURTAS: Seja o mais breve e direto possível.
+4. FOCO NO CLIENTE: Adapte o tom mas mantenha a fidelidade aos dados.`;
+
   // Adicionar contexto RAG
   if (context) {
     basePrompt += `\n\nCONTEXTO (Documentos da empresa):\n<context>\n${context}\n</context>`;
-    basePrompt += `\n\nCOMO USAR O CONTEXTO: Use as informações acima para responder, mas ADAPTE a resposta para o cliente atual ("${contactName}"). NÃO copie saudações, despedidas ou nomes de terceiros que possam estar nos exemplos do contexto.`;
+    basePrompt += `\n\nPRIORIDADE MÁXIMA (REGRA DE OURO): Use as informações do CONTEXTO acima para responder ao cliente. O Contexto é a sua ÚNICA fonte de verdade sobre preços e políticas. ADAPTE a resposta para o cliente atual ("${contactName}"), mas NÃO invente dados que não estão no contexto.`;
   }
 
   // Instruções de segurança (sempre)

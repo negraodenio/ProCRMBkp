@@ -43,26 +43,27 @@ export function BillingContent({ subscription }: BillingContentProps) {
 
     return (
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl">
-            {/* FREE PLAN */}
+            {/* STARTER PLAN */}
             <Card className={!isPro ? "border-blue-500 shadow-md transform scale-105 transition-all" : "opacity-80"}>
                 <CardHeader>
                     <div className="flex justify-between items-start">
-                        <CardTitle>Plano Gratuito</CardTitle>
+                        <CardTitle>Plano Starter</CardTitle>
                         {!isPro && <Badge>Atual</Badge>}
                     </div>
-                    <CardDescription>Para começar.</CardDescription>
+                    <CardDescription>O início da sua automação.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                    <div className="text-3xl font-bold">R$ 0<span className="text-sm font-normal text-muted-foreground">/mês</span></div>
+                    <div className="text-3xl font-bold">R$ 29<span className="text-sm font-normal text-muted-foreground">/mês</span></div>
                     <ul className="space-y-2 pt-4 text-sm">
-                        <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> 1 Usuário</li>
-                        <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> 100 Mensagens/mês</li>
-                        <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Funil Básico</li>
+                        <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Até 200 leads ativos</li>
+                        <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> 1 conexão WhatsApp</li>
+                        <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Robô IA ATIVO</li>
+                        <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Personalidade configurável</li>
                     </ul>
                 </CardContent>
                 <CardFooter>
-                    <Button variant="outline" disabled className="w-full">
-                        {!isPro ? "Plano Ativo" : "Downgrade"}
+                    <Button variant="outline" disabled={!isPro} className="w-full">
+                        {!isPro ? "Plano Ativo" : "Downgrade disponível via suporte"}
                     </Button>
                 </CardFooter>
             </Card>
@@ -72,15 +73,15 @@ export function BillingContent({ subscription }: BillingContentProps) {
                 {isPro && <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-bl">Ativo</div>}
                 <CardHeader>
                     <CardTitle>Plano PRO</CardTitle>
-                    <CardDescription>Para empresas em crescimento.</CardDescription>
+                    <CardDescription>Para escala e multi-atendimento.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                    <div className="text-3xl font-bold">R$ 197<span className="text-sm font-normal text-muted-foreground">/mês</span></div>
+                    <div className="text-3xl font-bold">R$ 49<span className="text-sm font-normal text-muted-foreground">/mês</span></div>
                     <ul className="space-y-2 pt-4 text-sm">
+                        <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Chatep IA + RAG (Documentos)</li>
+                        <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Mensagens Automáticas de Status</li>
                         <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Usuários Ilimitados</li>
-                        <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> IA + RAG Ilimitado</li>
-                        <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Múltiplos Funis</li>
-                        <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Automações Avançadas</li>
+                        <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Dashboard Analytics Avançado</li>
                     </ul>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-2">
@@ -92,11 +93,10 @@ export function BillingContent({ subscription }: BillingContentProps) {
                     ) : (
                         <Button className="w-full" onClick={handleUpgrade} disabled={loading}>
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Assinar Agora
+                            Upgrade para PRO
                         </Button>
                     )}
 
-                    {/* If has customer ID but not active pro plan, show manage button too maybe */}
                     {!isPro && subscription?.stripe_customer_id && (
                         <Button variant="ghost" size="sm" onClick={handlePortal} className="text-muted-foreground w-full">
                              Faturas / Histórico

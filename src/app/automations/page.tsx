@@ -44,13 +44,13 @@ interface Automation {
 }
 
 const PIPELINE_STAGES = [
-    "Primeiro Contato",
-    "Prospecção",
-    "Qualificação",
-    "Proposta",
-    "Negociação",
-    "Fechado",
-    "Perdido",
+    { value: "new", label: "Novo / Primeiro Contato" },
+    { value: "contacted", label: "Contatado / Prospecção" },
+    { value: "qualified", label: "Qualificado" },
+    { value: "proposal", label: "Proposta Enviada" },
+    { value: "negotiation", label: "Em Negociação" },
+    { value: "won", label: "Venda Fechada" },
+    { value: "lost", label: "Lead Perdido" },
 ];
 
 const ANY_STATUS_VALUE = "ANY_STATUS";
@@ -108,10 +108,13 @@ export default function AutomationsPage() {
             return;
         }
 
+        const fromStage = PIPELINE_STAGES.find(s => s.value === formData.fromStatus);
+        const toStage = PIPELINE_STAGES.find(s => s.value === formData.toStatus);
+
         const fromStatusValue = formData.fromStatus === ANY_STATUS_VALUE ? null : formData.fromStatus;
         const name = fromStatusValue
-            ? `${fromStatusValue} → ${formData.toStatus}`
-            : `Novo em ${formData.toStatus}`;
+            ? `${fromStage?.label || fromStatusValue} → ${toStage?.label || formData.toStatus}`
+            : `Novo em ${toStage?.label || formData.toStatus}`;
 
         const { error } = await supabase.from("automation_rules").insert({
             organization_id: profile.organization_id,
@@ -217,8 +220,8 @@ export default function AutomationsPage() {
                                                     <SelectContent>
                                                         <SelectItem value={ANY_STATUS_VALUE}>Qualquer status</SelectItem>
                                                         {PIPELINE_STAGES.map((stage) => (
-                                                            <SelectItem key={stage} value={stage}>
-                                                                {stage}
+                                                            <SelectItem key={stage.value} value={stage.value}>
+                                                                {stage.label}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>
@@ -235,8 +238,8 @@ export default function AutomationsPage() {
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         {PIPELINE_STAGES.map((stage) => (
-                                                            <SelectItem key={stage} value={stage}>
-                                                                {stage}
+                                                            <SelectItem key={stage.value} value={stage.value}>
+                                                                {stage.label}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>
@@ -310,17 +313,19 @@ export default function AutomationsPage() {
                                                         {automation.from_status ? (
                                                             <>
                                                                 <Badge variant="outline" className="mr-1">
-                                                                    {automation.from_status}
+                                                                    {PIPELINE_STAGES.find(s => s.value === automation.from_status)?.label || automation.from_status}
                                                                 </Badge>
                                                                 →
                                                                 <Badge variant="outline" className="ml-1">
-                                                                    {automation.to_status}
+                                                                    {PIPELINE_STAGES.find(s => s.value === automation.to_status)?.label || automation.to_status}
                                                                 </Badge>
                                                             </>
                                                         ) : (
                                                             <>
                                                                 Novo lead em{" "}
-                                                                <Badge variant="outline">{automation.to_status}</Badge>
+                                                                <Badge variant="outline">
+                                                                    {PIPELINE_STAGES.find(s => s.value === automation.to_status)?.label || automation.to_status}
+                                                                </Badge>
                                                             </>
                                                         )}
                                                     </CardDescription>

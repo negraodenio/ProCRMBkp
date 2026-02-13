@@ -353,12 +353,12 @@ export default function UsersPage() {
                                                             <TableCell>
                                                                 <Badge
                                                                     className={
-                                                                        user.status === "active"
+                                                                        user.status !== "inactive"
                                                                             ? "bg-green-100 text-green-700"
                                                                             : "bg-gray-100 text-gray-700"
                                                                     }
                                                                 >
-                                                                    {user.status === "active" ? "Ativo" : "Inativo"}
+                                                                    {user.status !== "inactive" ? "Ativo" : "Inativo"}
                                                                 </Badge>
                                                             </TableCell>
                                                             <TableCell>{formatDate(user.created_at)}</TableCell>

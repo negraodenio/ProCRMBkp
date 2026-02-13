@@ -167,6 +167,17 @@ export default function ChatPage() {
     }, [selectedId, supabase]);
 
     // Scroll to bottom
+    // 4. Polling Fallback (5s) for Redundancy
+    useEffect(() => {
+        const interval = setInterval(() => {
+            console.log("⏱️ Polling for updates...");
+            loadConversations();
+            if (selectedId) loadMessages(selectedId);
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [selectedId, profile?.organization_id]);
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
