@@ -50,10 +50,9 @@ export async function POST(req: NextRequest) {
 
         // 3. Build Prompt
         const presetKey = (botSettings.personality_preset || "friendly") as PersonalityType;
-        const preset = PERSONALITY_PRESETS[presetKey];
 
         const systemPrompt = buildSystemPrompt(
-            preset,
+            presetKey,
             botSettings.custom_instructions || "",
             contextText,
             "Visitante", // PushName

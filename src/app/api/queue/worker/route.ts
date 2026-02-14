@@ -73,10 +73,9 @@ export async function POST(req: NextRequest) {
         const botSettings = org?.bot_settings || {};
 
         const personalityKey = (botSettings.personality_preset || "instruction_follower") as PersonalityType;
-        const selectedPersonality = PERSONALITY_PRESETS[personalityKey] || PERSONALITY_PRESETS.instruction_follower;
 
         const systemPrompt = buildSystemPrompt(
-            selectedPersonality,
+            personalityKey,
             botSettings.custom_instructions || "",
             contextText,
             pushName,
