@@ -341,7 +341,7 @@ export function PersonalityTab({ botSettings: initialSettings, organizationId }:
                             onChange={(preset) => setSettings({ ...settings, personality_preset: preset })}
                         />
                         <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
-                            {currentPreset.emoji} {currentPreset.tone_prompt.substring(0, 100)}...
+                            {currentPreset.emoji} {currentPreset.description} - {currentPreset.tone_prompt.substring(0, 80)}...
                         </p>
                     </div>
 
