@@ -1,0 +1,7 @@
+{
+  "answer": "O contexto não fornece informações sobre como o CRM funciona. Poderia fornecer mais detalhes ou verificar com a equipe de suporte?",
+  "model_used": "balanced",
+  "reason": "primary_retry_no_evidence_blocked",
+  "raw": "{\"answer\":null,\"evidence_quotes\":[],\"next_step\":\"O contexto não fornece informações sobre como o CRM funciona. Poderia fornecer mais detalhes ou verificar com a equipe de suporte?\"}",
+  "context_preview": "CPF entra aqui → passa por 4 serviços → vai parar num log → vai para S3 → vai para BI\r\nMCP Tool\r\n{\r\n  name: \"trace_pii_flow\",\r\n  output: [\r\n    {\r\n      data: \"cpf\",\r\n      entry: \"POST /signup\",\r\n      services: [\"auth\", \"billing\", \"analytics\"],\r\n      storage: [\"users_db\", \"logs_bucket\"],\r\n      undocumentedFlows: true,\r\n      risk: \"high\"\r\n    }\r\n  ]\r\n}\r"
+}

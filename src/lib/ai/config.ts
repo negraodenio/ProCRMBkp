@@ -19,6 +19,10 @@ export const AI_CONFIG = {
             primary: process.env.SILICONFLOW_MODEL_FAST || "Qwen/Qwen2.5-7B-Instruct",
             fallback: process.env.OPENROUTER_MODEL_FAST || "qwen/qwen-2.5-7b-instruct",
         },
+        balanced: {
+            primary: process.env.SILICONFLOW_MODEL_BALANCED || "Qwen/Qwen2.5-72B-Instruct",
+            fallback: process.env.OPENROUTER_MODEL_BALANCED || "qwen/qwen-2.5-72b-instruct",
+        },
         coding: {
             primary: process.env.SILICONFLOW_MODEL_CODING || "deepseek-ai/DeepSeek-V3",
             fallback: process.env.OPENROUTER_MODEL_CODING || "deepseek/deepseek-chat",

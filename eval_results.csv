@@ -1,0 +1,11 @@
+id,type,ok,is_blocked,retrieval_ok,must_any_ok,must_all_ok,must_not_ok,cta_ok,latency_ms,reason,model_used,answer
+manual_ferramentas_arsenal,factual,false,true,true,true,true,true,true,4781,no_evidence_blocked_primary,balanced,Poderia especificar mais detalhes sobre o arsenal de ferramentas que você está se referindo?
+manual_dados_passagem,factual,false,true,true,true,true,true,true,7544,primary_retry_no_evidence_blocked,balanced,Poderia fornecer mais detalhes sobre o que você quer saber; Eval? Estou baseado em cálculos de similaridade de cosseno e erros de posição; mas não tenho informações específicas sobre o fluxo de dados.
+manual_crm_funcionamento,factual,false,true,true,true,true,false,true,6565,primary_retry_no_evidence_blocked,balanced,O contexto fornecido não contém informações sobre como um CRM funciona. Você pode fornecer mais detalhes ou deseja que eu busque informações adicionais?
+manual_complemento_ideia,open_ended,true,true,true,true,true,true,true,5696,primary_retry_no_evidence_blocked,balanced,Poderia especificar qual ideia de funcionamento gostaria que eu complementasse?
+nonexistent_pizza,unknown,false,true,true,false,true,true,true,5404,primary_retry_no_evidence_blocked,balanced,Não há informações sobre pizzas no contexto. Posso ajudar com outra pergunta?
+nonexistent_tiramisu,unknown,true,true,true,true,true,true,true,5689,primary_retry_no_evidence_blocked,balanced,O contexto não contém informações sobre tiramisù. Poderia fornecer mais detalhes sobre o que você está procurando?
+greeting_simple,greeting,true,false,true,true,true,true,true,1329,greeting_match,regex,Como posso ajudar você hoje?
+out_of_scope_cooking,out_of_scope,true,true,true,true,true,true,true,3659,no_evidence_blocked_primary,balanced,Desculpe; mas o contexto fornecido não contém informações sobre como fazer um bolo de cenoura. Posso ajudar com outra dúvida?
+pricing_request,pricing_unknown,false,true,true,true,true,true,false,3084,no_evidence_blocked_primary,balanced,O contexto fornecido não contém informações sobre o preço do Arsenal. Por favor; forneça mais detalhes ou entre em contato com um atendente.
+summary_request,open_ended,true,true,true,true,true,true,true,4865,primary_retry_no_evidence_blocked,balanced,O contexto não fornece um resumo do manual. Você gostaria de especificar qual parte do manual você gostaria de entender melhor?

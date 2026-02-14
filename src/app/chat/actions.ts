@@ -1,7 +1,8 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { EvolutionService } from "@/services/evolution";
+import { revalidatePath } from "next/cache";
 
 export async function sendMessageAction(conversationId: string, text: string) {
     console.log(`[Action] Starting sendMessageAction for conv: ${conversationId}`);
@@ -131,5 +132,54 @@ export async function toggleAIAction(conversationId: string, enabled: boolean) {
     } catch (error: any) {
         console.error("Error toggling AI:", error);
         return { error: "Erro ao configurar IA: " + error.message };
+    }
+}
+
+export async function clearChatMessagesAction(conversationId: string) {
+    console.log(`[Action] Starting clearChatMessagesAction for conv: ${conversationId}`);
+    try {
+        const supabase = await createClient();
+
+        // 1. Auth Check
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return { error: "Não autorizado" };
+
+        const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
+        if (!profile?.organization_id) return { error: "Organização não encontrada" };
+
+        // 2. Admin Client to bypass RLS and ensure complete deletion
+        const adminClient = createServiceRoleClient();
+
+        // 3. Verify conversation belongs to org
+        const { data: conversation } = await adminClient
+            .from("conversations")
+            .select("id")
+            .eq("id", conversationId)
+            .eq("organization_id", profile.organization_id)
+            .single();
+
+        if (!conversation) return { error: "Conversa não encontrada ou sem permissão" };
+
+        // 4. Delete messages
+        const { error, count } = await adminClient
+            .from("messages")
+            .delete({ count: 'exact' })
+            .eq("conversation_id", conversationId);
+
+        if (error) throw error;
+
+        console.log(`[Action] Successfully cleared ${count} messages for conv: ${conversationId}`);
+
+        // 5. Update Conversation timestamp/content to show it's cleared
+        await adminClient.from("conversations").update({
+            last_message_content: "Histórico limpo",
+            unread_count: 0
+        }).eq("id", conversationId);
+
+        revalidatePath("/chat");
+        return { success: true, count };
+    } catch (err: any) {
+        console.error("Error clearing chat messages:", err);
+        return { error: "Erro ao limpar histórico: " + (err.message || "Erro desconhecido") };
     }
 }

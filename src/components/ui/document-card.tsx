@@ -99,7 +99,7 @@ export function DocumentCard({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onDelete(id)}
+            onClick={() => onDelete(filename)}
             className="h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 ml-auto"
           >
             <Trash2 className="h-3.5 w-3.5 mr-1" />

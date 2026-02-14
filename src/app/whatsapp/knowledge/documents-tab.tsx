@@ -3,10 +3,11 @@
 import { StatsCard } from '@/components/ui/stats-card';
 import { DropzoneArea } from '@/components/ui/dropzone-area';
 import { DocumentCard } from '@/components/ui/document-card';
-import { uploadDocument, deleteDocument } from './actions';
+import { uploadDocument, deleteDocument, purgeAllDocuments } from './actions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { FileText } from 'lucide-react';
+import { FileText, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface DocumentsTabProps {
   documents: Array<{
@@ -38,15 +39,28 @@ export function DocumentsTab({ documents, chunksCount }: DocumentsTabProps) {
     router.refresh();
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este documento?')) return;
+  const handleDelete = async (filename: string) => {
+    if (!confirm(`Tem certeza que deseja excluir o documento "${filename}" e todo o seu conteúdo de treinamento?`)) return;
 
     try {
-      await deleteDocument(id);
-      toast.success('Documento excluído com sucesso');
+      await deleteDocument(filename);
+      toast.success('Documento e chunks excluídos com sucesso');
       router.refresh();
     } catch (error) {
       toast.error('Erro ao excluir documento');
+    }
+  };
+
+  const handlePurge = async () => {
+    if (!confirm('ATENÇÃO: Isso excluirá TODOS os documentos e conhecimentos do robô. Esta ação não pode ser desfeita. Deseja continuar?')) return;
+
+    try {
+      const result = await purgeAllDocuments();
+      if (result.error) throw new Error(result.error);
+      toast.success('Base de conhecimento resetada com sucesso');
+      router.refresh();
+    } catch (error: any) {
+      toast.error('Erro ao limpar base: ' + error.message);
     }
   };
 
@@ -93,7 +107,20 @@ export function DocumentsTab({ documents, chunksCount }: DocumentsTabProps) {
 
       {/* Documents List */}
       <div>
-        <h3 className="text-lg font-semibold mb-4">📚 Seus Documentos</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">📚 Seus Documentos</h3>
+          {documents.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handlePurge}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 text-xs"
+            >
+              <Trash2 className="h-3.5 w-3.5 mr-1" />
+              Limpar Tudo
+            </Button>
+          )}
+        </div>
 
         {documents.length === 0 ? (
           <div className="glass-card p-12 text-center space-y-4">

@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { generateEmbedding } from "@/lib/ai/client";
 import { VECTOR_CONFIG } from "@/lib/ai/config";
 import { splitTextWithOverlap } from "@/lib/ai/chunking";
@@ -125,10 +125,75 @@ export async function uploadDocument(formData: FormData) {
     return { success: true, count: insertedCount };
 }
 
-export async function deleteDocument(id: string) {
-    const supabase = await createClient();
-    const { error } = await supabase.from("documents").delete().eq("id", id);
-    if (error) return { error: error.message };
+export async function deleteDocument(filename: string) {
+    // 1. Auth Check (Always use user client for session validation)
+    const userClient = await createClient();
+    const { data: { user } } = await userClient.auth.getUser();
+    if (!user) return { error: "Unauthorized" };
+
+    const { data: profile } = await userClient.from("profiles").select("organization_id").eq("id", user.id).single();
+    if (!profile?.organization_id) return { error: "Organization not found" };
+
+    console.log(`[Delete] HARD DELETE for "${filename}" in org: ${profile.organization_id}`);
+
+    // 2. Admin Client for Deletion (Bypass RLS to be sure)
+    const adminClient = createServiceRoleClient();
+
+    // Delete Chunks (JSONB contains is the most robust way)
+    const { error: deleteError, count } = await adminClient
+        .from("documents")
+        .delete({ count: 'exact' })
+        .eq("organization_id", profile.organization_id)
+        .contains("metadata", { filename: filename });
+
+    if (deleteError) {
+        console.error("[Delete] Error deleting documents:", deleteError);
+        return { error: deleteError.message };
+    }
+
+    console.log(`[Delete] Successfully removed ${count} chunks for "${filename}"`);
+
+    // 3. Delete from 'training_reports'
+    await adminClient
+        .from("training_reports")
+        .delete()
+        .eq("organization_id", profile.organization_id)
+        .eq("filename", filename);
+
+    revalidatePath("/whatsapp/knowledge");
+    return { success: true };
+}
+
+export async function purgeAllDocuments() {
+    // 1. Auth Check
+    const userClient = await createClient();
+    const { data: { user } } = await userClient.auth.getUser();
+    if (!user) return { error: "Unauthorized" };
+
+    const { data: profile } = await userClient.from("profiles").select("organization_id").eq("id", user.id).single();
+    if (!profile?.organization_id) return { error: "Organization not found" };
+
+    console.log(`[Purge] FORCING FULL PURGE for org: ${profile.organization_id}`);
+
+    // 2. Admin Client for Purge
+    const adminClient = createServiceRoleClient();
+
+    const { error: deleteError, count } = await adminClient
+        .from("documents")
+        .delete({ count: 'exact' })
+        .eq("organization_id", profile.organization_id);
+
+    if (deleteError) {
+        console.error("[Purge] Error purging documents:", deleteError);
+        return { error: deleteError.message };
+    }
+
+    console.log(`[Purge] Successfully removed ALL ${count} chunks for org ${profile.organization_id}`);
+
+    await adminClient
+        .from("training_reports")
+        .delete()
+        .eq("organization_id", profile.organization_id);
 
     revalidatePath("/whatsapp/knowledge");
     return { success: true };

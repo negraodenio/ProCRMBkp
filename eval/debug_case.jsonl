@@ -1,0 +1,1 @@
+{"id":"manual_dados_passagem","type":"factual","query":"onde os dados realmente passam?","must_include":["similaridade de cosseno","score de 0 a 100"],"must_not_include":["não sei","representante humano"]}

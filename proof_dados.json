@@ -1,0 +1,7 @@
+{
+  "answer": "Os dados realmente passam por 4 serviços, vão parar num log, depois para S3 e finalmente para BI.\n\nDeseja saber mais detalhes sobre algum desses serviços?",
+  "model_used": "balanced",
+  "reason": "evidence_validated",
+  "raw": "{\"answer\":\"Os dados realmente passam por 4 serviços, vão parar num log, depois para S3 e finalmente para BI.\",\"evidence_quotes\":[\"CPF entra aqui → passa por 4 serviços → vai parar num log → vai para S3 → vai para BI\"],\"next_step\":\"Deseja saber mais detalhes sobre algum desses serviços?\"}",
+  "context_preview": "A maior dor de auditoria não é bug — é não saber por onde dados pessoais trafegam.\r\nComplementando a idea de cima, exeto o compliance, isso agrega valor? Ferramentas adicionais para rodar antes do APP\r\n8) DATA FLOW DISCOVERY (Onde os dados realmente passam)\r\nCPF entra aqui → passa por 4 serviços → vai parar num log → vai para S3 → vai para BI\r\nMCP Tool\r\n{\r\n  name: \"trace_pii_flow\",\r\n  output: [\r\n    {\r\n      data: \"cpf\",\r\n      entry: \"POST /signup\",\r\n      services: [\"auth\", \"billing\", \"analytics\"],\r\n      storage: [\"users_db\", \"logs_bucket\"],\r\n      undocumentedFlows: true,\r\n      risk: \"high\"\r\n    }\r\n  ]\r\n}\r"
+}

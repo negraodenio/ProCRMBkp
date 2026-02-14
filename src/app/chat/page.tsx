@@ -8,11 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Send, User, Trash2, Tag, Plus, CheckCircle2, ArrowLeft, Brain } from "lucide-react";
+import { MessageSquare, Send, User, Trash2, Tag, Plus, CheckCircle2, ArrowLeft, Brain, Eraser } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { sendMessageAction, deleteConversationAction, toggleAIAction } from "./actions";
+import { sendMessageAction, deleteConversationAction, toggleAIAction, clearChatMessagesAction } from "./actions";
 import { useProfile } from "@/hooks/use-profile";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -289,6 +289,25 @@ export default function ChatPage() {
         }
     };
 
+    const handleClearHistory = async (conversationId: string) => {
+        if (!confirm("Tem certeza que deseja limpar todo o histórico desta conversa? Isso resetará a 'memória' da IA para este contato. Esta ação não pode ser desfeita.")) {
+            return;
+        }
+
+        try {
+            const result = await clearChatMessagesAction(conversationId);
+            if (result.error) {
+                toast.error(result.error);
+            } else {
+                toast.success("Histórico limpo com sucesso!");
+                setMessages([]); // Clear local state directly
+            }
+        } catch (error) {
+            console.error("Error clearing history:", error);
+            toast.error("Erro ao limpar histórico");
+        }
+    };
+
     const selectedChat = conversations.find(c => c.id === selectedId);
 
     return (
@@ -427,27 +446,42 @@ export default function ChatPage() {
                                         </div>
                                     </div>
 
-                                    {/* AI Toggle */}
-                                    <div className="flex flex-col items-center gap-2 px-4 py-2 bg-muted/30 rounded-2xl border border-border/50">
-                                        <div className="flex items-center gap-2">
-                                            {selectedChat?.ai_enabled ? (
-                                                <Brain className="h-4 w-4 text-emerald-500 animate-pulse" />
-                                            ) : (
-                                                <Brain className="h-4 w-4 text-muted-foreground opacity-50" />
-                                            )}
-                                            <Label htmlFor="ai-toggle" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                                                IA Status
-                                            </Label>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className={`text-[10px] font-medium ${!selectedChat?.ai_enabled ? 'text-primary' : 'text-muted-foreground'}`}>OFF</span>
-                                            <Switch
-                                                id="ai-toggle"
-                                                checked={selectedChat?.ai_enabled ?? true}
-                                                onCheckedChange={(checked) => handleToggleAI(selectedChat!.id, checked)}
-                                                className="scale-75 data-[state=checked]:bg-emerald-500"
-                                            />
-                                            <span className={`text-[10px] font-medium ${selectedChat?.ai_enabled ? 'text-emerald-500' : 'text-muted-foreground'}`}>ON</span>
+                                    {/* AI and History Controls */}
+                                    <div className="flex items-center gap-3">
+                                        {/* Reset Button */}
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleClearHistory(selectedChat!.id)}
+                                            className="h-9 px-3 text-xs border-orange-200 text-orange-600 hover:bg-orange-50 hover:text-orange-700 bg-orange-50/30 font-bold gap-1.5 rounded-xl hidden sm:flex"
+                                            title="Limpar memória do contato (IA)"
+                                        >
+                                            <Eraser className="h-4 w-4" />
+                                            Resetar IA
+                                        </Button>
+
+                                        {/* AI Toggle */}
+                                        <div className="flex flex-col items-center gap-2 px-4 py-2 bg-muted/30 rounded-2xl border border-border/50">
+                                            <div className="flex items-center gap-2">
+                                                {selectedChat?.ai_enabled ? (
+                                                    <Brain className="h-4 w-4 text-emerald-500 animate-pulse" />
+                                                ) : (
+                                                    <Brain className="h-4 w-4 text-muted-foreground opacity-50" />
+                                                )}
+                                                <Label htmlFor="ai-toggle" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                                    IA Status
+                                                </Label>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`text-[10px] font-medium ${!selectedChat?.ai_enabled ? 'text-primary' : 'text-muted-foreground'}`}>OFF</span>
+                                                <Switch
+                                                    id="ai-toggle"
+                                                    checked={selectedChat?.ai_enabled ?? true}
+                                                    onCheckedChange={(checked) => handleToggleAI(selectedChat!.id, checked)}
+                                                    className="scale-75 data-[state=checked]:bg-emerald-500"
+                                                />
+                                                <span className={`text-[10px] font-medium ${selectedChat?.ai_enabled ? 'text-emerald-500' : 'text-muted-foreground'}`}>ON</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

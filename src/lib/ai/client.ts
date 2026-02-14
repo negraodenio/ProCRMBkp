@@ -57,6 +57,7 @@ interface AIRequest {
     messages: Array<{ role: "system" | "user" | "assistant"; content: string }>;
     temperature?: number;
     max_tokens?: number;
+    response_format?: { type: "json_object" };
 }
 
 async function callProvider(
@@ -87,6 +88,7 @@ async function callProvider(
             temperature: request.temperature || 0.7,
             max_tokens: request.max_tokens || 1000,
             stream: false,
+            ...(request.response_format ? { response_format: request.response_format } : {})
         }),
         signal: AbortSignal.timeout(30000), // 30s timeout for chat completions
     });

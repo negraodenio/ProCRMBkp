@@ -3,7 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { createOrgScopedServiceClient, createServiceRoleClient } from "@/lib/supabase/service-scoped";
 import { EvolutionService } from "@/services/evolution";
 import { aiChat, generateEmbedding } from "@/lib/ai/client";
-import { PERSONALITY_PRESETS, PersonalityType, buildSystemPrompt } from "@/lib/bot-personalities";
+import { PERSONALITY_PRESETS, PersonalityType, buildSystemPrompt, clampTemperature } from "@/lib/bot-personalities";
+import { ragAnswerWithGating } from "@/lib/ai/router_rag";
+import { retrieveContextText } from "@/lib/rag/retrieve";
 import { normalizePhone } from "@/lib/utils";
 // cleaned up imports
 
@@ -391,42 +393,32 @@ export async function POST(req: NextRequest) {
         }
 
         // 5. Intelligence Section (RAG + AI)
-        console.log(`🧠 [Webhook] Starting intelligence flow for: "${text.substring(0, 30)}..."`);
+        console.log(`🧠 [Webhook] Starting RAG Hardening flow for: "${text.substring(0, 30)}..."`);
         const startTime = Date.now();
         let aiResponse = "";
 
         try {
-            // 5.1 Generate Embedding
-            const embStart = Date.now();
-            const embedding = await generateEmbedding(text);
-            console.log(`⏱️ [Webhook] Embedding generated in ${Date.now() - embStart}ms`);
-
-            // 5.2 RAG Match
-            const ragStart = Date.now();
+            // 5.1 Retrieval Real (using org-scoped helper)
             let contextText = "";
             try {
-                const { data: chunks, error: matchError } = await serviceClient.rpc("match_documents", {
-                    query_embedding: embedding,
-                    match_threshold: 0.5, // Lowered from 0.7 to catch more relevant chunks
-                    match_count: 5,       // Increased from 3 to provide more context
-                    org_id: org.id
+                const r = await retrieveContextText({
+                    orgId: org.id,
+                    query: text,
+                    match_threshold: 0.5,
+                    match_count: 5
                 });
-                if (matchError) throw matchError;
-                contextText = chunks?.length ? chunks.map((c: any) => c.content).join("\n") : "";
-                console.log(`⏱️ [Webhook] RAG match in ${Date.now() - ragStart}ms. Context length: ${contextText.length}`);
-                if (contextText) {
-                    console.log(`📄 [Webhook] RAG Context Preview: ${contextText.substring(0, 500).replace(/\n/g, ' ')}...`);
-                }
+                contextText = r.contextText;
             } catch (ragError: any) {
-                console.warn("⚠️ [Webhook] RAG retrieval failed, continuing without context:", ragError.message);
+                console.warn("⚠️ [Webhook] RAG retrieval failed:", ragError.message);
             }
 
-            // 5.3 Build Prompt & Chat
-            // Use "instruction_follower" as default for better RAG reliability
+            // 5.3 Model Selection & Routing
             const personalityKey = (botSettings?.personality_preset || "instruction_follower") as PersonalityType;
-            const selectedPersonality = PERSONALITY_PRESETS[personalityKey] || PERSONALITY_PRESETS.instruction_follower;
+            const temperature = clampTemperature(personalityKey, botSettings.temperature);
+
+            // Build Context-Aware Prompt
             const systemPrompt = buildSystemPrompt(
-                selectedPersonality,
+                personalityKey,
                 botSettings.custom_instructions || "",
                 contextText,
                 pushName,
@@ -436,55 +428,46 @@ export async function POST(req: NextRequest) {
                 }
             );
 
-            // Fetch recent messages for AI context (messages only)
+            // Chat History
             const chatHistory = (recentMessages || [])
                 .filter(m => m.content !== text)
                 .reverse()
-                // SANITIZATION: Remove history where the bot introduced itself to avoid "Hello loop"
-                .filter(m => {
-                    if (m.direction === "outbound") {
-                        const isGreeting = m.content.includes("Meu nome é") || m.content.includes("Sou a IA");
-                        return !isGreeting;
-                    }
-                    return true;
-                })
                 .map((m: { content: string; direction: string }) => ({
-                    role: (m.direction === "inbound" ? "user" : "assistant") as "user" | "assistant",
+                    role: (m.direction === "inbound" ? "user" : "assistant") as "user" | "assistant" | "system",
                     content: m.content
                 }));
 
-            // --- STRATEGY: Grounded Temperature ---
-            // If we have RAG context, we force a low temperature to avoid "hallucination/creativity"
-            // If no context, we use the user's creative preference.
-            const userTemperature = botSettings.temperature ?? 0.6;
-            const finalTemperature = contextText ? 0.3 : userTemperature;
+            const messages = [
+                { role: "system" as const, content: systemPrompt },
+                ...chatHistory,
+                { role: "user" as const, content: text }
+            ];
 
-            const chatStart = Date.now();
-            console.log(`🤖 [Webhook] Calling AI Chat (model: fast, temp: ${finalTemperature})...`);
-            aiResponse = await aiChat({
-                messages: [
-                    { role: "system", content: systemPrompt },
-                    ...chatHistory,
-                    { role: "user", content: text }
-                ],
-                model: "fast",
-                temperature: finalTemperature,
-                max_tokens: botSettings.max_tokens ?? 250
+            // Roteamento Inteligente Ultra-Fidelidade (Phase 1)
+            const routed = await ragAnswerWithGating({
+                systemPrompt,
+                userText: text,
+                chatHistory,
+                contextText,
+                temperature,
+                max_tokens: botSettings.max_tokens ?? 250,
+                primaryModelAlias: "balanced",
+                fallbackModelAlias: "coding" // DeepSeek-V3
             });
-            console.log(`⏱️ [Webhook] AI Response generated in ${Date.now() - chatStart}ms. Length: ${aiResponse.length}`);
+
+            aiResponse = routed.text;
+            console.log(`🏁 [RAG Router] Used: ${routed.model_used}, Reason: ${routed.reason}`);
 
         } catch (intelError: any) {
             console.error("❌ [Webhook] Intelligence Flow Failed:", intelError.message);
-            // Fallback: If AI fails but we haven't crashed, provide a polite safety response
-            aiResponse = "Desculpe, tive um problema técnico momentâneo para processar sua solicitação. Pode repetir, por favor?";
+            aiResponse = "Desculpe, tive um problema técnico momentâneo. Pode repetir?";
         }
 
         const totalTime = Date.now() - startTime;
-        console.log(`🏁 [Webhook] Intelligence flow finished in ${totalTime}ms`);
+        console.log(`🏁 [Webhook] Intelligence cycle finished in ${totalTime}ms`);
 
         if (!aiResponse) {
-             console.error("❌ [Webhook] No AI response generated (and no fallback). Skipping send.");
-             return NextResponse.json({ status: "no_response_generated" });
+             return NextResponse.json({ status: "no_response" });
         }
 
         // 6. Send Message
