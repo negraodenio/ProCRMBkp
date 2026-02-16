@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import {
     FileText,
     TrendingUp,
@@ -14,8 +15,6 @@ import {
     Mic,
     Briefcase,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Dialog,
     DialogContent,
@@ -24,16 +23,7 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { toast } from "sonner";
@@ -41,6 +31,11 @@ import { createClient } from "@/lib/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
 import { generateAIContent } from "@/app/actions/ai-actions";
 
+// New Components
+import { AIToolsHeader } from "@/components/ai-tools/ai-tools-header";
+import { AIToolsStats } from "@/components/ai-tools/ai-tools-stats";
+import { AIToolCard } from "@/components/ai-tools/ai-tool-card";
+import { AIToolGroup } from "@/components/ai-tools/ai-tool-group";
 
 interface AITool {
     id: string;
@@ -51,287 +46,256 @@ interface AITool {
     icon: React.ElementType;
     color: string;
     borderColor: string;
+    group: "qualification" | "communication" | "closing";
 }
 
 const AI_TOOLS: AITool[] = [
+    // GROUP 1: QUALIFICAÇÃO
+    {
+        id: "categorize-lead",
+        title: "Scoring & Qualificação",
+        subtitle: "Segmentação automática",
+        description: "Atribui pontuação e prioridade estratégica ao lead baseado em dados.",
+        buttonText: "Qualificar Lead",
+        icon: Tag,
+        color: "text-purple-600",
+        borderColor: "border-t-purple-500",
+        group: "qualification",
+    },
     {
         id: "generate-proposal",
         title: "Business Case Estratégico",
-        subtitle: "Viabilidade e proposta de valor",
-        description: "Estrutura um caso de negócio personalizado para o perfil do lead",
+        subtitle: "Viabilidade e valor",
+        description: "Estrutura um caso de negócio personalizado para o perfil do lead.",
         buttonText: "Gerar Business Case",
         icon: FileText,
-        color: "text-blue-700",
-        borderColor: "border-t-blue-600",
+        color: "text-blue-600",
+        borderColor: "border-t-blue-500",
+        group: "qualification",
     },
     {
         id: "predictive-analysis",
         title: "Propensão de Fechamento",
-        subtitle: "Score preditivo de conversão",
-        description: "Calcula a probabilidade real de fechamento com base em dados",
+        subtitle: "Score preditivo",
+        description: "Calcula a probabilidade real de fechamento com base em dados históricos.",
         buttonText: "Analisar Probabilidade",
         icon: TrendingUp,
-        color: "text-emerald-700",
-        borderColor: "border-t-emerald-600",
+        color: "text-emerald-600",
+        borderColor: "border-t-emerald-500",
+        group: "qualification",
     },
-    {
-        id: "categorize-lead",
-        title: "Scoring & Qualificação",
-        subtitle: "Segmentação automática de potencial",
-        description: "Atribui pontuação e prioridade estratégica ao lead",
-        buttonText: "Qualificar Lead",
-        icon: Tag,
-        color: "text-purple-700",
-        borderColor: "border-t-purple-600",
-    },
+    // GROUP 2: COMUNICAÇÃO
     {
         id: "generate-email",
         title: "Comunicação Persuasiva",
-        subtitle: "Copywriting de alto impacto",
-        description: "Gera comunicações de follow-up focadas em conversão",
+        subtitle: "Copywriting de impacto",
+        description: "Gera comunicações de follow-up focadas em conversão e engajamento.",
         buttonText: "Gerar Comunicação",
         icon: Mail,
         color: "text-indigo-600",
         borderColor: "border-t-indigo-500",
+        group: "communication",
     },
     {
         id: "sentiment-analysis",
         title: "Inteligência Comportamental",
-        subtitle: "Análise de humor e intenção",
-        description: "Decifra o tom e o engajamento emocional do contato",
+        subtitle: "Análise de humor",
+        description: "Decifra o tom, intenção e o engajamento emocional do contato.",
         buttonText: "Analisar Comportamento",
         icon: Heart,
         color: "text-rose-600",
         borderColor: "border-t-rose-500",
-    },
-    {
-        id: "next-action",
-        title: "Next Best Action",
-        subtitle: "Recomendação estratégica de passo",
-        description: "Sugere a ação de maior impacto para o momento atual",
-        buttonText: "Ver Recomendação",
-        icon: ArrowRight,
-        color: "text-amber-600",
-        borderColor: "border-t-amber-500",
-    },
-    {
-        id: "objection-handler",
-        title: "Consultoria de Negociação",
-        subtitle: "Contorno estratégico de objeções",
-        description: "Argumentos baseados em frameworks de negociação",
-        buttonText: "Tratar Objeções",
-        icon: ShieldAlert,
-        color: "text-red-700",
-        borderColor: "border-t-red-600",
+        group: "communication",
     },
     {
         id: "sales-script",
         title: "Framework de Conversa",
-        subtitle: "Argumentação dinâmica de vendas",
-        description: "Roteiro estratégico para abordagens de alta performance",
+        subtitle: "Argumentação dinâmica",
+        description: "Roteiro estratégico para abordagens de alta performance em vendas.",
         buttonText: "Ver Framework",
         icon: Mic,
-        color: "text-primary/70",
+        color: "text-slate-700",
         borderColor: "border-t-slate-600",
+        group: "communication",
+    },
+    // GROUP 3: FECHAMENTO
+    {
+        id: "next-action",
+        title: "Next Best Action",
+        subtitle: "Recomendação estratégica",
+        description: "Sugere a ação de maior impacto para o momento atual do funil.",
+        buttonText: "Ver Recomendação",
+        icon: ArrowRight,
+        color: "text-amber-600",
+        borderColor: "border-t-amber-500",
+        group: "closing",
+    },
+    {
+        id: "objection-handler",
+        title: "Consultoria de Negociação",
+        subtitle: "Contorno de objeções",
+        description: "Argumentos baseados em frameworks de negociação de alta complexidade.",
+        buttonText: "Tratar Objeções",
+        icon: ShieldAlert,
+        color: "text-red-600",
+        borderColor: "border-t-red-500",
+        group: "closing",
     },
     {
         id: "meeting-prep",
         title: "Dossiê Pré-Reunião",
-        subtitle: "Inteligência para o fechamento",
-        description: "Briefing executivo com pauta, riscos e objetivos",
+        subtitle: "Inteligência de fechamento",
+        description: "Briefing executivo com pauta, riscos e objetivos para reuniões.",
         buttonText: "Gerar Dossiê",
         icon: Briefcase,
-        color: "text-cyan-700",
-        borderColor: "border-t-cyan-600",
+        color: "text-cyan-600",
+        borderColor: "border-t-cyan-500",
+        group: "closing",
     },
 ];
 
-export default function AIToolsPage() {
+function AIToolsContent() {
     const [supabase] = useState(() => createClient());
-    const { profile, loading: profileLoading } = useProfile();
+    const { profile } = useProfile();
+    const [selectedLead, setSelectedLead] = useState<any>(null);
     const [activeModal, setActiveModal] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [executingToolId, setExecutingToolId] = useState<string | null>(null);
     const [result, setResult] = useState("");
-    const [selectedLead, setSelectedLead] = useState("");
-    const [leads, setLeads] = useState<{ id: string; name: string }[]>([]);
+    const searchParams = useSearchParams();
+    const initialLeadId = searchParams.get("leadId");
 
-
-    async function loadLeads() {
-        if (!profile?.organization_id) return;
-        const { data } = await supabase
-            .from("contacts")
-            .select("id, name")
-            .eq("organization_id", profile.organization_id)
-            .limit(20);
-        setLeads(data || []);
-    }
-
-
-    function openModal(toolId: string) {
-        setActiveModal(toolId);
-        setResult("");
-        loadLeads();
-    }
-
-    function closeModal() {
-        setActiveModal(null);
-        setResult("");
-        setSelectedLead("");
-    }
-
-    async function executeAI(toolId: string) {
+    const executeAI = async (toolId: string) => {
         if (!selectedLead) {
             toast.error("Selecione um lead primeiro");
             return;
         }
 
-        setLoading(true);
+        setExecutingToolId(toolId);
+        setActiveModal(toolId);
         setResult("");
 
         try {
-            const response = await generateAIContent(toolId, selectedLead);
+            const response = await generateAIContent(toolId, selectedLead.id);
 
             if (response.success && response.result) {
                 setResult(response.result);
-                toast.success("Análise concluída com sucesso!");
+                toast.success("Análise concluída!");
             } else {
                 toast.error("Erro na análise: " + (response.error || "Erro desconhecido"));
-                setResult("Erro ao processar solicitação. Verifique sua chave de API.");
+                setResult("Erro ao processar solicitação. Tente novamente em instantes.");
             }
         } catch (error) {
             console.error("Error executing AI:", error);
             toast.error("Erro ao comunicar com o servidor");
         } finally {
-            setLoading(false);
+            setExecutingToolId(null);
         }
-    }
+    };
+
+    const closeModal = () => {
+        if (executingToolId) return; // Prevent close while running
+        setActiveModal(null);
+        setResult("");
+    };
 
     const activeTool = AI_TOOLS.find((t) => t.id === activeModal);
 
+    const renderToolGroup = (groupId: "qualification" | "communication" | "closing", title: string, subtitle: string, icon: string, accentColor: string) => {
+        const tools = AI_TOOLS.filter(t => t.group === groupId);
+        return (
+            <AIToolGroup title={title} subtitle={subtitle} icon={icon} accentColor={accentColor}>
+                {tools.map(tool => (
+                    <AIToolCard
+                        key={tool.id}
+                        {...tool}
+                        disabled={!selectedLead}
+                        loading={executingToolId === tool.id}
+                        onClick={() => executeAI(tool.id)}
+                    />
+                ))}
+            </AIToolGroup>
+        );
+    };
+
     return (
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen bg-slate-50/50">
             <Sidebar />
             <div className="flex flex-1 flex-col md:ml-64">
                 <Header />
                 <main className="flex-1 p-6">
-                    <div className="space-y-6">
-                        {/* Header */}
-                        <div>
-                            <h1 className="text-3xl font-bold flex items-center gap-2">
-                                <Sparkles className="h-8 w-8 text-primary" />
-                                Sales Intelligence Center
-                            </h1>
-                            <p className="text-muted-foreground">
-                                Ferramentas estratégicas de IA para aceleração comercial
-                            </p>
-                        </div>
+                    <div className="max-w-7xl mx-auto space-y-8">
+                        <AIToolsHeader
+                            selectedLeadId={initialLeadId}
+                            orgId={profile?.organization_id || null}
+                            onSelectLead={(lead) => setSelectedLead(lead)}
+                        />
 
-                        {/* Tools Grid */}
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {AI_TOOLS.map((tool) => {
-                                const Icon = tool.icon;
-                                return (
-                                    <Card
-                                        key={tool.id}
-                                        className={`border-t-4 ${tool.borderColor} hover:shadow-lg transition-shadow`}
-                                    >
-                                        <CardHeader className="text-center pb-2">
-                                            <div className={`mx-auto mb-2 ${tool.color}`}>
-                                                <Icon className="h-10 w-10" />
-                                            </div>
-                                            <CardTitle className="text-lg">{tool.title}</CardTitle>
-                                            <CardDescription>{tool.subtitle}</CardDescription>
-                                        </CardHeader>
-                                        <CardContent className="text-center space-y-4">
-                                            <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
-                                                <Sparkles className="h-4 w-4 text-yellow-500" />
-                                                {tool.description}
-                                            </p>
-                                            <Button
-                                                variant="outline"
-                                                className="w-full"
-                                                onClick={() => openModal(tool.id)}
-                                            >
-                                                <Icon className="mr-2 h-4 w-4" />
-                                                {tool.buttonText}
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
-                                );
-                            })}
+                        <AIToolsStats />
+
+                        <div className="space-y-12 pb-20">
+                            {renderToolGroup("qualification", "Qualificação & Análise", "Entenda o potencial do seu lead", "📥", "bg-blue-500")}
+                            {renderToolGroup("communication", "Comunicação & Relacionamento", "Comunique com impacto e inteligência", "💬", "bg-purple-500")}
+                            {renderToolGroup("closing", "Negociação & Fechamento", "Feche com estratégia e preparação", "🎯", "bg-emerald-500")}
                         </div>
                     </div>
                 </main>
             </div>
 
-            {/* Modal for AI Tool */}
-            <Dialog open={activeModal !== null} onOpenChange={() => closeModal()}>
+            {/* Result Modal */}
+            <Dialog open={activeModal !== null} onOpenChange={(open) => !open && closeModal()}>
                 <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             {activeTool && <activeTool.icon className={`h-5 w-5 ${activeTool.color}`} />}
                             {activeTool?.title}
                         </DialogTitle>
-                        <DialogDescription>{activeTool?.subtitle}</DialogDescription>
+                        <DialogDescription>
+                            Resultado da análise para <span className="font-bold text-slate-900">{selectedLead?.name}</span>
+                        </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label>Selecione um Lead</Label>
-                            <Select value={selectedLead} onValueChange={setSelectedLead}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Escolha o lead para análise" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {leads.map((lead) => (
-                                        <SelectItem key={lead.id} value={lead.id}>
-                                            {lead.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {result && (
-                            <div className="bg-muted/50 border rounded-lg p-4 mt-4">
-                                <div className="prose dark:prose-invert prose-sm max-w-none text-foreground">
+                    <div className="py-4">
+                        {executingToolId ? (
+                            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                                <div className="text-center">
+                                    <p className="font-bold text-slate-900">Analisando com Inteligência Artificial</p>
+                                    <p className="text-sm text-slate-500">Isso pode levar alguns segundos...</p>
+                                </div>
+                            </div>
+                        ) : result ? (
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-inner">
+                                <div className="prose prose-sm max-w-none text-slate-800 leading-relaxed font-sans">
                                     <pre className="whitespace-pre-wrap font-sans text-sm">{result}</pre>
                                 </div>
                             </div>
-                        )}
-
-                        {loading && (
-                            <div className="flex items-center justify-center py-8">
-                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                                <span className="ml-2 text-muted-foreground">Processando com IA...</span>
-                            </div>
-                        )}
+                        ) : null}
                     </div>
 
                     <DialogFooter>
-                        <Button variant="outline" onClick={closeModal}>
+                        <Button variant="outline" onClick={closeModal} disabled={!!executingToolId}>
                             Fechar
                         </Button>
-                        <Button
-                            className="bg-primary hover:bg-primary/90"
-                            onClick={() => executeAI(activeModal!)}
-                            disabled={loading || !selectedLead}
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Processando...
-                                </>
-                            ) : (
-                                <>
-                                    <Sparkles className="mr-2 h-4 w-4" />
-                                    Executar IA
-                                </>
-                            )}
-                        </Button>
+                        {result && (
+                             <Button onClick={() => toast.info("Funcionalidade de exportação em breve!")}>
+                                Exportar PDF
+                             </Button>
+                        )}
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>
+    );
+}
+
+export default function AIToolsPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center h-screen">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            </div>
+        }>
+            <AIToolsContent />
+        </Suspense>
     );
 }
