@@ -85,10 +85,10 @@ export function Sidebar({ mobile }: SidebarProps) {
             <div className="flex items-center h-16 px-4 border-b border-slate-800">
              <div className="flex items-center gap-2">
                  <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
-                   <LayoutDashboard className="h-4 w-4 text-white" />
+                   <Sparkles className="h-4 w-4 text-white" />
                  </div>
                  <h1 className="text-xl font-bold text-white">
-                   {loading ? "..." : profile?.organizations?.name || "CRM IA"}
+                   {loading ? "..." : profile?.organizations?.name || "CRMia"}
                  </h1>
                </div>
             </div>
@@ -135,10 +135,10 @@ export function Sidebar({ mobile }: SidebarProps) {
         <div className="flex items-center h-16 px-4 border-b border-white/10 shrink-0 bg-gradient-to-r from-primary/5 to-secondary/5">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center shadow-lg shadow-primary/20">
-              <LayoutDashboard className="h-4 w-4 text-white" />
+              <Sparkles className="h-4 w-4 text-white" />
             </div>
             <h1 className="text-xl font-bold truncate bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-              {loading ? "..." : profile?.organizations?.name || "CRM IA"}
+              {loading ? "..." : profile?.organizations?.name || "CRMia"}
             </h1>
           </div>
         </div>

@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'ProCRM System',
-    short_name: 'ProCRM',
-    description: 'Sistema CRM para gerenciamento de clientes e leads',
+    name: 'CRMia System',
+    short_name: 'CRMia',
+    description: 'Sistema CRM inteligente com 9 ferramentas de IA para acelerar suas vendas',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

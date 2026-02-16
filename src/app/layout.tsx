@@ -26,13 +26,13 @@ export const viewport: Viewport = {
 
 
 export const metadata: Metadata = {
-  title: "ProCRM - Sistema de Gestão de Relacionamento de Clientes",
-  description: "Sistema CRM para gerenciamento de clientes e leads",
+  title: "CRMia - O CRM que pensa por si",
+  description: "Sistema CRM inteligente com 9 ferramentas de IA para acelerar suas vendas",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "ProCRM",
+    title: "CRMia",
   },
   formatDetection: {
     telephone: false,

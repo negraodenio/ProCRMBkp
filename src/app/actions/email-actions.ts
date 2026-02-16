@@ -27,9 +27,9 @@ export async function sendWelcomeEmailAction() {
   try {
     // 3. Send Email via Resend
     const { data, error } = await resend.emails.send({
-      from: "ProCRM <onboarding@resend.dev>", // Mude para seu domínio verificado depois!
+      from: "CRMia <onboarding@resend.dev>", // Mude para seu domínio verificado depois!
       to: [user.email],
-      subject: "Bem-vindo ao ProCRM! 🚀",
+      subject: "A CRMia lhe deu as boas-vindas! 🚀",
       react: WelcomeEmail({ name }),
     });
 

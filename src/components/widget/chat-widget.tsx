@@ -189,9 +189,9 @@ export function ChatWidget({
 
                 {!removeWatermark && (
                     <div className="mt-2 text-center">
-                        <a href="https://procrm.io" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary transition-colors">
+                        <a href="https://crmia.eu" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary transition-colors">
                             <Sparkles className="h-3 w-3" />
-                            Feito com <strong>ProCRM</strong>
+                            Feito com <strong>CRMia</strong>
                         </a>
                     </div>
                 )}

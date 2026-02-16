@@ -50,9 +50,9 @@ export default function LoginPage() {
         <div className="flex items-center justify-center min-h-screen bg-muted/40 px-4">
             <Card className="w-full max-w-md">
                 <CardHeader className="text-center">
-                    <CardTitle className="text-2xl font-bold">ProCRM</CardTitle>
+                    <CardTitle className="text-2xl font-bold">CRMia</CardTitle>
                     <CardDescription>
-                        Entre na sua conta para acessar o sistema
+                        Acesse seu assistente de vendas inteligente
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

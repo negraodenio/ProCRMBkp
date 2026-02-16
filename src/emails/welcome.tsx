@@ -20,7 +20,7 @@ interface WelcomeEmailProps {
 }
 
 export const WelcomeEmail = ({ name = "Novo Usuário" }: WelcomeEmailProps) => {
-  const previewText = `Bem-vindo ao ProCRM, ${name}!`;
+  const previewText = `A CRMia deu as boas-vindas a você, ${name}!`;
 
   return (
     <Html>
@@ -32,8 +32,8 @@ export const WelcomeEmail = ({ name = "Novo Usuário" }: WelcomeEmailProps) => {
             <Section className="mt-[32px]">
               <div className="flex items-center gap-2 justify-center mb-8">
                  {/* Logo placeholder - replace with actual URL in production */}
-                 <Text className="text-2xl font-bold text-blue-600 text-center">
-                    🧠 ProCRM
+                 <Text className="text-2xl font-bold text-purple-600 text-center">
+                    ✨ CRMia
                  </Text>
               </div>
             </Section>
@@ -47,7 +47,7 @@ export const WelcomeEmail = ({ name = "Novo Usuário" }: WelcomeEmailProps) => {
             </Text>
 
             <Text className="text-black text-[14px] leading-[24px]">
-              Estamos muito felizes em ter você a bordo. O ProCRM foi criado para ajudar você a vender 35% a mais usando Inteligência Artificial.
+              Estamos muito felizes em ter você a bordo. A CRMia foi criada para ajudar você a vender muito mais usando Inteligência Artificial de ponta.
             </Text>
 
             <Section className="bg-slate-50 p-4 rounded-lg my-4 border border-slate-100">
@@ -77,7 +77,7 @@ export const WelcomeEmail = ({ name = "Novo Usuário" }: WelcomeEmailProps) => {
             <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full" />
 
             <Text className="text-[#666666] text-[12px] leading-[24px] text-center">
-              © 2026 ProCRM. Todos os direitos reservados.
+              © 2026 CRMia. Todos os direitos reservados.
               <br />
               Feito com ❤️ por Denio & AI AntiGravity.
             </Text>
