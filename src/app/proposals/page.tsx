@@ -438,7 +438,7 @@ export default function ProposalsPage() {
                             <Dialog open={open} onOpenChange={(isOpen) => {
                                 setOpen(isOpen);
                                 if (!isOpen) {
-                                    setFormData({ contactId: "", title: "", value: "", validDays: "30", content: "" });
+                                    setFormData({ contactId: "", title: "", value: "", currency: "BRL", validDays: "30", content: "" });
                                     setEditingProposalId(null);
                                 }
                             }}>

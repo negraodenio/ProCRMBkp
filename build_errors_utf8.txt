@@ -1,0 +1,6 @@
+﻿
+> next-template@0.1.0 typecheck
+> tsc --noEmit
+
+src/app/proposals/page.tsx(441,49): error TS2345: Argument of type '{ contactId: string; title: string; value: string; validDays: string; content: string; }' is not assignable to parameter of type 'SetStateAction<{ contactId: string; title: string; value: string; currency: string; validDays: string; content: string; }>'.
+  Property 'currency' is missing in type '{ contactId: string; title: string; value: string; validDays: string; content: string; }' but required in type '{ contactId: string; title: string; value: string; currency: string; validDays: string; content: string; }'.
