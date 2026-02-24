@@ -231,7 +231,9 @@ export default function ProposalsPage() {
                     proposal_id: editingProposalId,
                     organization_id: organizationId,
                     name: item.name,
-                    value: item.value,
+                    unit_price: item.value,
+                    total_price: item.value,
+                    quantity: 1,
                     currency: item.currency
                 }));
 
@@ -268,7 +270,9 @@ export default function ProposalsPage() {
                     proposal_id: proposalId,
                     organization_id: organizationId,
                     name: item.name,
-                    value: item.value,
+                    unit_price: item.value,
+                    total_price: item.value,
+                    quantity: 1,
                     currency: item.currency
                 }));
 
@@ -291,7 +295,7 @@ export default function ProposalsPage() {
     }
 
     function handleAddItem() {
-        setProposalItems([...proposalItems, { name: "", value: 0, currency: "BRL" }]);
+        setProposalItems([...proposalItems, { name: "", value: 0, currency: formData.currency }]);
     }
 
     function handleRemoveItem(index: number) {
@@ -478,7 +482,11 @@ export default function ProposalsPage() {
                                                 <Label htmlFor="currency">Moeda Principal</Label>
                                                 <Select
                                                     value={formData.currency}
-                                                    onValueChange={(v) => setFormData({ ...formData, currency: v })}
+                                                    onValueChange={(v) => {
+                                                        setFormData({ ...formData, currency: v });
+                                                        // Update all items to the same currency for consistency
+                                                        setProposalItems(prev => prev.map(item => ({ ...item, currency: v })));
+                                                    }}
                                                 >
                                                     <SelectTrigger>
                                                         <SelectValue />
@@ -538,14 +546,23 @@ export default function ProposalsPage() {
                                                                 onChange={(e) => handleUpdateItem(index, "name", e.target.value)}
                                                             />
                                                         </div>
-                                                        <div className="w-24 space-y-1">
+                                                        <div className="w-32 space-y-1">
                                                             <Label className="text-[10px] uppercase text-slate-500">Valor</Label>
-                                                            <Input
-                                                                type="number"
-                                                                placeholder="0,00"
-                                                                value={item.value}
-                                                                onChange={(e) => handleUpdateItem(index, "value", parseFloat(e.target.value) || 0)}
-                                                            />
+                                                            <div className="relative">
+                                                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-medium text-slate-400">
+                                                                    {item.currency === 'BRL' ? 'R$' : item.currency === 'USD' ? '$' : '€'}
+                                                                </span>
+                                                                <Input
+                                                                    placeholder="0,00"
+                                                                    className="pl-7 text-right"
+                                                                    value={item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                                    onChange={(e) => {
+                                                                        const raw = e.target.value.replace(/\D/g, "");
+                                                                        const num = raw ? parseInt(raw, 10) / 100 : 0;
+                                                                        handleUpdateItem(index, "value", num);
+                                                                    }}
+                                                                />
+                                                            </div>
                                                         </div>
                                                         <div className="w-24 space-y-1">
                                                             <Label className="text-[10px] uppercase text-slate-500">Moeda</Label>
