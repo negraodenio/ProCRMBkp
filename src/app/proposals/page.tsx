@@ -115,7 +115,7 @@ export default function ProposalsPage() {
         content: "",
     });
     const [proposalItems, setProposalItems] = useState<ProposalItem[]>([
-        { name: "", value: 0, currency: "BRL" }
+        { name: "", unit_price: 0, currency: "BRL" }
     ]);
 
     const supabase = createClient();
@@ -186,7 +186,17 @@ export default function ProposalsPage() {
     }
 
     async function loadStages(orgId: string) {
-        const { data } = await supabase.from("stages").select("id, name, pipeline_id").eq("organization_id", orgId).order("order");
+        // Fetch stages that belong to any pipeline of this organization
+        const { data } = await supabase
+            .from("stages")
+            .select(`
+                id,
+                name,
+                pipeline_id,
+                pipelines!inner(organization_id)
+            `)
+            .eq("pipelines.organization_id", orgId)
+            .order("order");
         setAllStages(data || []);
     }
 
@@ -826,7 +836,14 @@ export default function ProposalsPage() {
                                 <Label>Selecione o Funil</Label>
                                 <Select
                                     value={transferData.pipelineId}
-                                    onValueChange={(v) => setTransferData({ ...transferData, pipelineId: v, stageId: "" })}
+                                    onValueChange={(v) => {
+                                        const firstStage = allStages.find(s => s.pipeline_id === v);
+                                        setTransferData({
+                                            ...transferData,
+                                            pipelineId: v,
+                                            stageId: firstStage ? firstStage.id : ""
+                                        });
+                                    }}
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Escolha um funil" />
