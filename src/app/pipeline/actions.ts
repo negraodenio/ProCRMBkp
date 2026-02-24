@@ -3,66 +3,71 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function updateDealStage(dealId: string, newStageId: string) {
+export async function updateProposalStage(proposalId: string, newStageId: string) {
     const supabase = await createClient()
 
-    // 1. Fetch stage name to determine new status
+    // 1. Fetch stage to get pipeline_id (fallback) and name
     const { data: stage } = await supabase
         .from('stages')
-        .select('name')
+        .select('name, pipeline_id')
         .eq('id', newStageId)
         .single()
 
-    let dealStatus: 'open' | 'won' | 'lost' = 'open';
-    let contactStatus = 'negotiation';
-
-    if (stage) {
-        const stageName = stage.name.toLowerCase();
-        // More robust stage mapping
-        if (['ganho', 'won', 'fechado', 'concluído', 'concluido'].some(s => stageName.includes(s))) {
-            dealStatus = 'won';
-            contactStatus = 'won';
-        } else if (['perdido', 'lost', 'cancelado'].some(s => stageName.includes(s))) {
-            dealStatus = 'lost';
-            contactStatus = 'lost';
-        } else if (['proposta', 'proposal', 'orçamento', 'orcamento'].some(s => stageName.includes(s))) {
-            contactStatus = 'proposal';
-        } else if (['quali', 'triagem'].some(s => stageName.includes(s))) {
-            contactStatus = 'qualified';
-        } else if (['contat', 'abordagem', 'reunião', 'reuniao'].some(s => stageName.includes(s))) {
-            contactStatus = 'contacted';
-        }
-    }
-
-    // Need to get contact_id to update contact status
-    const { data: dealToUpdate } = await supabase.from('deals').select('contact_id').eq('id', dealId).single()
-
     const { error } = await supabase
-        .from('deals')
+        .from('proposals')
         .update({
             stage_id: newStageId,
-            status: dealStatus,
             updated_at: new Date().toISOString()
         })
-        .eq('id', dealId)
-
-    // Update contact status if deal moved to Won/Lost or specific contact status mapped
-    if (!error && dealToUpdate?.contact_id) {
-       await supabase.from('contacts').update({ status: contactStatus }).eq('id', dealToUpdate.contact_id);
-    }
+        .eq('id', proposalId)
 
     if (error) {
-        console.error('Error updating deal stage:', error)
+        console.error('Error updating proposal stage:', error)
         return { success: false, error: error.message }
     }
 
     revalidatePath('/pipeline')
-    revalidatePath('/leads')
-    revalidatePath('/dashboard')
-    revalidatePath('/reports')
     return { success: true }
 }
 
+export async function updateProposal(proposalId: string, data: { title?: string, total?: number, notes?: string }) {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('proposals')
+        .update({
+            ...data,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', proposalId)
+
+    if (error) {
+        console.error('Error updating proposal:', error)
+        return { success: false, error: error.message }
+    }
+
+    revalidatePath('/pipeline')
+    return { success: true }
+}
+
+export async function deleteProposal(proposalId: string) {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('proposals')
+        .delete()
+        .eq('id', proposalId)
+
+    if (error) {
+        console.error('Error deleting proposal:', error)
+        return { success: false, error: error.message }
+    }
+
+    revalidatePath('/pipeline')
+    return { success: true }
+}
+
+// Keep old actions for fallback or internal use if needed, but primary is now proposal
 export async function updateDeal(dealId: string, data: { title?: string, value?: number, notes?: string }) {
     const supabase = await createClient()
 

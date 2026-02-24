@@ -21,26 +21,29 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { DealCard } from "./deal-card";
-import { updateDealStage, updateDeal, createStage, updateStage, deleteStage, deleteDeal } from "@/app/pipeline/actions";
+import { ProposalCard } from "./proposal-card";
+import { updateProposalStage, updateProposal, createStage, updateStage, deleteStage, deleteProposal } from "@/app/pipeline/actions";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
 // Types matching Supabase
-type Deal = {
+type Proposal = {
     id: string;
     title: string;
-    value: number;
+    total: number;
     contact_id?: string;
-    contact_name?: string;
     stage_id: string;
+    description?: string;
     notes?: string;
-    proposals?: {
+    status: string;
+    contacts?: {
+        name: string;
+        companies?: { name: string } | null;
+    } | null;
+    deals?: {
         id: string;
         title: string;
-        status: string;
-        total: number;
-    }[] | null;
+    } | null;
 };
 
 type Stage = {
@@ -67,11 +70,11 @@ const COLOR_OPTIONS = [
 
 interface KanbanBoardProps {
     initialStages: Stage[];
-    initialDeals: any[];
+    initialProposals: any[];
 }
 
-export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
-    const [deals, setDeals] = useState<any[]>(initialDeals);
+export function KanbanBoard({ initialStages, initialProposals }: KanbanBoardProps) {
+    const [proposals, setProposals] = useState<any[]>(initialProposals);
     const [stages, setStages] = useState<Stage[]>(initialStages);
     const [editingStageId, setEditingStageId] = useState<string | null>(null);
     const [editingName, setEditingName] = useState("");
@@ -79,54 +82,54 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
     const [newStageName, setNewStageName] = useState("");
     const [newStageColor, setNewStageColor] = useState("bg-blue-500");
 
-    // Edit Deal State
-    const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
-    const [dealFormData, setDealFormData] = useState<Partial<Deal>>({});
-    const [isSavingDeal, setIsSavingDeal] = useState(false);
+    // Edit Proposal State
+    const [editingProposal, setEditingProposal] = useState<Proposal | null>(null);
+    const [proposalFormData, setProposalFormData] = useState<Partial<Proposal>>({});
+    const [isSavingProposal, setIsSavingProposal] = useState(false);
 
     const supabase = createClient();
 
-    const openEditDeal = (deal: Deal) => {
-        setEditingDeal(deal);
-        setDealFormData({
-            title: deal.title,
-            value: deal.value,
-            notes: deal.notes || ""
+    const openEditProposal = (proposal: Proposal) => {
+        setEditingProposal(proposal);
+        setProposalFormData({
+            title: proposal.title,
+            total: proposal.total,
+            notes: proposal.notes || ""
         });
     };
 
-    const handleSaveDeal = async () => {
-        if (!editingDeal) return;
-        setIsSavingDeal(true);
+    const handleSaveProposal = async () => {
+        if (!editingProposal) return;
+        setIsSavingProposal(true);
         try {
-            const result = await updateDeal(editingDeal.id, {
-                title: dealFormData.title,
-                value: Number(dealFormData.value) || 0,
-                notes: dealFormData.notes
+            const result = await updateProposal(editingProposal.id, {
+                title: proposalFormData.title,
+                total: Number(proposalFormData.total) || 0,
+                notes: proposalFormData.notes
             });
 
             if (result.success) {
-                setDeals(deals.map(d => d.id === editingDeal.id ? { ...d, ...dealFormData } : d));
-                toast.success("Negócio atualizado!");
-                setEditingDeal(null);
+                setProposals(proposals.map(p => p.id === editingProposal.id ? { ...p, ...proposalFormData } : p));
+                toast.success("Proposta atualizada!");
+                setEditingProposal(null);
             } else {
                 toast.error("Erro ao salvar: " + result.error);
             }
         } catch (e) {
             toast.error("Erro inesperado ao salvar.");
         } finally {
-            setIsSavingDeal(false);
+            setIsSavingProposal(false);
         }
     };
 
-    const handleDeleteDeal = async (dealId: string) => {
-        if (!confirm("Tem certeza que deseja excluir este lead?")) return;
+    const handleDeleteProposal = async (proposalId: string) => {
+        if (!confirm("Tem certeza que deseja excluir esta proposta?")) return;
 
         try {
-            const result = await deleteDeal(dealId);
+            const result = await deleteProposal(proposalId);
             if (result.success) {
-                setDeals(deals.filter(d => d.id !== dealId));
-                toast.success("Lead excluído com sucesso!");
+                setProposals(proposals.filter(p => p.id !== proposalId));
+                toast.success("Proposta excluída com sucesso!");
             } else {
                 toast.error("Erro ao excluir: " + result.error);
             }
@@ -150,26 +153,26 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
         const newStageId = destination.droppableId;
 
         // 1. Optimistic Update
-        const originalDeals = [...deals];
-        const newDeals = deals.map((deal) => {
-            if (deal.id === draggableId) {
-                return { ...deal, stage_id: newStageId };
+        const originalProposals = [...proposals];
+        const newProposals = proposals.map((p) => {
+            if (p.id === draggableId) {
+                return { ...p, stage_id: newStageId };
             }
-            return deal;
+            return p;
         });
 
-        setDeals(newDeals);
+        setProposals(newProposals);
 
         // 2. Server Action
         try {
-            const result = await updateDealStage(draggableId, newStageId);
+            const result = await updateProposalStage(draggableId, newStageId);
             if (!result.success) {
                 throw new Error(result.error);
             }
-            toast.success("Deal movido com sucesso!");
+            toast.success("Proposta movida com sucesso!");
         } catch (error) {
-            toast.error("Erro ao mover deal");
-            setDeals(originalDeals); // Rollback
+            toast.error("Erro ao mover proposta");
+            setProposals(originalProposals); // Rollback
         }
     };
 
@@ -202,10 +205,10 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
     };
 
     const handleDeleteStage = async (stageId: string) => {
-        const stageDeals = deals.filter(d => d.stage_id === stageId);
+        const stageProposals = proposals.filter(p => p.stage_id === stageId);
 
-        if (stageDeals.length > 0) {
-            toast.error(`Não é possível excluir. Existem ${stageDeals.length} deal(s) nesta etapa.`);
+        if (stageProposals.length > 0) {
+            toast.error(`Não é possível excluir. Existem ${stageProposals.length} propostas nesta etapa.`);
             return;
         }
 
@@ -281,8 +284,8 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
             <DragDropContext onDragEnd={onDragEnd}>
                 <div className="flex h-full gap-4 pb-4 overflow-x-auto">
                     {stages.map((stage) => {
-                        const stageDeals = deals.filter((deal) => deal.stage_id === stage.id);
-                        const totalValue = stageDeals.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0);
+                        const stageProposals = proposals.filter((p) => p.stage_id === stage.id);
+                        const totalValue = stageProposals.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0);
 
                         return (
                             <div key={stage.id} className="flex flex-col w-72 min-w-[288px] bg-muted/30 rounded-xl overflow-hidden shadow-sm border border-border">
@@ -361,7 +364,7 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                                         )}
                                     </div>
                                     <div className="flex items-center justify-between text-xs opacity-90">
-                                        <span>{stageDeals.length} deal{stageDeals.length !== 1 ? "s" : ""}</span>
+                                        <span>{stageProposals.length} proposta{stageProposals.length !== 1 ? "s" : ""}</span>
                                         <span>
                                             {new Intl.NumberFormat("pt-BR", {
                                                 style: "currency",
@@ -381,12 +384,12 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                                                 }`}
                                         >
 
-                                            {stageDeals.length === 0 ? (
+                                            {stageProposals.length === 0 ? (
                                                 <div className="flex flex-col gap-3 py-4">
                                                     <div className="h-24 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-card/50">
 
                                                         <p className="text-center text-[10px] uppercase tracking-wider text-slate-400 font-medium">
-                                                            Aguardando leads
+                                                            Aguardando Propostas
                                                         </p>
                                                     </div>
                                                     <div className="h-24 rounded-lg border border-border bg-card/20 opacity-40"></div>
@@ -394,19 +397,19 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
 
                                                 </div>
                                             ) : (
-                                                stageDeals.map((deal, index) => (
-                                                    <Draggable key={deal.id} draggableId={deal.id} index={index}>
+                                                stageProposals.map((proposal, index) => (
+                                                    <Draggable key={proposal.id} draggableId={proposal.id} index={index}>
                                                         {(provided, snapshot) => (
                                                             <div
                                                                 ref={provided.innerRef}
                                                                 {...provided.draggableProps}
                                                                 {...provided.dragHandleProps}
                                                             >
-                                                                <DealCard
-                                                                    deal={deal}
+                                                                <ProposalCard
+                                                                    proposal={proposal}
                                                                     isDragging={snapshot.isDragging}
-                                                                    onEdit={openEditDeal}
-                                                                    onDelete={handleDeleteDeal}
+                                                                    onEdit={openEditProposal}
+                                                                    onDelete={handleDeleteProposal}
                                                                     stageColor={stage.color}
                                                                 />
                                                             </div>
@@ -482,47 +485,47 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-            {/* Modal de Edição do Negócio (Deal) */}
-            <Dialog open={!!editingDeal} onOpenChange={(open) => !open && setEditingDeal(null)}>
+            {/* Modal de Edição da Proposta */}
+            <Dialog open={!!editingProposal} onOpenChange={(open) => !open && setEditingProposal(null)}>
                 <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Tag className="h-5 w-5 text-indigo-500" />
-                            Editar Negócio
+                            Editar Proposta
                         </DialogTitle>
                         <DialogDescription>
-                            Atualize as informações e adicione notas internas sobre este lead.
+                            Atualize as informações sobre esta proposta no funil.
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-6 py-4">
                         <div className="space-y-4 border-b pb-6">
                             <div className="space-y-2">
-                                <Label htmlFor="deal-title" className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                                    Título do Negócio
+                                <Label htmlFor="proposal-title" className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                    Título da Proposta
                                 </Label>
                                 <Input
-                                    id="deal-title"
-                                    value={dealFormData.title}
-                                    onChange={(e) => setDealFormData({ ...dealFormData, title: e.target.value })}
+                                    id="proposal-title"
+                                    value={proposalFormData.title}
+                                    onChange={(e) => setProposalFormData({ ...proposalFormData, title: e.target.value })}
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="deal-value" className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                                    Valor Estimado (R$)
+                                <Label htmlFor="proposal-total" className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                    Valor Total (R$)
                                 </Label>
                                 <div className="relative">
                                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">R$</span>
                                     <Input
-                                        id="deal-value"
+                                        id="proposal-total"
                                         type="text"
-                                        value={dealFormData.value !== undefined ? dealFormData.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0,00"}
+                                        value={proposalFormData.total !== undefined ? proposalFormData.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0,00"}
                                         onChange={(e) => {
                                             const raw = e.target.value.replace(/\D/g, "");
-                                            setDealFormData({
-                                                ...dealFormData,
-                                                value: raw ? parseInt(raw, 10) / 100 : 0
+                                            setProposalFormData({
+                                                ...proposalFormData,
+                                                total: raw ? parseInt(raw, 10) / 100 : 0
                                             });
                                         }}
                                         className="pl-9"
@@ -532,26 +535,26 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="deal-notes" className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                            <Label htmlFor="proposal-notes" className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
                                 <FileText className="h-3.5 w-3.5" />
-                                Notas e Observações Externas
+                                Notas e Observações
                             </Label>
                             <Textarea
-                                id="deal-notes"
-                                placeholder="Registre aqui detalhes sobre a negociação..."
-                                value={dealFormData.notes}
-                                onChange={(e) => setDealFormData({ ...dealFormData, notes: e.target.value })}
+                                id="proposal-notes"
+                                placeholder="Registre aqui detalhes sobre a proposta..."
+                                value={proposalFormData.notes}
+                                onChange={(e) => setProposalFormData({ ...proposalFormData, notes: e.target.value })}
                                 className="min-h-[150px] resize-none"
                             />
                         </div>
                     </div>
 
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setEditingDeal(null)} disabled={isSavingDeal}>
+                        <Button variant="outline" onClick={() => setEditingProposal(null)} disabled={isSavingProposal}>
                             Cancelar
                         </Button>
-                        <Button onClick={handleSaveDeal} disabled={isSavingDeal}>
-                            {isSavingDeal ? "Salvando..." : "Salvar Alterações"}
+                        <Button onClick={handleSaveProposal} disabled={isSavingProposal}>
+                            {isSavingProposal ? "Salvando..." : "Salvar Alterações"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

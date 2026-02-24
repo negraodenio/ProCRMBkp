@@ -58,10 +58,14 @@ export default async function PipelinePage({
         .eq('pipeline_id', currentPipeline.id)
         .order('order', { ascending: true });
 
-    // 4. Get Deals for THIS ORG & THIS PIPELINE + Proposals
-    const { data: deals } = await supabase
-        .from('deals')
-        .select('*, companies(name), contacts(name), proposals(id, title, status, total)')
+    // 4. Get Proposals for THIS ORG & THIS PIPELINE
+    const { data: proposals } = await supabase
+        .from('proposals')
+        .select(`
+            *,
+            contacts(name, companies(name)),
+            deals(id, title)
+        `)
         .eq('organization_id', profile.organization_id)
         .eq('pipeline_id', currentPipeline.id);
 
@@ -88,7 +92,7 @@ export default async function PipelinePage({
                     <div className="flex-1 overflow-x-auto overflow-y-hidden">
                         <KanbanBoard
                             initialStages={stages || []}
-                            initialDeals={deals || []}
+                            initialProposals={proposals || []}
                         />
                     </div>
                 </main>

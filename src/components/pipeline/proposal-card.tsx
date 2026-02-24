@@ -4,41 +4,38 @@ import { Edit2, Trash2, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
-// Define the Deal type with optional proposals
-type Deal = {
+// Define the Proposal type
+type Proposal = {
     id: string;
     title: string;
-    value: number;
+    total: number;
     contact_id?: string;
-    contact_name?: string; // Legacy field
-    contacts?: { name: string } | null;
-    companies?: { name: string } | null;
     notes?: string;
     stage_id: string;
-    proposals?: {
+    status: string;
+    contacts?: {
+        name: string;
+        companies?: { name: string } | null;
+    } | null;
+    deals?: {
         id: string;
         title: string;
-        status: string;
-        total: number;
-    }[] | null;
+    } | null;
 };
 
-interface DealCardProps {
-    deal: Deal;
+interface ProposalCardProps {
+    proposal: Proposal;
     isDragging: boolean;
-    onEdit?: (deal: any) => void;
+    onEdit?: (proposal: any) => void;
     onDelete?: (id: string) => void;
     stageColor?: string;
 }
 
-export function DealCard({ deal, isDragging, onEdit, onDelete, stageColor }: DealCardProps) {
+export function ProposalCard({ proposal, isDragging, onEdit, onDelete, stageColor }: ProposalCardProps) {
     const router = useRouter();
 
-    // Safety check for proposals
-    const proposal = Array.isArray(deal.proposals) && deal.proposals.length > 0 ? deal.proposals[0] : null;
-
     const handleCardClick = () => {
-        router.push(`/deals/${deal.id}`);
+        router.push(`/proposals/${proposal.id}`);
     };
 
     const getProposalStatusColor = (status: string) => {
@@ -89,14 +86,14 @@ export function DealCard({ deal, isDragging, onEdit, onDelete, stageColor }: Dea
 
             <div className="flex items-start justify-between gap-2 pl-2">
                 <span className="text-sm font-bold text-slate-800 line-clamp-2 pr-10">
-                    {deal.title}
+                    {proposal.title}
                 </span>
 
                 <div className="absolute right-2 top-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all z-20">
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            onEdit?.(deal);
+                            onEdit?.(proposal);
                         }}
                         className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-muted cursor-pointer bg-white/90 backdrop-blur-sm shadow-sm border"
                         title="Editar"
@@ -106,7 +103,7 @@ export function DealCard({ deal, isDragging, onEdit, onDelete, stageColor }: Dea
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            onDelete?.(deal.id);
+                            onDelete?.(proposal.id);
                         }}
                         className="p-1.5 rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-50 bg-white/90 backdrop-blur-sm shadow-sm border"
                         title="Excluir"
@@ -118,39 +115,32 @@ export function DealCard({ deal, isDragging, onEdit, onDelete, stageColor }: Dea
 
             <div className="mt-3 pl-2 space-y-3">
                 <div className="flex flex-col gap-1.5">
-                    {deal.companies?.name && (
+                    {proposal.contacts?.companies?.name && (
                         <div className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-50/50 px-2 py-0.5 rounded w-fit border border-indigo-100">
-                           🏢 {deal.companies.name}
+                           🏢 {proposal.contacts.companies.name}
                         </div>
                     )}
                     <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
-                        👤 {deal.contacts?.name || deal.contact_name || 'Sem contato'}
+                        👤 {proposal.contacts?.name || 'Sem contato'}
                     </p>
+                    {proposal.deals?.title && (
+                        <p className="text-[10px] text-slate-400 font-medium truncate">
+                           📁 Negócio: {proposal.deals.title}
+                        </p>
+                    )}
                 </div>
 
-                {/* ATTACHED PROPOSAL INDICATOR */}
-                {proposal && (
-                    <div className="bg-slate-50/50 rounded-lg p-2.5 border border-dashed border-slate-200 group/prop hover:border-cyan-300 transition-colors">
-                        <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-600 truncate">
-                                <FileText className="h-3 w-3 text-cyan-600 shrink-0" />
-                                <span className="truncate" title={proposal.title}>{proposal.title}</span>
-                            </div>
-                            <div className={cn("text-[9px] px-1.5 rounded-full font-black border uppercase shrink-0", getProposalStatusColor(proposal.status))}>
-                                {getProposalStatusLabel(proposal.status)}
-                            </div>
-                        </div>
-                        <div className="text-[10px] font-black text-cyan-700 mt-1">
-                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.total)}
-                        </div>
+                <div className="flex items-center justify-between gap-2">
+                    <div className={cn("text-[9px] px-1.5 rounded-full font-black border uppercase shrink-0", getProposalStatusColor(proposal.status))}>
+                        {getProposalStatusLabel(proposal.status)}
                     </div>
-                )}
+                </div>
 
                 <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                     <span className="text-sm font-black text-slate-900">
-                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(deal.value)}
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.total)}
                     </span>
-                    {deal.notes && (
+                    {proposal.notes && (
                         <div className="h-2 w-2 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.4)]" title="Tem notas" />
                     )}
                 </div>

@@ -9,8 +9,9 @@ import {
     Edit,
     Send,
     MessageCircle,
-    Copy,
     Trash2,
+    LayoutDashboard,
+    Share2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,6 +89,13 @@ export default function ProposalsPage() {
     const [loading, setLoading] = useState(true);
     const [organizationId, setOrganizationId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
+    const [pipelines, setPipelines] = useState<{ id: string; name: string }[]>([]);
+    const [allStages, setAllStages] = useState<{ id: string; name: string; pipeline_id: string }[]>([]);
+    const [transferringProposal, setTransferringProposal] = useState<Proposal | null>(null);
+    const [transferData, setTransferData] = useState({
+        pipelineId: "",
+        stageId: ""
+    });
     const [formData, setFormData] = useState({
         contactId: "",
         title: "",
@@ -113,7 +121,9 @@ export default function ProposalsPage() {
                     setOrganizationId(profile.organization_id);
                     await Promise.all([
                         loadProposals(profile.organization_id),
-                        loadContacts(profile.organization_id)
+                        loadContacts(profile.organization_id),
+                        loadPipelines(profile.organization_id),
+                        loadStages(profile.organization_id)
                     ]);
                 }
             }
@@ -153,6 +163,16 @@ export default function ProposalsPage() {
             .eq("organization_id", id)
             .order("name");
         setContacts((data || []).map(c => ({ id: c.id, name: `${c.name}${c.type === 'client' ? ' (Cliente)' : ' (Lead)'}` })));
+    }
+
+    async function loadPipelines(orgId: string) {
+        const { data } = await supabase.from("pipelines").select("id, name").eq("organization_id", orgId);
+        setPipelines(data || []);
+    }
+
+    async function loadStages(orgId: string) {
+        const { data } = await supabase.from("stages").select("id, name, pipeline_id").eq("organization_id", orgId).order("order");
+        setAllStages(data || []);
     }
 
     async function handleSubmit(e: React.FormEvent) {
@@ -251,13 +271,26 @@ export default function ProposalsPage() {
         loadProposals();
     }
 
-    async function deleteProposal(id: string) {
-        if (!organizationId) return;
-        const { error } = await supabase.from("proposals").delete().eq("id", id).eq("organization_id", organizationId);
+    async function handleTransferSubmit() {
+        if (!transferringProposal || !transferData.pipelineId || !transferData.stageId) {
+            toast.error("Selecione o funil e a etapa");
+            return;
+        }
+
+        const { error } = await supabase
+            .from("proposals")
+            .update({
+                pipeline_id: transferData.pipelineId,
+                stage_id: transferData.stageId,
+                updated_at: new Date().toISOString()
+            })
+            .eq("id", transferringProposal.id);
+
         if (error) {
-            toast.error("Erro ao excluir proposta");
+            toast.error("Erro ao enviar para o pipeline");
         } else {
-            toast.success("Proposta excluída!");
+            toast.success("Proposta enviada ao pipeline!");
+            setTransferringProposal(null);
             loadProposals();
         }
     }
@@ -490,6 +523,15 @@ export default function ProposalsPage() {
                                                             <Button variant="ghost" size="icon" title="Visualizar" onClick={() => setViewingProposal(proposal)}>
                                                                 <Eye className="h-4 w-4" />
                                                             </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                title="Lançar no Funil (Pipeline)"
+                                                                className="text-blue-600 hover:text-blue-700"
+                                                                onClick={() => setTransferringProposal(proposal)}
+                                                            >
+                                                                <LayoutDashboard className="h-4 w-4" />
+                                                            </Button>
                                                             <Button variant="ghost" size="icon" title="Editar" onClick={() => handleEdit(proposal)}>
                                                                 <Edit className="h-4 w-4" />
                                                             </Button>
@@ -576,6 +618,60 @@ export default function ProposalsPage() {
                         </div>
                         <DialogFooter>
                             <Button onClick={() => setViewingProposal(null)}>Fechar</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                <Dialog open={!!transferringProposal} onOpenChange={(open) => !open && setTransferringProposal(null)}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Enviar para o Pipeline</DialogTitle>
+                            <DialogDescription>
+                                Escolha em qual funil e etapa esta proposta deve aparecer.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                                <Label>Selecione o Funil</Label>
+                                <Select
+                                    value={transferData.pipelineId}
+                                    onValueChange={(v) => setTransferData({ ...transferData, pipelineId: v, stageId: "" })}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Escolha um funil" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {pipelines.map(p => (
+                                            <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Selecione a Etapa</Label>
+                                <Select
+                                    value={transferData.stageId}
+                                    onValueChange={(v) => setTransferData({ ...transferData, stageId: v })}
+                                    disabled={!transferData.pipelineId}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Escolha uma etapa" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {allStages
+                                            .filter(s => s.pipeline_id === transferData.pipelineId)
+                                            .map(s => (
+                                                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                            ))
+                                        }
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setTransferringProposal(null)}>Cancelar</Button>
+                            <Button onClick={handleTransferSubmit} className="bg-indigo-600 hover:bg-indigo-700">Confirmar Envio</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
