@@ -318,7 +318,7 @@ export function LeadList() {
     toast.success("Lead criado e adicionado ao Pipeline!");
     resetForm();
     setOpen(false);
-    loadLeads(1, true);
+    loadLeads(0, true);
   }
 
   function handleEditLead(lead: Lead) {
@@ -412,22 +412,28 @@ export function LeadList() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Leads</h1>
+          <h1 className="text-3xl font-bold">Contatos</h1>
           <p className="text-muted-foreground">
             Gerencie seus leads e oportunidades
           </p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog
+          open={open}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) resetForm();
+            setOpen(isOpen);
+          }}
+        >
           <DialogTrigger asChild>
             <Button className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="mr-2 h-4 w-4" /> Novo Lead
+              <Plus className="mr-2 h-4 w-4" /> Novo Contato
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>{editingLeadId ? "Editar Lead" : "Novo Lead"}</DialogTitle>
+              <DialogTitle>{editingLeadId ? "Editar Contato" : "Novo Contato"}</DialogTitle>
               <DialogDescription>
-                {editingLeadId ? "Atualize as informações do lead." : "Adicione um novo lead manualmente."}
+                {editingLeadId ? "Atualize as informações do contato." : "Adicione um novo contato manualmente."}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -517,7 +523,7 @@ export function LeadList() {
                   Cancelar
                 </Button>
                 <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                  {editingLeadId ? "Salvar Alterações" : "Criar Lead"}
+                  {editingLeadId ? "Salvar Alterações" : "Salvar Contato"}
                 </Button>
               </DialogFooter>
             </form>

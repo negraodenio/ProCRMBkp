@@ -2,13 +2,18 @@ import { KanbanBoard } from "@/components/pipeline/kanban-board";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { createClient } from "@/lib/supabase/server";
+import { PipelineSelector } from "@/components/pipeline/pipeline-selector";
 
-export default async function PipelinePage() {
+export default async function PipelinePage({
+    searchParams
+}: {
+    searchParams: { pipelineId?: string }
+}) {
     const supabase = await createClient();
 
     // 0. Get User Profile for Org Isolation
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null; // Or redirect
+    if (!user) return null;
 
     const { data: profile } = await supabase
         .from('profiles')
@@ -18,15 +23,14 @@ export default async function PipelinePage() {
 
     if (!profile?.organization_id) return null;
 
-    // 1. Get Default Pipeline for THIS ORG
-    const { data: pipeline } = await supabase
+    // 1. Get ALL Pipelines for this org
+    const { data: pipelines } = await supabase
         .from('pipelines')
-        .select('id')
+        .select('id, name, is_default')
         .eq('organization_id', profile.organization_id)
-        .eq('is_default', true)
-        .single();
+        .order('created_at', { ascending: true });
 
-    if (!pipeline) {
+    if (!pipelines || pipelines.length === 0) {
         return (
             <div className="flex min-h-screen">
                 <Sidebar />
@@ -42,19 +46,24 @@ export default async function PipelinePage() {
         );
     }
 
-    // 2. Get Stages
+    // 2. Select current pipeline
+    const currentPipeline = searchParams.pipelineId
+        ? pipelines.find(p => p.id === searchParams.pipelineId) || pipelines[0]
+        : pipelines.find(p => p.is_default) || pipelines[0];
+
+    // 3. Get Stages for current pipeline
     const { data: stages } = await supabase
         .from('stages')
         .select('*')
-        .eq('pipeline_id', pipeline.id)
+        .eq('pipeline_id', currentPipeline.id)
         .order('order', { ascending: true });
 
-    // 3. Get Deals for THIS ORG
+    // 4. Get Deals for THIS ORG & THIS PIPELINE + Proposals
     const { data: deals } = await supabase
         .from('deals')
-        .select('*, companies(name), contacts(name)')
+        .select('*, companies(name), contacts(name), proposals(id, title, status, total)')
         .eq('organization_id', profile.organization_id)
-        .in('stage_id', (stages || []).map(s => s.id));
+        .eq('pipeline_id', currentPipeline.id);
 
     return (
         <div className="flex min-h-screen">
@@ -62,15 +71,20 @@ export default async function PipelinePage() {
             <div className="flex flex-1 flex-col md:ml-64">
                 <Header />
                 <main className="flex-1 p-6 bg-slate-50 dark:bg-background">
-                    <div className="space-y-4 mb-6">
-                        <h1 className="text-3xl font-bold">Kanban</h1>
-                        <div className="bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 rounded-lg p-3 flex items-center gap-2">
-                            <span className="text-blue-500">📋</span>
-                            <span className="text-blue-700 dark:text-blue-300 text-sm">
-                                Arraste os cards entre as colunas para atualizar o status automaticamente
-                            </span>
+                    <div className="flex items-center justify-between mb-8">
+                        <PipelineSelector
+                            pipelines={pipelines}
+                            currentPipelineId={currentPipeline.id}
+                        />
+                        <div className="flex items-center gap-2">
+                             <div className="flex -space-x-2">
+                                <div className="h-8 w-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-bold">RT</div>
+                                <div className="h-8 w-8 rounded-full border-2 border-white bg-cyan-100 flex items-center justify-center text-[10px] font-bold text-cyan-700">+3</div>
+                             </div>
+                             <button className="text-xs font-bold text-slate-500 ml-2">Minhas negociações</button>
                         </div>
                     </div>
+
                     <div className="flex-1 overflow-x-auto overflow-y-hidden">
                         <KanbanBoard
                             initialStages={stages || []}

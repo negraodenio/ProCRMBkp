@@ -35,6 +35,12 @@ type Deal = {
     contact_name?: string;
     stage_id: string;
     notes?: string;
+    proposals?: {
+        id: string;
+        title: string;
+        status: string;
+        total: number;
+    }[] | null;
 };
 
 type Stage = {

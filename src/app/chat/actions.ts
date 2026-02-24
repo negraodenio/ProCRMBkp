@@ -183,3 +183,93 @@ export async function clearChatMessagesAction(conversationId: string) {
         return { error: "Erro ao limpar histórico: " + (err.message || "Erro desconhecido") };
     }
 }
+
+export async function getTransferData() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Não autorizado" };
+
+    const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
+    if (!profile) return { error: "Perfil não encontrado" };
+
+    const [departmentsRes, usersRes] = await Promise.all([
+        supabase.from("departments").select("*").eq("organization_id", profile.organization_id),
+        supabase.from("profiles").select("id, full_name").eq("organization_id", profile.organization_id)
+    ]);
+
+    return {
+        departments: departmentsRes.data || [],
+        users: usersRes.data || []
+    };
+}
+
+export async function transferConversation(
+    conversationId: string,
+    targetUserId: string | null,
+    departmentId: string | null,
+    internalNote: string
+) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Não autorizado" };
+
+    try {
+        const { data: profile } = await supabase.from("profiles").select("organization_id, full_name").eq("id", user.id).single();
+        if (!profile) return { error: "Perfil não encontrado" };
+
+        // 1. Update Conversation
+        const updateData: any = {
+            last_transferred_at: new Date().toISOString(),
+            last_transferred_by: user.id
+        };
+
+        if (targetUserId) updateData.assigned_to = targetUserId;
+        if (departmentId) updateData.department_id = departmentId;
+
+        const { error: convErr } = await supabase
+            .from("conversations")
+            .update(updateData)
+            .eq("id", conversationId)
+            .eq("organization_id", profile.organization_id);
+
+        if (convErr) throw convErr;
+
+        // 2. Log Internal Note (if any)
+        if (internalNote.trim()) {
+            await supabase.from("messages").insert({
+                conversation_id: conversationId,
+                organization_id: profile.organization_id,
+                content: `📝 NOTA INTERNA: ${internalNote}`,
+                direction: "internal",
+                status: "sent",
+                sender_name: profile.full_name
+            });
+        }
+
+        // 3. Log System Message for Transfer
+        let transferMsg = `Ticket transferido`;
+        if (targetUserId) {
+            const { data: targetUser } = await supabase.from("profiles").select("full_name").eq("id", targetUserId).single();
+            transferMsg += ` para ${targetUser?.full_name || 'Usuário'}`;
+        }
+        if (departmentId) {
+            const { data: dept } = await supabase.from("departments").select("name").eq("id", departmentId).single();
+            transferMsg += ` (Setor: ${dept?.name || 'Geral'})`;
+        }
+
+        await supabase.from("messages").insert({
+            conversation_id: conversationId,
+            organization_id: profile.organization_id,
+            content: `📢 ${transferMsg}`,
+            direction: "system",
+            status: "sent",
+            sender_name: "Sistema"
+        });
+
+        revalidatePath("/chat");
+        return { success: true };
+    } catch (error: any) {
+        console.error("Transfer error:", error);
+        return { error: "Falha na transferência: " + error.message };
+    }
+}

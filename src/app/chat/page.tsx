@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Send, User, Trash2, Tag, Plus, CheckCircle2, ArrowLeft, Brain, Eraser } from "lucide-react";
+import { MessageSquare, Send, User, Trash2, Tag, Plus, CheckCircle2, ArrowLeft, Brain, Eraser, Building2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { TransferDialog } from "@/components/chat/transfer-dialog";
+import { MoveRight, History } from "lucide-react";
 
 type Conversation = {
     id: string;
@@ -28,8 +30,18 @@ type Conversation = {
     unread_count: number;
     status: string;
     ai_enabled: boolean;
+    assigned_to?: string;
+    department_id?: string;
+    last_transferred_by?: string;
     contacts?: {
         name: string;
+    };
+    profiles?: {
+        full_name: string;
+    };
+    departments?: {
+        name: string;
+        color: string;
     };
 };
 
@@ -40,6 +52,7 @@ type Message = {
     created_at: string;
     status: string;
     sender_name?: string;
+    type?: "whatsapp" | "system" | "internal";
 };
 
 
@@ -66,7 +79,7 @@ export default function ChatPage() {
 
             const { data, error } = await supabase
                 .from("conversations")
-                .select("*, contacts(name)")
+                .select("*, contacts(name), profiles:assigned_to(full_name), departments(name, color)")
                 .eq("organization_id", profile.organization_id)
                 .order("last_message_at", { ascending: false });
 
@@ -312,6 +325,7 @@ export default function ChatPage() {
     };
 
     const selectedChat = conversations.find(c => c.id === selectedId);
+    const [transferDialogOpen, setTransferDialogOpen] = useState(false);
 
     return (
         <div className="flex h-screen bg-background overflow-hidden text-foreground">
@@ -393,13 +407,20 @@ export default function ChatPage() {
                                                     </div>
                                                 </div>
 
-                                                <button
-                                                    onClick={(e) => handleDelete(e, chat.id)}
-                                                    className="p-1 text-muted-foreground/40 hover:text-red-500 transition-colors"
-                                                    title="Excluir conversa"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
+                                                <div className="flex flex-col items-end gap-2">
+                                                    <button
+                                                        onClick={(e) => handleDelete(e, chat.id)}
+                                                        className="p-1 text-muted-foreground/40 hover:text-red-500 transition-colors"
+                                                        title="Excluir conversa"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                    {chat.departments?.name && (
+                                                        <Badge variant="outline" className={`text-[9px] px-1 py-0 h-4 border-none shadow-none font-black ${chat.departments.color || 'bg-slate-200'} text-white`}>
+                                                            {chat.departments.name.toUpperCase()}
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
@@ -445,6 +466,18 @@ export default function ChatPage() {
                                                         <Plus className="h-3 w-3" /> <span className="hidden sm:inline">Adicionar</span>
                                                     </button>
                                                 </div>
+                                                <div className="flex items-center gap-2 pt-1">
+                                                    {selectedChat?.departments?.name && (
+                                                        <Badge variant="outline" className="text-[10px] font-bold border-cyan-200 bg-cyan-50 text-cyan-700 flex items-center gap-1">
+                                                            <Building2 className="h-3 w-3" /> {selectedChat.departments.name}
+                                                        </Badge>
+                                                    )}
+                                                    {selectedChat?.profiles?.full_name && (
+                                                        <Badge variant="outline" className="text-[10px] font-bold border-indigo-200 bg-indigo-50 text-indigo-700 flex items-center gap-1">
+                                                            <User className="h-3 w-3" /> {selectedChat.profiles.full_name}
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -461,6 +494,17 @@ export default function ChatPage() {
                                         >
                                             <Eraser className="h-4 w-4" />
                                             Resetar IA
+                                        </Button>
+
+                                        {/* Transfer Button */}
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setTransferDialogOpen(true)}
+                                            className="h-9 px-3 text-xs border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 bg-indigo-50/30 font-bold gap-1.5 rounded-xl"
+                                        >
+                                            <MoveRight className="h-4 w-4" />
+                                            Transferir
                                         </Button>
 
                                         {/* AI Toggle */}
@@ -515,7 +559,14 @@ export default function ChatPage() {
                                                         <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                                                     </div>
                                                 </div>
-                                            ))}
+                                            );
+                                        })}
+                                        {messages.length === 0 && (
+                                           <div className="flex flex-col items-center justify-center h-64 text-center space-y-2 opacity-30">
+                                               <History className="h-12 w-12" />
+                                               <p className="text-sm font-medium">Nenhuma mensagem no histórico</p>
+                                           </div>
+                                        )}
                                             <div ref={messagesEndRef} />
                                         </div>
                                     </ScrollArea>
@@ -576,6 +627,15 @@ export default function ChatPage() {
 
                 </main>
             </div>
+            <TransferDialog
+                isOpen={transferDialogOpen}
+                onClose={() => setTransferDialogOpen(false)}
+                conversationId={selectedId || ""}
+                onSuccess={() => {
+                    fetchConversations();
+                    if (selectedId) fetchMessages(selectedId);
+                }}
+            />
         </div>
     );
 }
