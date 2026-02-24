@@ -50,8 +50,8 @@ import { createClient } from "@/lib/supabase/client";
 
 interface ProposalItem {
     id?: string;
+    unit_price: number;
     name: string;
-    value: number;
     currency: string;
 }
 
@@ -59,7 +59,7 @@ interface Proposal {
     id: string;
     number: string;
     title: string;
-    value: number;
+    total: number;
     currency: string;
     status: string;
     created_at: string;
@@ -161,8 +161,8 @@ export default function ProposalsPage() {
             .order("created_at", { ascending: false });
 
         if (error) {
-            console.error("Error loading proposals:", error);
-            toast.error("Erro ao carregar propostas");
+            console.error("DEBUG: Error loading proposals:", error);
+            toast.error(`Erro ao carregar propostas: ${error.message}`);
         } else {
             setProposals(data || []);
         }
@@ -208,7 +208,7 @@ export default function ProposalsPage() {
                 .update({
                     contact_id: formData.contactId,
                     title: formData.title,
-                    value: parsedValue,
+                    total: parsedValue,
                     currency: formData.currency,
                     valid_until: validUntil.toISOString().split("T")[0],
                     content: { description: formData.content },
@@ -216,8 +216,8 @@ export default function ProposalsPage() {
                 .eq("id", editingProposalId);
 
             if (error) {
-                console.error("Error updating proposal:", error);
-                toast.error("Erro ao atualizar proposta");
+                console.error("DEBUG: Error updating proposal:", error);
+                toast.error(`Erro ao atualizar proposta: ${error.message}`);
                 return;
             }
 
@@ -231,14 +231,18 @@ export default function ProposalsPage() {
                     proposal_id: editingProposalId,
                     organization_id: organizationId,
                     name: item.name,
-                    unit_price: item.value,
-                    total_price: item.value,
+                    unit_price: item.unit_price,
+                    total_price: item.unit_price,
                     quantity: 1,
                     currency: item.currency
                 }));
 
             if (itemsToInsert.length > 0) {
-                await supabase.from("proposal_items").insert(itemsToInsert);
+                const { error: itemsError } = await supabase.from("proposal_items").insert(itemsToInsert);
+                if (itemsError) {
+                    console.error("DEBUG: Error inserting items:", itemsError);
+                    toast.error(`Erro ao salvar itens: ${itemsError.message}`);
+                }
             }
 
             toast.success("Proposta atualizada com sucesso!");
@@ -248,7 +252,7 @@ export default function ProposalsPage() {
                 contact_id: formData.contactId,
                 number: proposalNumber,
                 title: formData.title,
-                value: parsedValue,
+                total: parsedValue,
                 currency: formData.currency,
                 valid_until: validUntil.toISOString().split("T")[0],
                 status: "draft",
@@ -256,8 +260,8 @@ export default function ProposalsPage() {
             }).select().single();
 
             if (error) {
-                console.error("Error creating proposal:", error);
-                toast.error("Erro ao criar proposta");
+                console.error("DEBUG: Error creating proposal:", error);
+                toast.error(`Erro ao criar proposta: ${error.message}`);
                 return;
             }
 
@@ -270,41 +274,45 @@ export default function ProposalsPage() {
                     proposal_id: proposalId,
                     organization_id: organizationId,
                     name: item.name,
-                    unit_price: item.value,
-                    total_price: item.value,
+                    unit_price: item.unit_price,
+                    total_price: item.unit_price,
                     quantity: 1,
                     currency: item.currency
                 }));
 
             if (itemsToInsert.length > 0) {
-                await supabase.from("proposal_items").insert(itemsToInsert);
+                const { error: itemsError } = await supabase.from("proposal_items").insert(itemsToInsert);
+                if (itemsError) {
+                    console.error("DEBUG: Error inserting items:", itemsError);
+                    toast.error(`Erro ao salvar itens: ${itemsError.message}`);
+                }
             }
 
             toast.success("Proposta criada com sucesso!");
         }
 
         setFormData({ contactId: "", title: "", value: "", currency: "BRL", validDays: "30", content: "" });
-        setProposalItems([{ name: "", value: 0, currency: "BRL" }]);
+        setProposalItems([{ name: "", unit_price: 0, currency: "BRL" }]);
         setEditingProposalId(null);
         setOpen(false);
         loadProposals();
     }
 
     function calculateTotal(items: ProposalItem[]) {
-        return items.reduce((acc, curr) => acc + curr.value, 0);
+        return items.reduce((acc, curr) => acc + curr.unit_price, 0);
     }
 
     function handleAddItem() {
-        setProposalItems([...proposalItems, { name: "", value: 0, currency: formData.currency }]);
+        setProposalItems([...proposalItems, { name: "", unit_price: 0, currency: formData.currency }]);
     }
 
     function handleRemoveItem(index: number) {
         const newItems = proposalItems.filter((_, i) => i !== index);
-        setProposalItems(newItems.length > 0 ? newItems : [{ name: "", value: 0, currency: "BRL" }]);
+        setProposalItems(newItems.length > 0 ? newItems : [{ name: "", unit_price: 0, currency: formData.currency }]);
 
         // Update total value in formData
-        const total = calculateTotal(newItems);
-        setFormData(prev => ({ ...prev, value: total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }));
+        const totalAmount = calculateTotal(newItems);
+        setFormData(prev => ({ ...prev, value: totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }));
     }
 
     function handleUpdateItem(index: number, field: keyof ProposalItem, value: any) {
@@ -321,12 +329,14 @@ export default function ProposalsPage() {
         setFormData({
             contactId: proposal.contact_id,
             title: proposal.title,
-            value: proposal.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            value: (proposal.total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
             currency: proposal.currency || "BRL",
             validDays: "30",
             content: proposal.content?.description || "",
         });
-        setProposalItems(proposal.items && proposal.items.length > 0 ? proposal.items : [{ name: "", value: 0, currency: "BRL" }]);
+        setProposalItems(proposal.items && proposal.items.length > 0
+            ? proposal.items.map(item => ({ ...item, unit_price: item.unit_price || 0 }))
+            : [{ name: "", unit_price: 0, currency: "BRL" }]);
         setEditingProposalId(proposal.id);
         setOpen(true);
     }
@@ -335,12 +345,14 @@ export default function ProposalsPage() {
         setFormData({
             contactId: proposal.contact_id,
             title: proposal.title + " (Cópia)",
-            value: proposal.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            value: (proposal.total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
             currency: proposal.currency || "BRL",
             validDays: "30",
             content: proposal.content?.description || "",
         });
-        setProposalItems(proposal.items ? proposal.items.map(item => ({ ...item, id: undefined })) : [{ name: "", value: 0, currency: "BRL" }]);
+        setProposalItems(proposal.items
+            ? proposal.items.map(item => ({ ...item, id: undefined, unit_price: item.unit_price || 0 }))
+            : [{ name: "", unit_price: 0, currency: "BRL" }]);
         setEditingProposalId(null);
         setOpen(true);
     }
@@ -555,11 +567,11 @@ export default function ProposalsPage() {
                                                                 <Input
                                                                     placeholder="0,00"
                                                                     className="pl-7 text-right"
-                                                                    value={item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                                    value={(item.unit_price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                                     onChange={(e) => {
                                                                         const raw = e.target.value.replace(/\D/g, "");
                                                                         const num = raw ? parseInt(raw, 10) / 100 : 0;
-                                                                        handleUpdateItem(index, "value", num);
+                                                                        handleUpdateItem(index, "unit_price", num);
                                                                     }}
                                                                 />
                                                             </div>
@@ -684,7 +696,7 @@ export default function ProposalsPage() {
                                                         </div>
                                                     </TableCell>
                                                     <TableCell className="font-medium">
-                                                        {formatCurrency(proposal.value)}
+                                                        {formatCurrency(proposal.total, proposal.currency)}
                                                     </TableCell>
                                                     <TableCell>
                                                         <Badge className={statusColors[proposal.status] || "bg-gray-100"}>
@@ -775,7 +787,7 @@ export default function ProposalsPage() {
                                 </div>
                                 <div>
                                     <p className="text-sm font-semibold">Valor Total</p>
-                                    <p className="text-sm">{viewingProposal ? formatCurrency(viewingProposal.value, viewingProposal.currency) : "R$ 0,00"}</p>
+                                    <p className="text-sm">{viewingProposal ? formatCurrency(viewingProposal.total, viewingProposal.currency) : "R$ 0,00"}</p>
                                 </div>
                                 <div>
                                     <p className="text-sm font-semibold">Status</p>
