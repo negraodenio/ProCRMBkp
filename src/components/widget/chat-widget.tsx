@@ -143,7 +143,29 @@ export function ChatWidget({
                                 color: msg.role === "user" ? "#fff" : (colors.agentMsg === '#ffffff' ? '#1e293b' : '#fff')
                             }}
                         >
-                            <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                            <p className="leading-relaxed whitespace-pre-wrap">
+                                {msg.role === "assistant" ? (() => {
+                                    try {
+                                        // Try to parse if it looks like JSON
+                                        if (msg.content.trim().startsWith('{')) {
+                                            const cleaned = msg.content.trim().replace(/^```json\n?/, "").replace(/\n?```$/, "");
+                                            const parsed = JSON.parse(cleaned);
+
+                                            if (parsed && typeof parsed === 'object') {
+                                                const answer = parsed.answer;
+                                                const nextStep = parsed.next_step;
+
+                                                if (answer && nextStep) return `${answer}\n\n${nextStep}`;
+                                                if (answer) return answer;
+                                                if (nextStep) return nextStep;
+                                            }
+                                        }
+                                    } catch (e) {
+                                        // Fallback to raw content
+                                    }
+                                    return msg.content;
+                                })() : msg.content}
+                            </p>
                         </div>
                     </div>
                 ))}
