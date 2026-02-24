@@ -9,6 +9,7 @@ import {
     Edit,
     Send,
     MessageCircle,
+    Copy,
     Trash2,
     LayoutDashboard,
     Share2,
@@ -269,6 +270,17 @@ export default function ProposalsPage() {
             .eq("id", proposal.id);
         toast.success("Proposta enviada via Email!");
         loadProposals();
+    }
+
+    async function deleteProposal(id: string) {
+        if (!organizationId) return;
+        const { error } = await supabase.from("proposals").delete().eq("id", id).eq("organization_id", organizationId);
+        if (error) {
+            toast.error("Erro ao excluir proposta");
+        } else {
+            toast.success("Proposta excluída!");
+            loadProposals();
+        }
     }
 
     async function handleTransferSubmit() {
