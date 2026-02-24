@@ -9,6 +9,7 @@ type Proposal = {
     id: string;
     title: string;
     total: number;
+    currency?: string;
     contact_id?: string;
     notes?: string;
     stage_id: string;
@@ -138,7 +139,7 @@ export function ProposalCard({ proposal, isDragging, onEdit, onDelete, stageColo
 
                 <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                     <span className="text-sm font-black text-slate-900">
-                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.total)}
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: proposal.currency || 'BRL' }).format(proposal.total)}
                     </span>
                     {proposal.notes && (
                         <div className="h-2 w-2 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.4)]" title="Tem notas" />

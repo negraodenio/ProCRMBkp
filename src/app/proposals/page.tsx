@@ -48,11 +48,19 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
+interface ProposalItem {
+    id?: string;
+    name: string;
+    value: number;
+    currency: string;
+}
+
 interface Proposal {
     id: string;
     number: string;
     title: string;
     value: number;
+    currency: string;
     status: string;
     created_at: string;
     valid_until: string | null;
@@ -63,6 +71,7 @@ interface Proposal {
     contact?: {
         name: string;
     };
+    items?: ProposalItem[];
 }
 
 const statusColors: Record<string, string> = {
@@ -101,9 +110,13 @@ export default function ProposalsPage() {
         contactId: "",
         title: "",
         value: "",
+        currency: "BRL",
         validDays: "30",
         content: "",
     });
+    const [proposalItems, setProposalItems] = useState<ProposalItem[]>([
+        { name: "", value: 0, currency: "BRL" }
+    ]);
 
     const supabase = createClient();
 
@@ -141,7 +154,8 @@ export default function ProposalsPage() {
             .from("proposals")
             .select(`
                 *,
-                contact:contacts(name)
+                contact:contacts(name),
+                items:proposal_items(*)
             `)
             .eq("organization_id", id)
             .order("created_at", { ascending: false });
@@ -186,6 +200,8 @@ export default function ProposalsPage() {
 
         const parsedValue = parseFloat(formData.value.replace(/\./g, "").replace(",", ".")) || 0;
 
+        let proposalId = editingProposalId;
+
         if (editingProposalId) {
             const { error } = await supabase
                 .from("proposals")
@@ -193,6 +209,7 @@ export default function ProposalsPage() {
                     contact_id: formData.contactId,
                     title: formData.title,
                     value: parsedValue,
+                    currency: formData.currency,
                     valid_until: validUntil.toISOString().split("T")[0],
                     content: { description: formData.content },
                 })
@@ -203,31 +220,97 @@ export default function ProposalsPage() {
                 toast.error("Erro ao atualizar proposta");
                 return;
             }
+
+            // Update items
+            // Simple approach: delete all and re-insert
+            await supabase.from("proposal_items").delete().eq("proposal_id", editingProposalId);
+
+            const itemsToInsert = proposalItems
+                .filter(item => item.name.trim() !== "")
+                .map(item => ({
+                    proposal_id: editingProposalId,
+                    organization_id: organizationId,
+                    name: item.name,
+                    value: item.value,
+                    currency: item.currency
+                }));
+
+            if (itemsToInsert.length > 0) {
+                await supabase.from("proposal_items").insert(itemsToInsert);
+            }
+
             toast.success("Proposta atualizada com sucesso!");
         } else {
-            const { error } = await supabase.from("proposals").insert({
+            const { data: newProposal, error } = await supabase.from("proposals").insert({
                 organization_id: organizationId,
                 contact_id: formData.contactId,
                 number: proposalNumber,
                 title: formData.title,
                 value: parsedValue,
+                currency: formData.currency,
                 valid_until: validUntil.toISOString().split("T")[0],
                 status: "draft",
                 content: { description: formData.content },
-            });
+            }).select().single();
 
             if (error) {
                 console.error("Error creating proposal:", error);
                 toast.error("Erro ao criar proposta");
                 return;
             }
+
+            proposalId = newProposal.id;
+
+            // Insert items
+            const itemsToInsert = proposalItems
+                .filter(item => item.name.trim() !== "")
+                .map(item => ({
+                    proposal_id: proposalId,
+                    organization_id: organizationId,
+                    name: item.name,
+                    value: item.value,
+                    currency: item.currency
+                }));
+
+            if (itemsToInsert.length > 0) {
+                await supabase.from("proposal_items").insert(itemsToInsert);
+            }
+
             toast.success("Proposta criada com sucesso!");
         }
 
-        setFormData({ contactId: "", title: "", value: "", validDays: "30", content: "" });
+        setFormData({ contactId: "", title: "", value: "", currency: "BRL", validDays: "30", content: "" });
+        setProposalItems([{ name: "", value: 0, currency: "BRL" }]);
         setEditingProposalId(null);
         setOpen(false);
         loadProposals();
+    }
+
+    function calculateTotal(items: ProposalItem[]) {
+        return items.reduce((acc, curr) => acc + curr.value, 0);
+    }
+
+    function handleAddItem() {
+        setProposalItems([...proposalItems, { name: "", value: 0, currency: "BRL" }]);
+    }
+
+    function handleRemoveItem(index: number) {
+        const newItems = proposalItems.filter((_, i) => i !== index);
+        setProposalItems(newItems.length > 0 ? newItems : [{ name: "", value: 0, currency: "BRL" }]);
+
+        // Update total value in formData
+        const total = calculateTotal(newItems);
+        setFormData(prev => ({ ...prev, value: total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }));
+    }
+
+    function handleUpdateItem(index: number, field: keyof ProposalItem, value: any) {
+        const newItems = [...proposalItems];
+        newItems[index] = { ...newItems[index], [field]: value };
+        setProposalItems(newItems);
+
+        // Update total value in formData
+        const total = calculateTotal(newItems);
+        setFormData(prev => ({ ...prev, value: total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }));
     }
 
     function handleEdit(proposal: Proposal) {
@@ -235,9 +318,11 @@ export default function ProposalsPage() {
             contactId: proposal.contact_id,
             title: proposal.title,
             value: proposal.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            currency: proposal.currency || "BRL",
             validDays: "30",
             content: proposal.content?.description || "",
         });
+        setProposalItems(proposal.items && proposal.items.length > 0 ? proposal.items : [{ name: "", value: 0, currency: "BRL" }]);
         setEditingProposalId(proposal.id);
         setOpen(true);
     }
@@ -247,9 +332,11 @@ export default function ProposalsPage() {
             contactId: proposal.contact_id,
             title: proposal.title + " (Cópia)",
             value: proposal.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            currency: proposal.currency || "BRL",
             validDays: "30",
             content: proposal.content?.description || "",
         });
+        setProposalItems(proposal.items ? proposal.items.map(item => ({ ...item, id: undefined })) : [{ name: "", value: 0, currency: "BRL" }]);
         setEditingProposalId(null);
         setOpen(true);
     }
@@ -314,10 +401,11 @@ export default function ProposalsPage() {
             p.contact?.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const formatCurrency = (value: number) => {
+    const formatCurrency = (value: number, currencyCode?: string) => {
+        const code = currencyCode || formData.currency || "BRL";
         return new Intl.NumberFormat("pt-BR", {
             style: "currency",
-            currency: "BRL",
+            currency: code,
         }).format(value || 0);
     };
 
@@ -387,26 +475,20 @@ export default function ProposalsPage() {
                                                 </Select>
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="value">Valor (R$) *</Label>
-                                                <div className="relative">
-                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">R$</span>
-                                                    <Input
-                                                        id="value"
-                                                        placeholder="0,00"
-                                                        className="pl-9"
-                                                        value={formData.value}
-                                                        onChange={(e) => {
-                                                            const raw = e.target.value.replace(/\D/g, "");
-                                                            if (!raw || raw === "0" || raw === "00") {
-                                                                setFormData({ ...formData, value: "" });
-                                                                return;
-                                                            }
-                                                            const num = parseInt(raw, 10) / 100;
-                                                            setFormData({ ...formData, value: num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) });
-                                                        }}
-                                                        required
-                                                    />
-                                                </div>
+                                                <Label htmlFor="currency">Moeda Principal</Label>
+                                                <Select
+                                                    value={formData.currency}
+                                                    onValueChange={(v) => setFormData({ ...formData, currency: v })}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="BRL">Real (R$)</SelectItem>
+                                                        <SelectItem value="USD">Dólar (USD)</SelectItem>
+                                                        <SelectItem value="EUR">Euro (EUR)</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
                                             </div>
                                         </div>
                                         <div className="space-y-2">
@@ -437,14 +519,82 @@ export default function ProposalsPage() {
                                                 </SelectContent>
                                             </Select>
                                         </div>
+                                        <div className="space-y-4">
+                                            <div className="flex items-center justify-between border-b pb-2">
+                                                <Label className="text-base font-bold">Itens da Proposta</Label>
+                                                <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
+                                                    <Plus className="mr-2 h-4 w-4" /> Add Item
+                                                </Button>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                {proposalItems.map((item, index) => (
+                                                    <div key={index} className="flex gap-2 items-end bg-slate-50 p-3 rounded-lg border">
+                                                        <div className="flex-1 space-y-1">
+                                                            <Label className="text-[10px] uppercase text-slate-500">Produto #{index + 1}</Label>
+                                                            <Input
+                                                                placeholder="Nome do produto/serviço"
+                                                                value={item.name}
+                                                                onChange={(e) => handleUpdateItem(index, "name", e.target.value)}
+                                                            />
+                                                        </div>
+                                                        <div className="w-24 space-y-1">
+                                                            <Label className="text-[10px] uppercase text-slate-500">Valor</Label>
+                                                            <Input
+                                                                type="number"
+                                                                placeholder="0,00"
+                                                                value={item.value}
+                                                                onChange={(e) => handleUpdateItem(index, "value", parseFloat(e.target.value) || 0)}
+                                                            />
+                                                        </div>
+                                                        <div className="w-24 space-y-1">
+                                                            <Label className="text-[10px] uppercase text-slate-500">Moeda</Label>
+                                                            <Select
+                                                                value={item.currency}
+                                                                onValueChange={(v) => handleUpdateItem(index, "currency", v)}
+                                                            >
+                                                                <SelectTrigger>
+                                                                    <SelectValue />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="BRL">Real (R$)</SelectItem>
+                                                                    <SelectItem value="USD">Dólar ($)</SelectItem>
+                                                                    <SelectItem value="EUR">Euro (€)</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="text-red-500"
+                                                            onClick={() => handleRemoveItem(index)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="flex justify-between items-center bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                                <div className="text-sm font-medium text-blue-700">Total da Proposta</div>
+                                                <div className="text-lg font-bold text-blue-900">
+                                                    {formData.currency === 'BRL' && 'R$ '}
+                                                    {formData.currency === 'USD' && '$ '}
+                                                    {formData.currency === 'EUR' && '€ '}
+                                                    {formData.value}
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div className="space-y-2">
-                                            <Label htmlFor="content">Descrição</Label>
+                                            <Label htmlFor="content">Descrição Adicional</Label>
                                             <Textarea
                                                 id="content"
-                                                placeholder="Descreva os detalhes da proposta..."
+                                                placeholder="Descreva observações ou termos desta proposta..."
                                                 value={formData.content}
                                                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                                                rows={4}
+                                                rows={3}
                                             />
                                         </div>
                                         <DialogFooter>
@@ -607,8 +757,8 @@ export default function ProposalsPage() {
                                     <p className="text-sm">{viewingProposal?.contact?.name || "Desconhecido"}</p>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold">Valor</p>
-                                    <p className="text-sm">{viewingProposal ? formatCurrency(viewingProposal.value) : "R$ 0,00"}</p>
+                                    <p className="text-sm font-semibold">Valor Total</p>
+                                    <p className="text-sm">{viewingProposal ? formatCurrency(viewingProposal.value, viewingProposal.currency) : "R$ 0,00"}</p>
                                 </div>
                                 <div>
                                     <p className="text-sm font-semibold">Status</p>

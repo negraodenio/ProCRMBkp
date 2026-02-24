@@ -18,13 +18,18 @@ interface Pipeline {
 interface PipelineSelectorProps {
   pipelines: Pipeline[];
   currentPipelineId: string;
+  onManagePipelines?: () => void;
 }
 
-export function PipelineSelector({ pipelines, currentPipelineId }: PipelineSelectorProps) {
+export function PipelineSelector({ pipelines, currentPipelineId, onManagePipelines }: PipelineSelectorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const handlePipelineChange = (id: string) => {
+    if (id === "config") {
+      onManagePipelines?.();
+      return;
+    }
     const params = new URLSearchParams(searchParams);
     params.set("pipelineId", id);
     router.push(`/pipeline?${params.toString()}`);

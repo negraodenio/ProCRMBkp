@@ -1,8 +1,7 @@
-import { KanbanBoard } from "@/components/pipeline/kanban-board";
+import { PipelineView } from "@/components/pipeline/pipeline-view";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { createClient } from "@/lib/supabase/server";
-import { PipelineSelector } from "@/components/pipeline/pipeline-selector";
 
 export default async function PipelinePage({
     searchParams
@@ -75,26 +74,13 @@ export default async function PipelinePage({
             <div className="flex flex-1 flex-col md:ml-64">
                 <Header />
                 <main className="flex-1 p-6 bg-slate-50 dark:bg-background">
-                    <div className="flex items-center justify-between mb-8">
-                        <PipelineSelector
-                            pipelines={pipelines}
-                            currentPipelineId={currentPipeline.id}
-                        />
-                        <div className="flex items-center gap-2">
-                             <div className="flex -space-x-2">
-                                <div className="h-8 w-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-bold">RT</div>
-                                <div className="h-8 w-8 rounded-full border-2 border-white bg-cyan-100 flex items-center justify-center text-[10px] font-bold text-cyan-700">+3</div>
-                             </div>
-                             <button className="text-xs font-bold text-slate-500 ml-2">Minhas negociações</button>
-                        </div>
-                    </div>
-
-                    <div className="flex-1 overflow-x-auto overflow-y-hidden">
-                        <KanbanBoard
-                            initialStages={stages || []}
-                            initialProposals={proposals || []}
-                        />
-                    </div>
+                    <PipelineView
+                        pipelines={pipelines}
+                        currentPipelineId={currentPipeline.id}
+                        stages={stages || []}
+                        proposals={proposals || []}
+                        organizationId={profile.organization_id}
+                    />
                 </main>
             </div>
         </div>

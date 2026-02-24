@@ -165,3 +165,74 @@ export async function deleteDeal(dealId: string) {
     revalidatePath('/pipeline')
     return { success: true }
 }
+
+export async function createPipeline(data: { name: string, organization_id: string, is_default?: boolean }) {
+    const supabase = await createClient()
+
+    const { data: pipeline, error } = await supabase
+        .from('pipelines')
+        .insert(data)
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error creating pipeline:', error)
+        return { success: false, error: error.message }
+    }
+
+    revalidatePath('/pipeline')
+    return { success: true, data: pipeline }
+}
+
+export async function updatePipeline(pipelineId: string, data: { name?: string, is_default?: boolean }) {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('pipelines')
+        .update(data)
+        .eq('id', pipelineId)
+
+    if (error) {
+        console.error('Error updating pipeline:', error)
+        return { success: false, error: error.message }
+    }
+
+    revalidatePath('/pipeline')
+    return { success: true }
+}
+
+export async function deletePipeline(pipelineId: string) {
+    const supabase = await createClient()
+
+    // Check if it's the only pipeline
+    // Check if it has stages with proposals
+    const { data: stages } = await supabase
+        .from('stages')
+        .select('id')
+        .eq('pipeline_id', pipelineId)
+
+    if (stages && stages.length > 0) {
+        const stageIds = stages.map(s => s.id)
+        const { count } = await supabase
+            .from('proposals')
+            .select('*', { count: 'exact', head: true })
+            .in('stage_id', stageIds)
+
+        if ((count || 0) > 0) {
+            return { success: false, error: "Cannot delete pipeline with active proposals." }
+        }
+    }
+
+    const { error } = await supabase
+        .from('pipelines')
+        .delete()
+        .eq('id', pipelineId)
+
+    if (error) {
+        console.error('Error deleting pipeline:', error)
+        return { success: false, error: error.message }
+    }
+
+    revalidatePath('/pipeline')
+    return { success: true }
+}
