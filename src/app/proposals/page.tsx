@@ -186,18 +186,35 @@ export default function ProposalsPage() {
     }
 
     async function loadStages(orgId: string) {
-        // Fetch stages that belong to any pipeline of this organization
-        const { data } = await supabase
-            .from("stages")
-            .select(`
-                id,
-                name,
-                pipeline_id,
-                pipelines!inner(organization_id)
-            `)
-            .eq("pipelines.organization_id", orgId)
-            .order("order");
-        setAllStages(data || []);
+        try {
+            // Step 1: Get all pipelines for this organization to use their IDs
+            const { data: pipelinesData, error: pError } = await supabase
+                .from("pipelines")
+                .select("id")
+                .eq("organization_id", orgId);
+
+            if (pError) throw pError;
+            if (!pipelinesData || pipelinesData.length === 0) {
+                setAllStages([]);
+                return;
+            }
+
+            const pipelineIds = pipelinesData.map(p => p.id);
+
+            // Step 2: Get all stages for these pipelines
+            const { data, error } = await supabase
+                .from("stages")
+                .select("id, name, pipeline_id")
+                .in("pipeline_id", pipelineIds)
+                .order("order", { ascending: true });
+
+            if (error) throw error;
+
+            setAllStages(data || []);
+        } catch (error: any) {
+            console.error("ERROR: Failed to load stages:", error);
+            // Don't show toast for every load, but keep it for debugging if needed
+        }
     }
 
     async function handleSubmit(e: React.FormEvent) {
@@ -837,11 +854,12 @@ export default function ProposalsPage() {
                                 <Select
                                     value={transferData.pipelineId}
                                     onValueChange={(v) => {
-                                        const firstStage = allStages.find(s => s.pipeline_id === v);
+                                        // Auto-select the first stage of the selected pipeline
+                                        const stagesForPipeline = allStages.filter(s => s.pipeline_id === v);
                                         setTransferData({
                                             ...transferData,
                                             pipelineId: v,
-                                            stageId: firstStage ? firstStage.id : ""
+                                            stageId: stagesForPipeline.length > 0 ? stagesForPipeline[0].id : ""
                                         });
                                     }}
                                 >
