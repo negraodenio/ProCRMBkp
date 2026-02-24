@@ -120,8 +120,13 @@ MODO JSON (OBRIGATÓRIO):
 {
   "answer": "Sua resposta natural (ou null se for algo que você REALMENTE não sabe sobre a empresa)",
   "evidence_quotes": ["frase_literal_do_contexto_que_prova_sua_resposta"],
-  "next_step": "Pergunta curta para manter o papo ou CTA"
+  "next_step": "Pergunta curta para manter o papo ou CTA",
+  "handoff_to": "Maria | Financeiro | Human | null"
 }
+
+REGRAS DE TRANSBORDO (HANDOFF):
+- Se o cliente pedir explicitamente para falar com uma PESSOA (ex: Maria), SETOR (ex: Financeiro) ou simplesmente "atendimento humano", preencha "handoff_to" com o nome ou setor solicitado. Caso contrário, mantenha null.
+- Nestes casos, responda educadamente no "answer" que está encaminhando o contato.
 
 REGRAS DE EVIDÊNCIA:
 - Se "answer" for preenchido, você DEVE citar o trecho do manual em "evidence_quotes".

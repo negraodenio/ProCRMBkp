@@ -11,6 +11,7 @@ export interface RagJson {
   answer: string | null;
   evidence_quotes: string[];
   next_step: string;
+  handoff_to?: string | null;
 }
 
 /**
@@ -52,7 +53,8 @@ export function safeParseRagJson(s: string): RagJson | null {
     return {
       answer: typeof o.answer === "string" ? o.answer.trim() : null,
       evidence_quotes: Array.isArray(o.evidence_quotes) ? o.evidence_quotes.map(String) : [],
-      next_step: next_raw || "Como posso ajudar?"
+      next_step: next_raw || "Como posso ajudar?",
+      handoff_to: typeof o.handoff_to === "string" ? o.handoff_to.trim() : null
     };
   } catch (e) {
     console.warn("[RAG JSON] Parse failed:", e);

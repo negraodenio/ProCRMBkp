@@ -424,9 +424,11 @@ export async function POST(req: NextRequest) {
         }
 
         // 5. Intelligence Section (RAG + AI)
-        console.log(`🧠 [Webhook] Starting RAG Hardening flow for: "${text.substring(0, 30)}..."`);
         const startTime = Date.now();
         let aiResponse = "";
+        let botInteractionStatus = 'success';
+        let botInteractionError = '';
+        let routed: any = null;
 
         try {
             // 5.1 Retrieval Real (using org-scoped helper)
@@ -441,6 +443,7 @@ export async function POST(req: NextRequest) {
                 contextText = r.contextText;
             } catch (ragError: any) {
                 console.warn("⚠️ [Webhook] RAG retrieval failed:", ragError.message);
+                botInteractionError += `RAG Error: ${ragError.message}; `;
             }
 
             // 5.3 Model Selection & Routing
@@ -468,14 +471,8 @@ export async function POST(req: NextRequest) {
                     content: m.content
                 }));
 
-            const messages = [
-                { role: "system" as const, content: systemPrompt },
-                ...chatHistory,
-                { role: "user" as const, content: text }
-            ];
-
-            // Roteamento Inteligente Ultra-Fidelidade (Phase 1)
-            const routed = await ragAnswerWithGating({
+            // Roteamento Inteligente Ultra-Fidelidade
+            routed = await ragAnswerWithGating({
                 systemPrompt,
                 userText: text,
                 chatHistory,
@@ -483,20 +480,131 @@ export async function POST(req: NextRequest) {
                 temperature,
                 max_tokens: botSettings.max_tokens ?? 250,
                 primaryModelAlias: "balanced",
-                fallbackModelAlias: "coding" // DeepSeek-V3
+                fallbackModelAlias: "coding", // DeepSeek-V3
+                showRaw: true
             });
 
             aiResponse = routed.text;
             console.log(`🏁 [RAG Router] Used: ${routed.model_used}, Reason: ${routed.reason}`);
 
+            // --- SMART HANDOFF DETECTION (Phase 9 & 10 Hardening) ---
+            if (routed.raw) {
+                try {
+                    // JSON RECOVERY: Se o parse direto falhar, tentamos limpar marcas de markdown
+                    let cleanRaw = routed.raw.trim();
+                    if (cleanRaw.includes("```")) {
+                        cleanRaw = cleanRaw.replace(/```json|```/g, "").trim();
+                    }
+
+                    const parsedRaw = JSON.parse(cleanRaw);
+                    const handoff = parsedRaw.handoff_to;
+
+                    if (handoff && handoff !== "null") {
+                        botInteractionStatus = 'handoff';
+                        console.log(`🚀 [Handoff] AI signaling handoff to: ${handoff}`);
+
+                        const transferData: any = {
+                            ai_enabled: false,
+                            last_transferred_at: new Date().toISOString()
+                        };
+
+                        let handoffLabel = handoff;
+
+                        // 1. Try to find a department with that name
+                        const { data: depts } = await serviceClient
+                            .from("departments")
+                            .select("id, name")
+                            .ilike("name", `%${handoff}%`)
+                            .limit(1);
+
+                        if (depts && depts.length > 0) {
+                            transferData.department_id = depts[0].id;
+                            handoffLabel = `Setor ${depts[0].name}`;
+                        } else {
+                            // 2. Try to find a user with that name (Maria, etc)
+                            const { data: users } = await serviceClient
+                                .from("profiles")
+                                .select("id, full_name")
+                                .ilike("full_name", `%${handoff}%`)
+                                .limit(1);
+
+                            if (users && users.length > 0) {
+                                transferData.assigned_to = users[0].id;
+                                handoffLabel = `Atendente ${users[0].full_name}`;
+                            }
+                        }
+
+                        // 3. APPLY HANDOFF
+                        await serviceClient.from("conversations").update(transferData).eq("id", conversation.id);
+
+                        // 4. LOG SYSTEM MESSAGE
+                        await serviceClient.from("messages").insert({
+                            conversation_id: conversation.id,
+                            organization_id: org.id,
+                            content: `⚠️ IA: Transbordo solicitado para ${handoffLabel}. Chat assumido por humano.`,
+                            direction: "system",
+                            status: "sent",
+                            sender_name: "Sistema"
+                        });
+                    }
+                } catch (pe) {
+                    console.warn("⚠️ [Handoff] Failed to parse raw AI output for handoff:", pe);
+                    botInteractionError += `Parse Error: ${pe instanceof Error ? pe.message : 'Unknown'}; `;
+                }
+            }
+
         } catch (intelError: any) {
             console.error("❌ [Webhook] Intelligence Flow Failed:", intelError.message);
-            aiResponse = "Desculpe, tive um problema técnico momentâneo. Pode repetir?";
+            botInteractionStatus = 'error';
+            botInteractionError += intelError.message;
+
+            // --- FAIL-SAFE: DEADMAN SWITCH (Phase 10) ---
+            const { data: recentLogs } = await serviceClient
+                .from("bot_interactions")
+                .select("status")
+                .eq("conversation_id", conversation.id)
+                .order("created_at", { ascending: false })
+                .limit(2);
+
+            const consecutiveErrors = (recentLogs?.filter(l => l.status === 'error').length || 0) + 1;
+
+            if (consecutiveErrors >= 3) {
+                console.log(`🚨 [Deadman Switch] 3 consecutive errors for ${phone}. Disabling AI.`);
+                await serviceClient.from("conversations").update({ ai_enabled: false }).eq("id", conversation.id);
+                await serviceClient.from("messages").insert({
+                    conversation_id: conversation.id,
+                    organization_id: org.id,
+                    content: `🚨 ERRO CRÍTICO: O robô falhou 3 vezes seguidas. IA desativada. Atendimento humanizado solicitado.`,
+                    direction: "system",
+                    status: "sent",
+                    sender_name: "Sistema"
+                });
+                aiResponse = "Desculpe, estou com uma pequena instabilidade técnica. Um atendente humano virá te ajudar em instantes.";
+            } else {
+                aiResponse = "Desculpe, tive um problema técnico momentâneo. Pode repetir?";
+            }
         }
 
         const totalTime = Date.now() - startTime;
         console.log(`🏁 [Webhook] Intelligence cycle finished in ${totalTime}ms`);
 
+        // 5.5 LOG INTERACTION (Phase 10)
+        try {
+            await serviceClient.from("bot_interactions").insert({
+                organization_id: org.id,
+                conversation_id: conversation.id,
+                contact_phone: phone,
+                user_message: text.substring(0, 500),
+                bot_response: aiResponse.substring(0, 500),
+                model_used: routed?.model_used || 'none',
+                reason: routed?.reason || 'error',
+                processing_time_ms: totalTime,
+                status: botInteractionStatus,
+                error_details: botInteractionError || null
+            });
+        } catch (lErr) {
+            console.warn("⚠️ [Webhook] Failed to log interaction:", lErr);
+        }
         if (!aiResponse) {
              return NextResponse.json({ status: "no_response" });
         }
@@ -516,7 +624,7 @@ export async function POST(req: NextRequest) {
         console.log(`📡 [Webhook] Message ready to send to ${targetJid}.`);
         await EvolutionService.sendMessage(replyInstance, targetJid, aiResponse);
 
-        // Log Bot Message
+        // Log Bot Message in Chat
         await serviceClient.from("messages").insert({
             conversation_id: conversation.id,
             organization_id: org.id,

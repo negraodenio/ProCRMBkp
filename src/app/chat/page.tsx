@@ -48,11 +48,11 @@ type Conversation = {
 type Message = {
     id: string;
     content: string;
-    direction: "inbound" | "outbound";
+    direction: "inbound" | "outbound" | "internal" | "system";
     created_at: string;
     status: string;
     sender_name?: string;
-    type?: "whatsapp" | "system" | "internal";
+    type?: string;
 };
 
 
@@ -79,7 +79,7 @@ export default function ChatPage() {
 
             const { data, error } = await supabase
                 .from("conversations")
-                .select("*, contacts(name), profiles:assigned_to(full_name), departments(name, color)")
+                .select("*, profiles:assigned_to(full_name), departments(name, color)")
                 .eq("organization_id", profile.organization_id)
                 .order("last_message_at", { ascending: false });
 
@@ -537,30 +537,59 @@ export default function ChatPage() {
                                 <div className="flex-1 relative overflow-hidden bg-muted/10">
                                     <ScrollArea className="h-full p-4 md:p-6">
                                         <div className="space-y-6 pb-6">
-                                            {messages.map((msg) => (
-                                                <div
-                                                    key={msg.id}
-                                                    className={`flex flex-col ${msg.direction === 'outbound' ? 'items-end' : 'items-start'}`}
-                                                >
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <span className="text-[11px] font-bold text-foreground">
-                                                            {msg.direction === 'outbound' ? (msg.sender_name || 'Você') : (selectedChat?.contact_name || 'Cliente')}
-                                                        </span>
+                                            {messages.map((msg) => {
+                                                if (msg.type === "system") {
+                                                    return (
+                                                        <div key={msg.id} className="flex justify-center my-4">
+                                                            <div className="bg-muted/50 px-4 py-1.5 rounded-full border border-border/50 flex items-center gap-2 shadow-sm">
+                                                                <Tag className="h-3 w-3 text-primary/60" />
+                                                                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                                                                    {msg.content}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
 
-                                                        <span className="text-[10px] text-muted-foreground">
-                                                            {format(new Date(msg.created_at), "HH:mm")}
-                                                        </span>
+                                                if (msg.direction === "internal" || msg.type === "internal") {
+                                                    return (
+                                                        <div key={msg.id} className="flex justify-center my-4 relative group">
+                                                            <div className="bg-amber-50 border border-amber-200 text-amber-900 px-6 py-3 rounded-2xl max-w-[80%] shadow-sm relative overflow-hidden">
+                                                                <div className="absolute top-0 left-0 w-1 h-full bg-amber-400" />
+                                                                <div className="flex items-center gap-2 mb-1">
+                                                                    <Tag className="h-3 w-3" />
+                                                                    <span className="text-[10px] font-black uppercase tracking-tighter">Nota Interna - {msg.sender_name || 'Equipe'}</span>
+                                                                </div>
+                                                                <p className="text-xs font-medium leading-relaxed italic">{msg.content.replace("📝 NOTA INTERNA: ", "")}</p>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                return (
+                                                    <div
+                                                        key={msg.id}
+                                                        className={`flex flex-col ${msg.direction === 'outbound' ? 'items-end' : 'items-start'}`}
+                                                    >
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className="text-[11px] font-bold text-foreground">
+                                                                {msg.direction === 'outbound' ? (msg.sender_name || 'Você') : (selectedChat?.contact_name || 'Cliente')}
+                                                            </span>
+
+                                                            <span className="text-[10px] text-muted-foreground">
+                                                                {msg.created_at ? format(new Date(msg.created_at), "HH:mm") : '--:--'}
+                                                            </span>
+                                                        </div>
+                                                        <div className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] border ${
+                                                            msg.direction === 'outbound'
+                                                                ? 'bg-primary/10 text-foreground border-primary/20 rounded-tr-none'
+                                                                : 'bg-background text-foreground border-border rounded-tl-none'
+                                                        }`}>
+                                                            <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                                                        </div>
                                                     </div>
-                                                    <div className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] border ${
-                                                        msg.direction === 'outbound'
-                                                            ? 'bg-primary/10 text-foreground border-primary/20 rounded-tr-none'
-                                                            : 'bg-background text-foreground border-border rounded-tl-none'
-                                                    }`}>
-                                                        <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
+                                                );
+                                            })}
                                         {messages.length === 0 && (
                                            <div className="flex flex-col items-center justify-center h-64 text-center space-y-2 opacity-30">
                                                <History className="h-12 w-12" />
