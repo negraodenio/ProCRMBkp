@@ -146,6 +146,13 @@ export default function ProposalsPage() {
         init();
     }, []);
 
+    // Self-healing: reload stages if empty when opening transfer dialog
+    useEffect(() => {
+        if (transferringProposal && allStages.length === 0 && organizationId) {
+            loadStages(organizationId);
+        }
+    }, [transferringProposal, allStages.length, organizationId]);
+
     async function loadProposals(orgId?: string) {
         const id = orgId || organizationId;
         if (!id) return;
