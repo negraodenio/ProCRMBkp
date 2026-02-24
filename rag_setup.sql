@@ -40,9 +40,11 @@ for delete using (
   organization_id in (select organization_id from public.profiles where id = auth.uid())
 );
 
--- 4. Performance (Vector Index)
--- HNSW is much faster for large datasets than IVFFlat or sequential scans
-create index on public.documents using hnsw (embedding vector_cosine_ops);
+-- 4. Performance (Index)
+-- HNSW has a limit of 2000 dimensions in some pgvector versions.
+-- Since Qwen-4B uses 2560, we rely on sequential scan (very fast for manuals < 10k chunks)
+-- or you can use IVFFlat if your dataset grows very large.
+-- CREATE INDEX ON public.documents USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
 
 -- 5. Match Function (Harden Security and check org_id)
 -- Drop first to avoid "cannot change return type" error
@@ -63,18 +65,18 @@ returns table (
 )
 language plpgsql
 security invoker -- Ensures it respects RLS
-as $$
+as $body$
 begin
   return query
-  select distinct on (d.content)
+  select
     d.id,
     d.content,
     d.metadata,
     1 - (d.embedding <=> query_embedding) as similarity
   from public.documents d
   where d.organization_id = org_id
-  and 1 - (d.embedding <=> query_embedding) > match_threshold
-  order by d.content, (d.embedding <=> query_embedding) asc
+    and 1 - (d.embedding <=> query_embedding) > match_threshold
+  order by (d.embedding <=> query_embedding) asc
   limit match_count;
 end;
-$$;
+$body$;

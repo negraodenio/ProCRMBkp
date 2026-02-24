@@ -59,7 +59,9 @@ export async function getAdvancedReportsData(
       created_at,
       stage_id,
       user_id,
-      contact:contacts(source)
+      updated_at,
+      contact:contacts(source),
+      stages:stages(name)
     `)
     .eq("organization_id", orgId);
 
@@ -83,15 +85,22 @@ export async function getAdvancedReportsData(
     return dDate >= start && dDate <= end;
   });
 
+  // Helper: check if deal is won (by status OR stage name)
+  const isDealWon = (d: any) => {
+    if (d.status === 'won') return true;
+    const stageName = (d.stages?.name || '').toLowerCase();
+    return stageName === 'ganho' || stageName === 'won' || stageName === 'fechado';
+  };
+
+  const isDealLost = (d: any) => {
+    if (d.status === 'lost') return true;
+    const stageName = (d.stages?.name || '').toLowerCase();
+    return stageName === 'perdido' || stageName === 'lost';
+  };
+
   const wonInPeriod = deals.filter(d => {
-    // Ideally we'd use a 'won_at' field, but 'created_at' or 'updated_at' is what we have.
-    // If we use 'updated_at', we need to fetch it. for now, let's use created_at for simplicity
-    // OR just assume 'won' deals currently in that status that were created in that period.
-    // To be more 'Accounting' accurate we need 'date of sale'.
-    // Let's stick to: "Deals Created in Period that are currently Won" for conversion rate
-    // AND "Deals Created in Period" for Total Leads.
-    const dDate = new Date(d.created_at);
-    return dDate >= start && dDate <= end && d.status === "won";
+    const closedDate = new Date(d.updated_at || d.created_at);
+    return closedDate >= start && closedDate <= end && isDealWon(d);
   });
 
   // -- KPIs --
@@ -99,7 +108,7 @@ export async function getAdvancedReportsData(
 
   // Active Pipeline: All open deals regardless of date (money on the table NOW)
   const activePipeline = deals
-    .filter(d => d.status !== "won" && d.status !== "lost" && d.status !== "archived")
+    .filter(d => !isDealWon(d) && !isDealLost(d) && d.status !== "archived")
     .reduce((acc, d) => acc + Number(d.value || 0), 0);
 
   const wonCount = wonInPeriod.length;
@@ -127,8 +136,9 @@ export async function getAdvancedReportsData(
     revenueMap.set(label, 0);
   }
 
-  wonInPeriod.forEach(d => {
-     const label = format(new Date(d.created_at), "dd/MM"); // Using created_at for trend of "cohort"
+    wonInPeriod.forEach(d => {
+      const closedDate = new Date(d.updated_at || d.created_at);
+      const label = format(closedDate, "dd/MM");
      if (revenueMap.has(label)) {
         revenueMap.set(label, (revenueMap.get(label) || 0) + Number(d.value || 0));
      }
@@ -163,10 +173,9 @@ export async function getAdvancedReportsData(
   stages?.forEach(s => stageMap.set(s.id, 0));
 
   deals.forEach(d => {
-      // Only count active deals for funnel? Or all? Usually Funnel = Active Pipeline
-      if (d.status !== "won" && d.status !== "lost") {
+      if (!isDealWon(d) && !isDealLost(d)) {
           if (stageMap.has(d.stage_id)) {
-              stageMap.set(d.stage_id, (stageMap.get(d.stage_id) || 0) + 1); // Count of deals
+              stageMap.set(d.stage_id, (stageMap.get(d.stage_id) || 0) + 1);
           }
       }
   });
@@ -214,7 +223,7 @@ export async function getAdvancedReportsData(
     conversionRate,
     totalLeads: totalLeadsInPeriod,
     wonDealsCount: wonCount,
-    lostDealsCount: dealsInPeriod.filter(d => d.status === 'lost').length,
+    lostDealsCount: dealsInPeriod.filter(d => isDealLost(d)).length,
     revenueTrend,
     salesFunnel,
 
@@ -271,14 +280,20 @@ export async function getReportsData() {
 
   const orgId = profile.organization_id;
 
-  // 2. Fetch Sales Data (Last 6 Months)
+  // 2. Fetch Sales Data (Last 6 Months) — fetch all deals, filter won in-memory
   const sixMonthsAgo = startOfMonth(subMonths(new Date(), 5));
-  const { data: deals } = await supabase
+  const { data: allRecentDeals } = await supabase
     .from("deals")
-    .select("value, created_at, status")
+    .select("value, created_at, updated_at, status, stages:stages(name)")
     .eq("organization_id", orgId)
-    .eq("status", "won")
     .gte("created_at", sixMonthsAgo.toISOString());
+
+  // Filter won deals (by status OR stage name)
+  const deals = (allRecentDeals || []).filter(d => {
+    if (d.status === 'won') return true;
+    const stageName = ((d as any).stages?.name || '').toLowerCase();
+    return stageName === 'ganho' || stageName === 'won' || stageName === 'fechado';
+  });
 
   const salesData = [];
   for (let i = 5; i >= 0; i--) {
@@ -289,7 +304,7 @@ export async function getReportsData() {
 
     const monthValue = deals
       ?.filter(d => {
-        const date = new Date(d.created_at);
+        const date = new Date(d.updated_at || d.created_at);
         return date >= monthStart && date <= monthEnd;
       })
       .reduce((sum, d) => sum + Number(d.value || 0), 0) || 0;
@@ -297,11 +312,12 @@ export async function getReportsData() {
     salesData.push({ month: monthName, value: monthValue });
   }
 
-  // 3. Fetch Lead Sources
+  // 3. Fetch Lead Sources (Filtered by type='lead')
   const { data: contacts } = await supabase
     .from("contacts")
-    .select("source")
-    .eq("organization_id", orgId);
+    .select("source, type")
+    .eq("organization_id", orgId)
+    .eq("type", "lead");
 
   const sourcesMap: Record<string, number> = {};
   contacts?.forEach(c => {
@@ -319,10 +335,14 @@ export async function getReportsData() {
   const totalLeads = contacts?.length || 0;
   const { data: allDeals } = await supabase
     .from("deals")
-    .select("status, value")
+    .select("status, value, stages:stages(name)")
     .eq("organization_id", orgId);
 
-  const wonDeals = allDeals?.filter(d => d.status === "won") || [];
+  const wonDeals = (allDeals || []).filter(d => {
+    if (d.status === 'won') return true;
+    const stageName = ((d as any).stages?.name || '').toLowerCase();
+    return stageName === 'ganho' || stageName === 'won' || stageName === 'fechado';
+  });
   const conversionRate = totalLeads > 0 ? (wonDeals.length / totalLeads) * 100 : 0;
   const avgTicket = wonDeals.length > 0
     ? wonDeals.reduce((sum, d) => sum + Number(d.value || 0), 0) / wonDeals.length

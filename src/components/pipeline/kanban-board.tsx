@@ -507,12 +507,18 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
                                     Valor Estimado (R$)
                                 </Label>
                                 <div className="relative">
-                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">R$</span>
                                     <Input
                                         id="deal-value"
-                                        type="number"
-                                        value={dealFormData.value}
-                                        onChange={(e) => setDealFormData({ ...dealFormData, value: Number(e.target.value) })}
+                                        type="text"
+                                        value={dealFormData.value !== undefined ? dealFormData.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0,00"}
+                                        onChange={(e) => {
+                                            const raw = e.target.value.replace(/\D/g, "");
+                                            setDealFormData({
+                                                ...dealFormData,
+                                                value: raw ? parseInt(raw, 10) / 100 : 0
+                                            });
+                                        }}
                                         className="pl-9"
                                     />
                                 </div>

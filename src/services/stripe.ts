@@ -59,7 +59,7 @@ export async function createCheckoutSession(priceId?: string) {
         customer: customerId,
         line_items: [
             {
-                price: priceId,
+                price: finalPriceId,
                 quantity: 1,
             },
         ],

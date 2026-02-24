@@ -30,6 +30,9 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
 import { generateAIContent } from "@/app/actions/ai-actions";
+import { usePlanLimit } from "@/hooks/use-plan-limit";
+import { UpgradeModal } from "@/components/billing/upgrade-modal";
+import ReactMarkdown from "react-markdown";
 
 // New Components
 import { AIToolsHeader } from "@/components/ai-tools/ai-tools-header";
@@ -164,6 +167,8 @@ function AIToolsContent() {
     const searchParams = useSearchParams();
     const initialLeadId = searchParams.get("leadId");
 
+    const { checkLimit, isUpgradeModalOpen, setIsUpgradeModalOpen, lastCheckMessage } = usePlanLimit();
+
     const executeAI = async (toolId: string) => {
         if (!selectedLead) {
             toast.error("Selecione um lead primeiro");
@@ -180,6 +185,12 @@ function AIToolsContent() {
             if (response.success && response.result) {
                 setResult(response.result);
                 toast.success("Análise concluída!");
+            } else if (response.upgradeRequired) {
+                setActiveModal(null); // Close the tool modal if it was open
+                setResult("");
+                // usePlanLimit hook will handle opening the UpgradeModal via checkLimit if we call it
+                // But here we got the error from server action. Let's trigger the modal manually or via hook.
+                setIsUpgradeModalOpen(true);
             } else {
                 toast.error("Erro na análise: " + (response.error || "Erro desconhecido"));
                 setResult("Erro ao processar solicitação. Tente novamente em instantes.");
@@ -264,9 +275,18 @@ function AIToolsContent() {
                                 </div>
                             </div>
                         ) : result ? (
-                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-inner">
-                                <div className="prose prose-sm max-w-none text-slate-800 leading-relaxed font-sans">
-                                    <pre className="whitespace-pre-wrap font-sans text-sm">{result}</pre>
+                            <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
+                                <div className="prose prose-slate prose-lg max-w-none
+                                    text-slate-700 leading-relaxed font-sans
+                                    prose-headings:text-indigo-900 prose-headings:font-bold
+                                    prose-p:mb-4 prose-p:leading-7
+                                    prose-strong:text-slate-900 prose-strong:font-bold
+                                    prose-ul:list-disc prose-ul:ml-6 prose-ul:space-y-2
+                                    prose-ol:list-decimal prose-ol:ml-6 prose-ol:space-y-2
+                                    prose-blockquote:italic prose-blockquote:border-l-4 prose-blockquote:border-indigo-500 prose-blockquote:pl-4 prose-blockquote:text-slate-600
+                                    prose-hr:my-8 prose-hr:border-slate-200
+                                    ">
+                                    <ReactMarkdown>{result}</ReactMarkdown>
                                 </div>
                             </div>
                         ) : null}
@@ -284,6 +304,15 @@ function AIToolsContent() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            <UpgradeModal
+                isOpen={isUpgradeModalOpen}
+                onClose={() => setIsUpgradeModalOpen(false)}
+                message={lastCheckMessage || "Você atingiu o limite de IA Tools do seu plano."}
+                orgId={profile?.organization_id}
+                userEmail={profile?.email}
+                userName={profile?.name}
+            />
         </div>
     );
 }

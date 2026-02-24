@@ -3,13 +3,16 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { QrCode, RefreshCw, LogOut, BookOpen, Bot, Sparkles } from "lucide-react";
+import { QrCode, RefreshCw, LogOut, BookOpen, Bot, Sparkles, Lock } from "lucide-react";
 import { getQrCode, logoutWhatsApp, getBotStatus, updateBotStatus } from "./actions";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
+import { usePlanLimit } from "@/hooks/use-plan-limit";
+import { UpgradeModal } from "@/components/billing/upgrade-modal";
+import { cn } from "@/lib/utils";
 
 export default function WhatsAppPage() {
     const [qrCode, setQrCode] = useState<string | null>(null);
@@ -19,10 +22,25 @@ export default function WhatsAppPage() {
     const [botActive, setBotActive] = useState(true);
     const [botLoading, setBotLoading] = useState(false);
 
+    const { checkLimit, isUpgradeModalOpen, setIsUpgradeModalOpen, lastCheckMessage, profile } = usePlanLimit();
+    const [canUseWhatsApp, setCanUseWhatsApp] = useState(true);
+    const [canUseRAG, setCanUseRAG] = useState(true);
+
     // Check status on load
     useEffect(() => {
-        handleConnect();
-        loadBotStatus();
+        const init = async () => {
+            const waCheck = await checkLimit("whatsapp");
+            setCanUseWhatsApp(waCheck.allowed);
+
+            const ragCheck = await checkLimit("rag_chatbot");
+            setCanUseRAG(ragCheck.allowed);
+
+            if (waCheck.allowed) {
+                handleConnect();
+            }
+            loadBotStatus();
+        };
+        init();
     }, []);
 
     const loadBotStatus = async () => {
@@ -35,28 +53,35 @@ export default function WhatsAppPage() {
     // Mock status for now, ideally fetching from API
     // const isConnected = !qrCode && !loading && instanceName;
 
-    const handleConnect = async () => {
+    const handleConnect = async (isRetry = false) => {
         setLoading(true);
-        setQrCode(null);
+        if (!isRetry) setQrCode(null);
+
+        // Add a safety timeout
+        const timeout = setTimeout(() => {
+            if (loading) {
+                setLoading(false);
+                toast.error("A conexão está demorando mais que o esperado. Tente novamente.");
+            }
+        }, 15000);
+
         try {
             const res = await getQrCode();
+            clearTimeout(timeout);
+
             if (res.error) {
                 toast.error("Erro ao conectar: " + res.error);
             } else if (res.qrcode) {
                 setQrCode(res.qrcode);
                 setInstanceName(res.instanceName || "");
-                toast.success("QR Code gerado! Escaneie agora.");
+                if (!isRetry) toast.success("QR Code gerado! Escaneie agora.");
             } else {
                 toast.info("Instância já conectada.");
                 setInstanceName(res.instanceName || "Connected");
-                if (res.webhookUrl) {
-                    console.log("Webhook Active:", res.webhookUrl);
-                    // Optional: Show to user as confirmation
-                    // toast.success(`Webhook: ${res.webhookUrl}`);
-                }
             }
         } catch (e) {
-            toast.error("Erro inesperado.");
+            clearTimeout(timeout);
+            toast.error("Erro inesperado na conexão.");
         } finally {
             setLoading(false);
         }
@@ -136,9 +161,13 @@ export default function WhatsAppPage() {
                                             <p className="text-muted-foreground">
                                                 Clique no botão abaixo para gerar um novo QR Code e conectar seu WhatsApp.
                                             </p>
-                                            <Button onClick={handleConnect} size="lg" className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20">
-                                                Gerar QR Code
-                                            </Button>
+                                                <Button
+                                                    onClick={() => canUseWhatsApp ? handleConnect() : setIsUpgradeModalOpen(true)}
+                                                    size="lg"
+                                                    className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
+                                                >
+                                                    {canUseWhatsApp ? "Gerar QR Code" : "Bloqueado no seu Plano"}
+                                                </Button>
                                         </div>
                                     )}
 
@@ -162,7 +191,7 @@ export default function WhatsAppPage() {
                                             <p className="text-sm text-muted-foreground text-center max-w-[250px]">
                                                 Abra o WhatsApp &gt; Configurações &gt; Aparelhos Conectados &gt; Conectar
                                             </p>
-                                            <Button variant="outline" onClick={handleConnect} size="sm">
+                                            <Button variant="outline" onClick={() => handleConnect(true)} size="sm">
                                                 <RefreshCw className="mr-2 h-3.5 w-3.5" /> Atualizar Code
                                             </Button>
                                         </div>
@@ -194,26 +223,34 @@ export default function WhatsAppPage() {
                         <div className="md:col-span-4 flex flex-col gap-6">
 
                             {/* Knowledge Base Card (Prominent) */}
-                            <Link href="/whatsapp/knowledge" className="group">
-                                <Card className="border-0 shadow-lg shadow-blue-100 hover:shadow-xl hover:shadow-blue-200 transition-all duration-300 ring-1 ring-blue-100 cursor-pointer overflow-hidden relative h-full">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-blue-500/20 transition-all" />
+                            <div
+                                onClick={() => !canUseRAG ? setIsUpgradeModalOpen(true) : null}
+                                className={cn("group h-full", !canUseRAG && "opacity-75 grayscale cursor-not-allowed")}
+                            >
+                                <Link href={canUseRAG ? "/whatsapp/knowledge" : "#"} className="block h-full">
+                                    <Card className="border-0 shadow-lg shadow-blue-100 hover:shadow-xl hover:shadow-blue-200 transition-all duration-300 ring-1 ring-blue-100 h-full relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-blue-500/20 transition-all" />
 
-                                    <CardHeader>
-                                        <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-2 shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform duration-300">
-                                            <BookOpen className="h-6 w-6 text-white" />
-                                        </div>
-                                        <CardTitle className="text-blue-900">Base de Conhecimento</CardTitle>
-                                        <CardDescription className="text-blue-700/70">
-                                            Treine sua IA com PDFs e textos da sua empresa.
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="flex items-center text-sm font-medium text-blue-600 group-hover:translate-x-1 transition-transform">
-                                            Acessar RAG <div className="ml-1">→</div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </Link>
+                                        <CardHeader>
+                                            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-2 shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform duration-300">
+                                                <BookOpen className="h-6 w-6 text-white" />
+                                            </div>
+                                            <CardTitle className="text-blue-900 flex items-center gap-2">
+                                                Base de Conhecimento
+                                                {!canUseRAG && <Lock className="h-4 w-4 text-amber-600" />}
+                                            </CardTitle>
+                                            <CardDescription className="text-blue-700/70">
+                                                Treine sua IA com PDFs e textos da sua empresa.
+                                            </CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="flex items-center text-sm font-medium text-blue-600 group-hover:translate-x-1 transition-transform">
+                                                {canUseRAG ? "Acessar RAG →" : "Disponível no Plano PRO"}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </Link>
+                            </div>
 
                             {/* Bot AI Control Card */}
                             <Card className="border-0 shadow-lg shadow-indigo-100 ring-1 ring-indigo-100 overflow-hidden relative">
@@ -271,6 +308,15 @@ export default function WhatsAppPage() {
                     </div>
                 </main>
             </div>
+
+            <UpgradeModal
+                isOpen={isUpgradeModalOpen}
+                onClose={() => setIsUpgradeModalOpen(false)}
+                message={lastCheckMessage}
+                orgId={profile?.organization_id}
+                userEmail={profile?.email}
+                userName={profile?.name}
+            />
         </div>
     );
 }

@@ -52,7 +52,7 @@ export default async function PipelinePage() {
     // 3. Get Deals for THIS ORG
     const { data: deals } = await supabase
         .from('deals')
-        .select('*')
+        .select('*, companies(name), contacts(name)')
         .eq('organization_id', profile.organization_id)
         .in('stage_id', (stages || []).map(s => s.id));
 

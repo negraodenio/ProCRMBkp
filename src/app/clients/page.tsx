@@ -45,6 +45,7 @@ export default function ClientsPage() {
     const [supabase] = useState(() => createClient());
     const { profile, loading: profileLoading } = useProfile();
     const [open, setOpen] = useState(false);
+    const [editingClientId, setEditingClientId] = useState<string | null>(null);
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -86,33 +87,51 @@ export default function ClientsPage() {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
 
-        const { data: profile } = await supabase
-            .from("profiles")
-            .select("organization_id")
-            .single();
-
         if (!profile?.organization_id) {
             toast.error("Organização não encontrada");
             return;
         }
 
-        const { error } = await supabase.from("contacts").insert({
-            organization_id: profile.organization_id,
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            company: formData.company,
-            type: "client",
-            status: "active",
-        });
+        if (editingClientId) {
+            const { error } = await supabase
+                .from("contacts")
+                .update({
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.phone,
+                    company: formData.company,
+                })
+                .eq("id", editingClientId)
+                .eq("organization_id", profile.organization_id);
 
-        if (error) {
-            console.error("Error creating client:", error);
-            toast.error("Erro ao criar cliente");
-            return;
+            if (error) {
+                console.error("Error updating client:", error);
+                toast.error("Erro ao atualizar cliente: " + error.message);
+                return;
+            }
+
+            toast.success("Cliente atualizado com sucesso!");
+            setEditingClientId(null); // Clear editing state
+        } else {
+            const { error } = await supabase.from("contacts").insert({
+                organization_id: profile.organization_id,
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                company: formData.company,
+                type: "client",
+                status: "active",
+            });
+
+            if (error) {
+                console.error("Error creating client:", error);
+                toast.error("Erro ao criar cliente");
+                return;
+            }
+
+            toast.success("Cliente criado com sucesso!");
         }
 
-        toast.success("Cliente criado com sucesso!");
         resetForm();
         setOpen(false);
         loadClients();
@@ -120,12 +139,23 @@ export default function ClientsPage() {
 
     function resetForm() {
         setFormData({ name: "", email: "", phone: "", company: "" });
+        setEditingClientId(null);
+    }
+
+    function handleEditClient(client: Client) {
+        setFormData({
+            name: client.name || "",
+            email: client.email || "",
+            phone: client.phone || "",
+            company: client.company || "",
+        });
+        setEditingClientId(client.id);
+        setOpen(true);
     }
 
     async function deleteClient(id: string) {
-        if (!confirm("Tem certeza que deseja excluir este cliente?")) return;
-
-        const { error } = await supabase.from("contacts").delete().eq("id", id);
+        if (!profile?.organization_id) return;
+        const { error } = await supabase.from("contacts").delete().eq("id", id).eq("organization_id", profile.organization_id);
         if (error) {
             toast.error("Erro ao excluir cliente");
         } else {
@@ -156,7 +186,10 @@ export default function ClientsPage() {
                                     Gerencie sua base de clientes
                                 </p>
                             </div>
-                            <Dialog open={open} onOpenChange={setOpen}>
+                            <Dialog open={open} onOpenChange={(isOpen) => {
+                                setOpen(isOpen);
+                                if (!isOpen) resetForm();
+                            }}>
                                 <DialogTrigger asChild>
                                     <Button className="bg-blue-600 hover:bg-blue-700">
                                         <Plus className="mr-2 h-4 w-4" /> Novo Cliente
@@ -164,9 +197,9 @@ export default function ClientsPage() {
                                 </DialogTrigger>
                                 <DialogContent className="sm:max-w-[500px]">
                                     <DialogHeader>
-                                        <DialogTitle>Novo Cliente</DialogTitle>
+                                        <DialogTitle>{editingClientId ? "Editar Cliente" : "Novo Cliente"}</DialogTitle>
                                         <DialogDescription>
-                                            Adicione um novo cliente à sua base.
+                                            {editingClientId ? "Atualize as informações do cliente." : "Adicione um novo cliente à sua base."}
                                         </DialogDescription>
                                     </DialogHeader>
                                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -213,7 +246,7 @@ export default function ClientsPage() {
                                                 Cancelar
                                             </Button>
                                             <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                                                Criar Cliente
+                                                {editingClientId ? "Salvar Alterações" : "Criar Cliente"}
                                             </Button>
                                         </DialogFooter>
                                     </form>
@@ -300,7 +333,7 @@ export default function ClientsPage() {
                                                         </TableCell>
                                                         <TableCell>
                                                             <div className="flex items-center gap-1">
-                                                                <Button variant="ghost" size="icon" title="Editar">
+                                                                <Button variant="ghost" size="icon" title="Editar" onClick={() => handleEditClient(client)}>
                                                                     <Edit className="h-4 w-4" />
                                                                 </Button>
                                                                 <Button

@@ -5,59 +5,56 @@ import { createClient } from '@/lib/supabase/server'
 export async function getFunnelData(organizationId: string) {
   const supabase = await createClient()
 
-  // Buscar todos os deals
-  const { data: deals } = await supabase
+  const { data: pipeline } = await supabase
+    .from('pipelines')
+    .select('id')
+    .eq('organization_id', organizationId)
+    .maybeSingle()
+
+  const { data: stagesData } = await supabase
+    .from('stages')
+    .select('id, name')
+    .eq('pipeline_id', pipeline?.id || '')
+    .order('order')
+
+  const { data: dealsData } = await supabase
     .from('deals')
-    .select('stage, status')
+    .select('stage_id, status')
     .eq('organization_id', organizationId)
 
-  if (!deals) {
+  if (!dealsData || !stagesData) {
     return []
   }
 
-  // Contar por etapa
-  const stageCounts: Record<string, number> = {
-    'Novo': 0,
-    'Contatado': 0,
-    'Qualificado': 0,
-    'Proposta': 0,
-    'Negociação': 0,
-    'Fechado': 0
-  }
+  const stageCounts: Record<string, number> = {}
+  stagesData.forEach(s => { stageCounts[s.id] = 0; })
 
-  deals.forEach(deal => {
-    const stage = deal.stage || 'Novo'
-    if (stageCounts[stage] !== undefined) {
-      stageCounts[stage]++
+  let accumulated = dealsData.length
+
+  dealsData.forEach(deal => {
+    if (stageCounts[deal.stage_id] !== undefined) {
+      stageCounts[deal.stage_id]++
     }
   })
 
-  // Calcular acumulado (funil)
-  const stages = ['Novo', 'Contatado', 'Qualificado', 'Proposta', 'Negociação', 'Fechado']
-  let accumulated = deals.length
+  const colors = [
+    '#3b82f6', // blue-500
+    '#8b5cf6', // purple-500
+    '#ec4899', // pink-500
+    '#f59e0b', // amber-500
+    '#10b981', // green-500
+    '#059669'  // green-600
+  ]
 
-  const funnelData = stages.map((stageName, index) => {
-    const count = index === 0
-      ? accumulated
-      : stageCounts[stageName]
-
+  const funnelData = stagesData.map((stage, index) => {
+    const count = index === 0 ? accumulated : stageCounts[stage.id]
     const percentage = accumulated > 0 ? (count / accumulated) * 100 : 0
 
-    // Cores do funil
-    const colors = [
-      '#3b82f6', // blue-500
-      '#8b5cf6', // purple-500
-      '#ec4899', // pink-500
-      '#f59e0b', // amber-500
-      '#10b981', // green-500
-      '#059669'  // green-600
-    ]
-
     return {
-      name: stageName,
+      name: stage.name,
       count,
       percentage,
-      color: colors[index]
+      color: colors[index % colors.length]
     }
   })
 
@@ -86,28 +83,28 @@ export async function getRealTimeInsights(organizationId: string) {
     .eq('type', 'lead')
     .lt('last_contact', threeDaysAgo.toISOString())
 
-  // Deals próximos de fechar (etapa Negociação)
-  const { count: closingDeals } = await supabase
+  // Deals próximos de fechar (etapa Negociação/Proposta) usando inner join seguro
+  const { data: closingDealsData } = await supabase
     .from('deals')
-    .select('*', { count: 'exact', head: true })
+    .select('value, stages!inner(name)')
     .eq('organization_id', organizationId)
-    .eq('stage', 'Negociação')
-    .eq('status', 'active')
+    .eq('status', 'open')
 
-  // Receita em negociação
-  const { data: negotiationDeals } = await supabase
-    .from('deals')
-    .select('value')
-    .eq('organization_id', organizationId)
-    .eq('stage', 'Negociação')
-    .eq('status', 'active')
+  let closingDeals = 0;
+  let revenueAtRisk = 0;
 
-  const revenueAtRisk = negotiationDeals?.reduce((sum, deal) => sum + (deal.value || 0), 0) || 0
+  closingDealsData?.forEach((d: any) => {
+     const n = d.stages?.name?.toLowerCase() || '';
+     if (n.includes('negocia') || n.includes('negotiat') || n.includes('proposta') || n.includes('proposal')) {
+         closingDeals++;
+         revenueAtRisk += Number(d.value || 0);
+     }
+  });
 
   return {
     hotLeads: hotLeads || 0,
     coldLeads: coldLeads || 0,
-    closingDeals: closingDeals || 0,
+    closingDeals,
     revenueAtRisk
   }
 }

@@ -166,10 +166,11 @@ export async function calculateCloseProbability(lead: any, deal?: any): Promise<
     probability += (lead.score / 100) * 30
   }
 
-  // Engajamento (peso: 25%)
-  if (lead.last_contact) {
+  // Engajamento (peso: 25%) - Usando updated_at como proxy se last_contact não existir
+  const lastContact = lead.last_contact || lead.updated_at || lead.created_at
+  if (lastContact) {
     const daysSinceContact = Math.floor(
-      (Date.now() - new Date(lead.last_contact).getTime()) / (1000 * 60 * 60 * 24)
+      (Date.now() - new Date(lastContact).getTime()) / (1000 * 60 * 60 * 24)
     )
     const engagementScore = Math.max(0, 100 - daysSinceContact * 10)
     probability += (engagementScore / 100) * 25

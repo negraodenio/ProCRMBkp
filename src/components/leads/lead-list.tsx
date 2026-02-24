@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus, Search, Phone, Mail, MessageCircle, Edit, Trash2, User, Building2, Sparkles, Send, Loader2, ExternalLink } from "lucide-react";
+import { Plus, Search, Phone, Mail, MessageCircle, Edit, Trash2, User, Building2, Sparkles, Send, Loader2, ExternalLink, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,8 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
 import { cn, formatPhoneNumber } from "@/lib/utils";
+import { usePlanLimit } from "@/hooks/use-plan-limit";
+import { UpgradeModal } from "@/components/billing/upgrade-modal";
 
 interface Lead {
   id: string;
@@ -95,7 +97,10 @@ export function LeadList() {
     phone: "",
     company: "",
     source: "whatsapp",
+    value: "",
   });
+
+  const { checkLimit, isUpgradeModalOpen, setIsUpgradeModalOpen, lastCheckMessage } = usePlanLimit();
 
   // Edit Lead State
   const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
@@ -110,47 +115,101 @@ export function LeadList() {
   const [loadingMore, setLoadingMore] = useState(false);
   const ITEMS_PER_PAGE = 20;
 
+  // Separate KPI counts (not limited by pagination)
+  const [kpiStats, setKpiStats] = useState({ total: 0, new: 0, qualified: 0, negotiation: 0 });
+
   const supabase = createClient();
 
-  useEffect(() => {
-    if (profile) {
-        setPage(0);
-        setLeads([]);
-        loadLeads(0, true);
-    }
-  }, [profile]);
-
-  async function loadLeads(pageNumber: number, isInitial: boolean = false) {
+  async function loadKPIs() {
     if (!profile?.organization_id) return;
-
-    if (isInitial) setLoading(true);
-    else setLoadingMore(true);
-
-    const from = pageNumber * ITEMS_PER_PAGE;
-    const to = from + ITEMS_PER_PAGE - 1;
-
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("contacts")
-      .select("*")
+      .select("status")
       .eq("type", "lead")
+      .eq("organization_id", profile.organization_id);
+
+    if (data) {
+      setKpiStats({
+        total: data.length,
+        new: data.filter(l => l.status === "new").length,
+        qualified: data.filter(l => l.status === "qualified").length,
+        negotiation: data.filter(l => l.status === "negotiation" || l.status === "proposal").length,
+      });
+    }
+  }
+
+  useEffect(() => {
+    if (profile?.organization_id) {
+      setPage(0);
+      setLeads([]); // Clear leads when profile or filter changes
+      loadLeads(0, true, filterStatus, searchTerm);
+      loadKPIs(); // Also reload KPIs
+    }
+  }, [profile?.organization_id, filterStatus]);
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (profile?.organization_id) {
+        setPage(0);
+        setLeads([]); // Clear leads when search term changes
+        loadLeads(0, true, filterStatus, searchTerm);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  async function loadLeads(offset = 0, reset = false, currentStatus = filterStatus, search = searchTerm) {
+    if (!profile?.organization_id) return;
+    setLoading(true);
+
+    let query = supabase
+      .from("contacts")
+      .select(`
+        *,
+        deals (
+          id,
+          title,
+          value,
+          status,
+          stage_id,
+          stages (
+            name
+          )
+        )
+      `)
       .eq("organization_id", profile.organization_id)
+      .eq("type", "lead");
+
+    if (currentStatus !== "all") {
+      query = query.eq("status", currentStatus);
+    }
+
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%,company.ilike.%${search}%`);
+    }
+
+    const { data, error } = await query
       .order("created_at", { ascending: false })
-      .range(from, to);
+      .range(offset, offset + ITEMS_PER_PAGE - 1);
 
     if (error) {
       console.error("Error loading leads:", error);
       toast.error("Erro ao carregar leads");
     } else {
-      if (isInitial) {
-          setLeads(data || []);
-      } else {
-          setLeads(prev => [...prev, ...(data || [])]);
-      }
-      setHasMore(data?.length === ITEMS_PER_PAGE);
-    }
+      const newLeads = (data || []).map(lead => ({
+        ...lead,
+        deals: lead.deals?.[0] || null
+      }));
 
+      if (reset) {
+        setLeads(newLeads);
+      } else {
+        setLeads(prev => [...prev, ...newLeads]);
+      }
+      setHasMore(newLeads.length === ITEMS_PER_PAGE);
+    }
     setLoading(false);
-    setLoadingMore(false);
   }
 
   const handleLoadMore = () => {
@@ -182,6 +241,7 @@ export function LeadList() {
           phone: formData.phone,
           company: formData.company,
           source: formData.source,
+          value: parseFloat(formData.value.replace(/\./g, "").replace(",", ".")) || 0,
         })
         .eq("id", editingLeadId);
 
@@ -200,6 +260,9 @@ export function LeadList() {
     }
 
     // Create mode (existing logic)
+    const result = await checkLimit("create_lead");
+    if (!result.allowed) return;
+
     const { data: newContact, error: contactError } = await supabase
       .from("contacts")
       .insert({
@@ -212,6 +275,7 @@ export function LeadList() {
         type: "lead",
         status: "new",
         score: 50,
+        value: parseFloat(formData.value.replace(/\./g, "").replace(",", ".")) || 0,
       })
       .select()
       .single();
@@ -264,13 +328,14 @@ export function LeadList() {
       phone: lead.phone,
       company: lead.company,
       source: lead.source,
+      value: (lead as any).value ? (lead as any).value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "",
     });
     setEditingLeadId(lead.id);
     setOpen(true);
   }
 
   function resetForm() {
-    setFormData({ name: "", email: "", phone: "", company: "", source: "whatsapp" });
+    setFormData({ name: "", email: "", phone: "", company: "", source: "whatsapp", value: "" });
     setEditingLeadId(null);
   }
 
@@ -319,10 +384,10 @@ export function LeadList() {
 
   const filteredLeads = leads.filter((lead) => {
     const matchesSearch =
-      lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.phone?.toLowerCase().includes(searchTerm.toLowerCase());
+      (lead.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (lead.email?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (lead.company?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (lead.phone?.toLowerCase() || "").includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "all" || lead.status === filterStatus;
 
     let matchesSpecialFilter = true;
@@ -340,12 +405,7 @@ export function LeadList() {
     return new Date(date).toLocaleDateString("pt-BR");
   };
 
-  const stats = {
-    total: leads.length,
-    new: leads.filter((l) => l.status === "new").length,
-    qualified: leads.filter((l) => l.status === "qualified").length,
-    negotiation: leads.filter((l) => l.status === "negotiation" || l.status === "proposal").length,
-  };
+  const stats = kpiStats;
 
   return (
     <div className="space-y-6">
@@ -429,6 +489,27 @@ export function LeadList() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="value">Valor Estimado (R$)</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">R$</span>
+                  <Input
+                    id="value"
+                    placeholder="0,00"
+                    className="pl-9"
+                    value={formData.value}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/\D/g, "");
+                      if (!raw || raw === "0" || raw === "00") {
+                        setFormData({ ...formData, value: "" });
+                        return;
+                      }
+                      const num = parseInt(raw, 10) / 100;
+                      setFormData({ ...formData, value: num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) });
+                    }}
+                  />
                 </div>
               </div>
               <DialogFooter>
@@ -557,6 +638,12 @@ export function LeadList() {
                     <div className="flex items-center gap-2 text-sm">
                       <Phone className="h-4 w-4 text-muted-foreground" />
                       <span>{formatPhoneNumber(lead.phone)}</span>
+                    </div>
+                  )}
+                  {(lead as any).value > 0 && (
+                    <div className="flex items-center gap-2 text-sm font-semibold text-green-600">
+                      <DollarSign className="h-4 w-4" />
+                      <span>{new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format((lead as any).value)}</span>
                     </div>
                   )}
                 </div>
@@ -718,6 +805,15 @@ export function LeadList() {
               </DialogFooter>
           </DialogContent>
       </Dialog>
+
+      <UpgradeModal
+        isOpen={isUpgradeModalOpen}
+        onClose={() => setIsUpgradeModalOpen(false)}
+        message={lastCheckMessage}
+        orgId={profile?.organization_id}
+        userEmail={profile?.email}
+        userName={profile?.name}
+      />
     </div>
   );
 }

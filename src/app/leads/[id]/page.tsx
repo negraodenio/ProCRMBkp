@@ -67,8 +67,9 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
 
   // Calcular fatores individuais
   const scoreWeight = lead.score ? (lead.score / 100) * 30 : 0
-  const daysSinceContact = lead.last_contact
-    ? Math.floor((Date.now() - new Date(lead.last_contact).getTime()) / (1000 * 60 * 60 * 24))
+  const lastContactDate = lead.last_contact || lead.updated_at || lead.created_at
+  const daysSinceContact = lastContactDate
+    ? Math.floor((Date.now() - new Date(lastContactDate).getTime()) / (1000 * 60 * 60 * 24))
     : 999
   const engagementScore = Math.max(0, 100 - daysSinceContact * 10)
   const engagementWeight = (engagementScore / 100) * 25

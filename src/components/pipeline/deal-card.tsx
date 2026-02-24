@@ -5,7 +5,10 @@ type Deal = {
     id: string;
     title: string;
     value: number;
-    contact_name: string;
+    contact_id?: string;
+    contact_name?: string; // Legacy
+    contacts?: { name: string } | null;
+    companies?: { name: string } | null;
     notes?: string;
     stage_id: string;
 };
@@ -63,14 +66,24 @@ export function DealCard({ deal, isDragging, onEdit, onDelete, stageColor }: Dea
                 </div>
             </div>
 
-            <div className="mt-3 pl-2">
-                <p className="text-xs text-muted-foreground mb-1">{deal.contact_name}</p>
-                <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-foreground">
+            <div className="mt-3 pl-2 space-y-2">
+                <div className="flex flex-col gap-1">
+                    {deal.companies?.name && (
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded w-fit">
+                           🏢 {deal.companies.name}
+                        </div>
+                    )}
+                    <p className="text-[11px] text-muted-foreground font-medium">
+                        👤 {deal.contacts?.name || deal.contact_name || 'Sem contato'}
+                    </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                    <span className="text-sm font-bold text-slate-800">
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(deal.value)}
                     </span>
                     {deal.notes && (
-                        <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse" title="Tem notas" />
+                        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]" title="Tem notas" />
                     )}
                 </div>
             </div>

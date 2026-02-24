@@ -29,9 +29,9 @@ import { logout } from "@/app/auth/actions";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Leads", href: "/leads", icon: Building2 },
+  { name: "Empresas", href: "/companies", icon: Building2 },
+  { name: "Contatos", href: "/contacts", icon: Users },
   { name: "Pipeline", href: "/pipeline", icon: KanbanSquare },
-  { name: "Clientes", href: "/clients", icon: Users },
   { name: "Propostas", href: "/proposals", icon: FileText },
   // { name: "Templates", href: "/templates", icon: Files },
   { name: "Conversas", href: "/chat", icon: MessageSquare },

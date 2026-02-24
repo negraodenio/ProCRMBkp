@@ -42,18 +42,25 @@ export async function getDashboardMetrics(organizationId: string) {
   const totalLeads = leads?.length || 0
   const qualifiedLeads = leads?.filter(l => l.status === 'qualified').length || 0
 
-  // Count won deals safely
+  // Count won deals safely (primarily by status field, fallback to stage name)
   const wonDeals = deals?.filter(d => {
-    const stageName = d.stages?.name
-    return stageName === 'Ganho' || stageName === 'Won'
+    // @ts-ignore - status exists in DB
+    if (d.status === 'won') return true;
+    if (d.stages?.name) {
+      const stageName = (d.stages as any).name.toLowerCase();
+      if (['ganho', 'won', 'fechado', 'concluído'].some(s => stageName.includes(s))) return true;
+    }
+    return false;
   }).length || 0
 
   const conversionRate = totalLeads > 0 ? (wonDeals / totalLeads) * 100 : 0
 
   // Calculate forecast revenue (excluding won and lost)
   const forecastRevenue = deals?.filter(d => {
-    const stageName = d.stages?.name
-    return stageName !== 'Ganho' && stageName !== 'Won' && stageName !== 'Perdido' && stageName !== 'Lost'
+    const stageName = ((d.stages as any)?.name || '').toLowerCase();
+    const isWon = stageName === 'ganho' || stageName === 'won' || stageName === 'fechado';
+    const isLost = stageName === 'perdido' || stageName === 'lost';
+    return !isWon && !isLost;
   }).reduce((sum, d) => sum + (d.value || 0), 0) || 0
 
   // Leads by source

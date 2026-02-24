@@ -26,12 +26,15 @@ export async function POST(req: NextRequest) {
         const eventType = (body.type || body.event || "").toLowerCase();
         const messageData = body.data;
 
-        if (!eventType.includes("messages.upsert") && !eventType.includes("messages_upsert") && !eventType.includes("messages-upsert")) {
-            console.log(`⏭️ [Webhook] Event type '${eventType}' is not messages.upsert, checking if messageData exists...`);
-            if (!messageData) {
-                console.log("⏭️ [Webhook] No messageData, ignoring event");
-                return NextResponse.json({ status: "ignored" });
-            }
+        if (!eventType.includes("messages.upsert") &&
+            !eventType.includes("messages_upsert") &&
+            !eventType.includes("messages-upsert") &&
+            !eventType.includes("connection.update") &&
+            !eventType.includes("connection_update") &&
+            !eventType.includes("qrcode.updated") &&
+            !eventType.includes("qrcode_updated")) {
+            console.log(`[Webhook] Event type '${eventType}' is not handled, ignoring.`);
+            return NextResponse.json({ status: "ignored" });
         }
 
         if (!messageData) {
@@ -87,6 +90,30 @@ export async function POST(req: NextRequest) {
             text = messageData.message.buttonsResponseMessage.selectedDisplayText || messageData.message.buttonsResponseMessage.selectedButtonId;
         } else if (messageData.message?.templateButtonReplyMessage?.selectedId) {
             text = messageData.message.templateButtonReplyMessage.selectedDisplayText || messageData.message.templateButtonReplyMessage.selectedId;
+        }
+
+        // 0. Handle Connection Events
+        if (eventType.includes("connection") || eventType.includes("qrcode")) {
+            const instanceName = body.instance || body.instanceName || "";
+            const status = messageData?.state || messageData?.status || "";
+            let finalOrgId = queryOrgId;
+
+            if (!finalOrgId && instanceName.startsWith("bot-")) {
+                finalOrgId = instanceName.split("bot-")[1];
+            }
+
+            if (finalOrgId) {
+                const unscopedClient = createServiceRoleClient();
+                if (status === "open" || status === "connected") {
+                    console.log(`🟢 [Webhook] WhatsApp Connected for Org ${finalOrgId}`);
+                    const { data: org } = await unscopedClient.from("organizations").select("bot_settings").eq("id", finalOrgId).single();
+                    const newSettings = { ...(org?.bot_settings || {}), active: true, connected_at: new Date().toISOString() };
+                    await unscopedClient.from("organizations").update({ bot_settings: newSettings }).eq("id", finalOrgId);
+                } else if (status === "close" || status === "connecting") {
+                    console.log(`🟡 [Webhook] WhatsApp ${status} for Org ${finalOrgId}`);
+                }
+            }
+            return NextResponse.json({ status: "connection_updated" });
         }
 
         if (!text) {
@@ -189,7 +216,7 @@ export async function POST(req: NextRequest) {
                 .from("contacts")
                 .insert({
                     organization_id: org.id,
-                    name: pushName,
+                    name: pushName || "Novo Contato", // Use pushName for NEW contacts
                     phone: phone,
                     status: "new"
                 })
@@ -201,6 +228,10 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json({ error: "Failed to create contact", details: createContactError.message }, { status: 500 });
             }
             contact = newContact;
+        } else {
+            // OPTIONAL: Update name if it's "Novo Contato" or empty, but don't overwrite user-set names
+            // For now, we JUST keep the existing name to solve the "Decor Live Cortinas" issue
+            console.log(`✅ [Webhook] Existing contact found: ${contact.id}`);
         }
         console.log(`✅ [Webhook] Contact ready: ${contact?.id}`);
 
@@ -404,8 +435,8 @@ export async function POST(req: NextRequest) {
                 const r = await retrieveContextText({
                     orgId: org.id,
                     query: text,
-                    match_threshold: 0.5,
-                    match_count: 5
+                    match_threshold: 0.35, // More inclusive
+                    match_count: 8        // More context
                 });
                 contextText = r.contextText;
             } catch (ragError: any) {

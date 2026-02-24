@@ -22,12 +22,15 @@ import { Label } from "@/components/ui/label";
 type Conversation = {
     id: string;
     contact_phone: string;
-    contact_name: string;
+    contact_name: string; // fallback
     last_message_content: string;
     last_message_at: string;
     unread_count: number;
     status: string;
     ai_enabled: boolean;
+    contacts?: {
+        name: string;
+    };
 };
 
 type Message = {
@@ -63,7 +66,7 @@ export default function ChatPage() {
 
             const { data, error } = await supabase
                 .from("conversations")
-                .select("*")
+                .select("*, contacts(name)")
                 .eq("organization_id", profile.organization_id)
                 .order("last_message_at", { ascending: false });
 
@@ -368,10 +371,10 @@ export default function ChatPage() {
                                                     <MessageSquare className="h-5 w-5" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="flex justify-between items-center mb-0.5">
-                                                        <span className="font-bold text-foreground truncate block">
-                                                            {chat.contact_name || "Contato Novo"}
-                                                        </span>
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <h3 className="font-bold text-foreground truncate block">
+                                                            {(chat as any).contacts?.name || chat.contact_name || chat.contact_phone}
+                                                        </h3>
                                                         {chat.unread_count > 0 && (
                                                             <Badge variant="default" className="bg-primary h-5 px-1.5 min-w-[20px] justify-center text-[10px]">
                                                                 {chat.unread_count}
@@ -386,7 +389,7 @@ export default function ChatPage() {
                                                     </p>
                                                     <div className="text-[10px] text-muted-foreground flex items-center gap-1">
                                                         <CheckCircle2 className="h-3 w-3" />
-                                                        Há {formatDistanceToNow(new Date(chat.last_message_at), { locale: ptBR })}
+                                                        Há {chat.last_message_at ? formatDistanceToNow(new Date(chat.last_message_at), { locale: ptBR }) : 'algum tempo'}
                                                     </div>
                                                 </div>
 
@@ -428,7 +431,7 @@ export default function ChatPage() {
                                         <div>
                                             <div className="flex items-center gap-2 md:gap-3 mb-1">
                                                 <h3 className="font-bold text-lg md:text-xl text-foreground line-clamp-1">
-                                                    {selectedChat?.contact_name || "Contato Novo"}
+                                                    {(selectedChat as any)?.contacts?.name || selectedChat?.contact_name || "Contato Novo"}
                                                 </h3>
                                                 <Badge variant="outline" className="text-primary bg-primary/5 border-primary/20 text-[10px] font-bold hidden sm:inline-flex">
                                                     {selectedChat?.contact_phone}

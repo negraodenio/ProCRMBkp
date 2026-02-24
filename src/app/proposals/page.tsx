@@ -55,6 +55,9 @@ interface Proposal {
     created_at: string;
     valid_until: string | null;
     contact_id: string;
+    content?: {
+        description?: string;
+    };
     contact?: {
         name: string;
     };
@@ -78,6 +81,8 @@ const statusLabels: Record<string, string> = {
 
 export default function ProposalsPage() {
     const [open, setOpen] = useState(false);
+    const [editingProposalId, setEditingProposalId] = useState<string | null>(null);
+    const [viewingProposal, setViewingProposal] = useState<Proposal | null>(null);
     const [proposals, setProposals] = useState<Proposal[]>([]);
     const [contacts, setContacts] = useState<{ id: string; name: string }[]>([]);
     const [loading, setLoading] = useState(true);
@@ -103,7 +108,7 @@ export default function ProposalsPage() {
                     .select("organization_id")
                     .eq("id", user.id)
                     .single();
-                
+
                 if (profile?.organization_id) {
                     setOrganizationId(profile.organization_id);
                     await Promise.all([
@@ -144,41 +149,88 @@ export default function ProposalsPage() {
 
         const { data } = await supabase
             .from("contacts")
-            .select("id, name")
+            .select("id, name, type")
             .eq("organization_id", id)
             .order("name");
-        setContacts(data || []);
+        setContacts((data || []).map(c => ({ id: c.id, name: `${c.name}${c.type === 'client' ? ' (Cliente)' : ' (Lead)'}` })));
     }
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (!organizationId) return;
 
-        const proposalNumber = `PROP-${Date.now()}`;
+        const proposalNumber = editingProposalId ? undefined : `PROP-${Date.now()}`;
         const validUntil = new Date();
         validUntil.setDate(validUntil.getDate() + parseInt(formData.validDays));
 
-        const { error } = await supabase.from("proposals").insert({
-            organization_id: organizationId,
-            contact_id: formData.contactId,
-            number: proposalNumber,
-            title: formData.title,
-            value: parseFloat(formData.value.replace(/[^\d,.-]/g, "").replace(",", ".")),
-            valid_until: validUntil.toISOString().split("T")[0],
-            status: "draft",
-            content: { description: formData.content },
-        });
+        const parsedValue = parseFloat(formData.value.replace(/\./g, "").replace(",", ".")) || 0;
 
-        if (error) {
-            console.error("Error creating proposal:", error);
-            toast.error("Erro ao criar proposta");
-            return;
+        if (editingProposalId) {
+            const { error } = await supabase
+                .from("proposals")
+                .update({
+                    contact_id: formData.contactId,
+                    title: formData.title,
+                    value: parsedValue,
+                    valid_until: validUntil.toISOString().split("T")[0],
+                    content: { description: formData.content },
+                })
+                .eq("id", editingProposalId);
+
+            if (error) {
+                console.error("Error updating proposal:", error);
+                toast.error("Erro ao atualizar proposta");
+                return;
+            }
+            toast.success("Proposta atualizada com sucesso!");
+        } else {
+            const { error } = await supabase.from("proposals").insert({
+                organization_id: organizationId,
+                contact_id: formData.contactId,
+                number: proposalNumber,
+                title: formData.title,
+                value: parsedValue,
+                valid_until: validUntil.toISOString().split("T")[0],
+                status: "draft",
+                content: { description: formData.content },
+            });
+
+            if (error) {
+                console.error("Error creating proposal:", error);
+                toast.error("Erro ao criar proposta");
+                return;
+            }
+            toast.success("Proposta criada com sucesso!");
         }
 
-        toast.success("Proposta criada com sucesso!");
         setFormData({ contactId: "", title: "", value: "", validDays: "30", content: "" });
+        setEditingProposalId(null);
         setOpen(false);
         loadProposals();
+    }
+
+    function handleEdit(proposal: Proposal) {
+        setFormData({
+            contactId: proposal.contact_id,
+            title: proposal.title,
+            value: proposal.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            validDays: "30",
+            content: proposal.content?.description || "",
+        });
+        setEditingProposalId(proposal.id);
+        setOpen(true);
+    }
+
+    function handleDuplicate(proposal: Proposal) {
+        setFormData({
+            contactId: proposal.contact_id,
+            title: proposal.title + " (Cópia)",
+            value: proposal.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            validDays: "30",
+            content: proposal.content?.description || "",
+        });
+        setEditingProposalId(null);
+        setOpen(true);
     }
 
     async function sendViaWhatsApp(proposal: Proposal) {
@@ -200,9 +252,8 @@ export default function ProposalsPage() {
     }
 
     async function deleteProposal(id: string) {
-        if (!confirm("Tem certeza que deseja excluir esta proposta?")) return;
-
-        const { error } = await supabase.from("proposals").delete().eq("id", id);
+        if (!organizationId) return;
+        const { error } = await supabase.from("proposals").delete().eq("id", id).eq("organization_id", organizationId);
         if (error) {
             toast.error("Erro ao excluir proposta");
         } else {
@@ -251,7 +302,13 @@ export default function ProposalsPage() {
                                     Gerencie suas propostas comerciais
                                 </p>
                             </div>
-                            <Dialog open={open} onOpenChange={setOpen}>
+                            <Dialog open={open} onOpenChange={(isOpen) => {
+                                setOpen(isOpen);
+                                if (!isOpen) {
+                                    setFormData({ contactId: "", title: "", value: "", validDays: "30", content: "" });
+                                    setEditingProposalId(null);
+                                }
+                            }}>
                                 <DialogTrigger asChild>
                                     <Button className="bg-blue-600 hover:bg-blue-700">
                                         <Plus className="mr-2 h-4 w-4" /> Nova Proposta
@@ -259,9 +316,9 @@ export default function ProposalsPage() {
                                 </DialogTrigger>
                                 <DialogContent className="sm:max-w-[600px]">
                                     <DialogHeader>
-                                        <DialogTitle>Nova Proposta</DialogTitle>
+                                        <DialogTitle>{editingProposalId ? "Editar Proposta" : "Nova Proposta"}</DialogTitle>
                                         <DialogDescription>
-                                            Crie uma nova proposta comercial para enviar ao cliente.
+                                            {editingProposalId ? "Atualize os detalhes desta proposta." : "Crie uma nova proposta comercial para enviar ao cliente."}
                                         </DialogDescription>
                                     </DialogHeader>
                                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -286,13 +343,25 @@ export default function ProposalsPage() {
                                             </div>
                                             <div className="space-y-2">
                                                 <Label htmlFor="value">Valor (R$) *</Label>
-                                                <Input
-                                                    id="value"
-                                                    placeholder="0,00"
-                                                    value={formData.value}
-                                                    onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                                                    required
-                                                />
+                                                <div className="relative">
+                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">R$</span>
+                                                    <Input
+                                                        id="value"
+                                                        placeholder="0,00"
+                                                        className="pl-9"
+                                                        value={formData.value}
+                                                        onChange={(e) => {
+                                                            const raw = e.target.value.replace(/\D/g, "");
+                                                            if (!raw || raw === "0" || raw === "00") {
+                                                                setFormData({ ...formData, value: "" });
+                                                                return;
+                                                            }
+                                                            const num = parseInt(raw, 10) / 100;
+                                                            setFormData({ ...formData, value: num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) });
+                                                        }}
+                                                        required
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="space-y-2">
@@ -338,7 +407,7 @@ export default function ProposalsPage() {
                                                 Cancelar
                                             </Button>
                                             <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                                                Criar Proposta
+                                                {editingProposalId ? "Salvar Alterações" : "Criar Proposta"}
                                             </Button>
                                         </DialogFooter>
                                     </form>
@@ -396,9 +465,10 @@ export default function ProposalsPage() {
                                             filteredProposals.map((proposal) => (
                                                 <TableRow key={proposal.id}>
                                                     <TableCell>
-                                                        <div className="font-medium">{proposal.number}</div>
-                                                        <div className="text-sm text-muted-foreground">
-                                                            {proposal.contact?.name || proposal.title}
+                                                        <div className="font-bold text-slate-900 text-base">{proposal.title || "Proposta sem título"}</div>
+                                                        <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
+                                                            <Badge variant="outline" className="text-[10px] font-mono py-0 h-4 uppercase bg-slate-50">{proposal.number}</Badge>
+                                                            <span className="truncate max-w-[150px] font-medium text-slate-600">{proposal.contact?.name || "Sem contato"}</span>
                                                         </div>
                                                     </TableCell>
                                                     <TableCell className="font-medium">
@@ -417,13 +487,13 @@ export default function ProposalsPage() {
                                                     </TableCell>
                                                     <TableCell>
                                                         <div className="flex items-center gap-1">
-                                                            <Button variant="ghost" size="icon" title="Visualizar">
+                                                            <Button variant="ghost" size="icon" title="Visualizar" onClick={() => setViewingProposal(proposal)}>
                                                                 <Eye className="h-4 w-4" />
                                                             </Button>
-                                                            <Button variant="ghost" size="icon" title="Editar">
+                                                            <Button variant="ghost" size="icon" title="Editar" onClick={() => handleEdit(proposal)}>
                                                                 <Edit className="h-4 w-4" />
                                                             </Button>
-                                                            <Button variant="ghost" size="icon" title="Duplicar">
+                                                            <Button variant="ghost" size="icon" title="Duplicar" onClick={() => handleDuplicate(proposal)}>
                                                                 <Copy className="h-4 w-4" />
                                                             </Button>
                                                             <Button
@@ -463,6 +533,52 @@ export default function ProposalsPage() {
                         </div>
                     </div>
                 </main>
+
+                <Dialog open={!!viewingProposal} onOpenChange={(open) => !open && setViewingProposal(null)}>
+                    <DialogContent className="sm:max-w-[500px]">
+                        <DialogHeader>
+                            <DialogTitle>Visualizar Proposta</DialogTitle>
+                            <DialogDescription>
+                                Detalhes completos da proposta comercial.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <div>
+                                <h3 className="text-lg font-bold">{viewingProposal?.title}</h3>
+                                <p className="text-sm text-muted-foreground">#{viewingProposal?.number}</p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-sm font-semibold">Cliente</p>
+                                    <p className="text-sm">{viewingProposal?.contact?.name || "Desconhecido"}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold">Valor</p>
+                                    <p className="text-sm">{viewingProposal ? formatCurrency(viewingProposal.value) : "R$ 0,00"}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold">Status</p>
+                                    <Badge className={viewingProposal ? statusColors[viewingProposal.status] : ""}>
+                                        {viewingProposal ? statusLabels[viewingProposal.status] : "Desconhecido"}
+                                    </Badge>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold">Validade</p>
+                                    <p className="text-sm">{viewingProposal?.valid_until ? new Date(viewingProposal.valid_until).toLocaleDateString("pt-BR") : "-"}</p>
+                                </div>
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold mb-1">Descrição</p>
+                                <div className="p-3 bg-muted rounded-md text-sm whitespace-pre-wrap min-h-[100px]">
+                                    {viewingProposal?.content?.description || "Sem descrição."}
+                                </div>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button onClick={() => setViewingProposal(null)}>Fechar</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );

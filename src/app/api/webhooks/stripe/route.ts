@@ -25,13 +25,13 @@ if (!process.env.RESEND_API_KEY) {
 // MAPA DE PLANOS — Price IDs do Stripe
 // ============================================
 const PLAN_MAP: Record<string, { name: string; slug: string }> = {
-  "price_1T0LLCHVYqBSctt34B3r7GS4": { name: "Starter", slug: "starter" },
-  "price_1T0LLxHVYqBSctt3R6wYjwpM": { name: "Pro", slug: "pro" },
-  "price_1T0LMXHVYqBSctt3PFmUVLaN": { name: "Business", slug: "business" },
+  [process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_STARTER || "price_starter_placeholder"]: { name: "Starter", slug: "starter" },
+  [process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO || "price_pro_placeholder"]: { name: "Pro", slug: "pro" },
+  [process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_BUSINESS || "price_business_placeholder"]: { name: "Business", slug: "business" },
 };
 
 function getPlanFromPriceId(priceId: string) {
-  return PLAN_MAP[priceId] || { name: "Pro", slug: "pro" };
+  return PLAN_MAP[priceId] || { name: "Free", slug: "free" };
 }
 
 // ============================================
@@ -60,7 +60,7 @@ async function sendWelcomeEmail(email: string, planName: string) {
             <p>O teu plano <strong>CRMia ${planName}</strong> está agora ativo. Já podes usar todas as funcionalidades incluídas.</p>
 
             <div style="text-align: center; padding: 20px 0;">
-              <a href="https://crmia.eu/dashboard"
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://crmia.eu'}/dashboard"
                  style="background: #7c3aed; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
                 Ir para o Dashboard →
               </a>
@@ -95,7 +95,7 @@ async function sendPaymentFailedEmail(email: string) {
           </div>
 
           <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 30px; text-align: center;">
-            <h2 style="color: # dc2626; margin: 0 0 10px;">⚠️ Pagamento Falhou</h2>
+            <h2 style="color: #dc2626; margin: 0 0 10px;">⚠️ Pagamento Falhou</h2>
             <p style="color: #7f1d1d; margin: 0;">Não conseguimos processar o teu pagamento.</p>
           </div>
 
@@ -104,7 +104,7 @@ async function sendPaymentFailedEmail(email: string) {
             <p>O último pagamento da tua subscrição CRMia falhou. Para evitar a suspensão do teu plano, por favor atualiza o teu método de pagamento.</p>
 
             <div style="text-align: center; padding: 20px 0;">
-              <a href="https://crmia.eu/dashboard/settings/billing"
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://crmia.eu'}/dashboard/settings/billing"
                  style="background: #dc2626; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
                 Atualizar Pagamento →
               </a>
@@ -147,7 +147,7 @@ async function sendCancellationEmail(email: string) {
             <p>Se mudares de ideia, podes reativar a qualquer momento:</p>
 
             <div style="text-align: center; padding: 20px 0;">
-              <a href="https://crmia.eu/pricing"
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://crmia.eu'}/pricing"
                  style="background: #7c3aed; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
                 Reativar Plano →
               </a>
@@ -215,6 +215,8 @@ export async function POST(req: Request) {
               subscription_status: "active",
               subscription_plan: plan.slug,
               stripe_customer_id: session.customer,
+              plan_started_at: new Date().toISOString(),
+              ia_tools_used_month: 0, // Reset IA tools usage on new subscription
             })
             .eq("id", orgId);
 
@@ -392,7 +394,13 @@ export async function POST(req: Request) {
           if (org) {
             await supabaseAdmin
               .from("organizations")
-              .update({ subscription_status: "active" })
+              .update({
+                subscription_status: "active",
+                ia_tools_used_month: 0, // RESET MENSAL!
+                ia_tools_reset_date: new Date(
+                  stripeSubscription.current_period_end * 1000
+                ).toISOString(),
+              })
               .eq("id", org.id);
           }
         }

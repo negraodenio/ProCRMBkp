@@ -6,10 +6,50 @@ import { revalidatePath } from 'next/cache'
 export async function updateDealStage(dealId: string, newStageId: string) {
     const supabase = await createClient()
 
+    // 1. Fetch stage name to determine new status
+    const { data: stage } = await supabase
+        .from('stages')
+        .select('name')
+        .eq('id', newStageId)
+        .single()
+
+    let dealStatus: 'open' | 'won' | 'lost' = 'open';
+    let contactStatus = 'negotiation';
+
+    if (stage) {
+        const stageName = stage.name.toLowerCase();
+        // More robust stage mapping
+        if (['ganho', 'won', 'fechado', 'concluído', 'concluido'].some(s => stageName.includes(s))) {
+            dealStatus = 'won';
+            contactStatus = 'won';
+        } else if (['perdido', 'lost', 'cancelado'].some(s => stageName.includes(s))) {
+            dealStatus = 'lost';
+            contactStatus = 'lost';
+        } else if (['proposta', 'proposal', 'orçamento', 'orcamento'].some(s => stageName.includes(s))) {
+            contactStatus = 'proposal';
+        } else if (['quali', 'triagem'].some(s => stageName.includes(s))) {
+            contactStatus = 'qualified';
+        } else if (['contat', 'abordagem', 'reunião', 'reuniao'].some(s => stageName.includes(s))) {
+            contactStatus = 'contacted';
+        }
+    }
+
+    // Need to get contact_id to update contact status
+    const { data: dealToUpdate } = await supabase.from('deals').select('contact_id').eq('id', dealId).single()
+
     const { error } = await supabase
         .from('deals')
-        .update({ stage_id: newStageId, updated_at: new Date().toISOString() })
+        .update({
+            stage_id: newStageId,
+            status: dealStatus,
+            updated_at: new Date().toISOString()
+        })
         .eq('id', dealId)
+
+    // Update contact status if deal moved to Won/Lost or specific contact status mapped
+    if (!error && dealToUpdate?.contact_id) {
+       await supabase.from('contacts').update({ status: contactStatus }).eq('id', dealToUpdate.contact_id);
+    }
 
     if (error) {
         console.error('Error updating deal stage:', error)
@@ -17,6 +57,9 @@ export async function updateDealStage(dealId: string, newStageId: string) {
     }
 
     revalidatePath('/pipeline')
+    revalidatePath('/leads')
+    revalidatePath('/dashboard')
+    revalidatePath('/reports')
     return { success: true }
 }
 

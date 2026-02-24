@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { redirect } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 import { getDashboardMetrics } from "./actions";
 import { getSmartAlerts } from "@/app/automations/actions";
 import { getFunnelData, getRealTimeInsights } from "./funnel-actions";

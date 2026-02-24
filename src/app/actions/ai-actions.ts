@@ -2,6 +2,8 @@
 
 import { aiChat } from "@/lib/ai/client";
 import { createClient } from "@/lib/supabase/server";
+import { checkPlanLimit } from "@/lib/stripe/limits";
+import { PlanLevel } from "@/lib/stripe/plans";
 
 export async function generateAIContent(toolId: string, leadId: string) {
     if (!leadId) {
@@ -19,6 +21,30 @@ export async function generateAIContent(toolId: string, leadId: string) {
     if (error || !lead) {
         console.error("Error fetching lead:", error);
         return { success: false, error: "Lead not found" };
+    }
+
+    // 1.1 Check Plan Limits
+    const { data: org } = await supabase
+        .from("organizations")
+        .select("id, subscription_plan, ia_tools_used_month")
+        .eq("id", lead.organization_id)
+        .single();
+
+    if (!org) return { success: false, error: "Organização não encontrada" };
+
+    const plan = (org.subscription_plan || "free") as PlanLevel;
+    const limitResult = checkPlanLimit(
+        plan,
+        { leads_count: 0, users_count: 0, ia_tools_used_month: org.ia_tools_used_month || 0 },
+        "use_ia_tool"
+    );
+
+    if (!limitResult.allowed) {
+        return {
+            success: false,
+            error: limitResult.message,
+            upgradeRequired: true
+        };
     }
 
     // 2. Fetch History (Optional - Messages)
@@ -185,6 +211,11 @@ export async function generateAIContent(toolId: string, leadId: string) {
                         output_result: { result: result.substring(0, 500) },
                         model_used: model,
                         tokens_used: 0, // SiliconFlow doesn't return usage easily in this simple call
+                    });
+
+                    // Increment usage count in organizations table
+                    await supabase.rpc('increment_ia_usage', {
+                        org_id: profile.organization_id
                     });
                 }
             }

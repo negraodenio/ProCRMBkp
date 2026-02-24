@@ -18,25 +18,25 @@ export const PERSONALITY_PRESETS = {
     name: "Entusiasmado",
     emoji: "🎉",
     description: "Animado e cheio de energia",
-    tone_prompt: "TOM: Entusiasmado e vibrante. Use exclamações. EMOJIS: ✨, 🚀, 🎉.",
-    temperature: 0.3,
-    max_temperature: 0.5,
+    tone_prompt: "TOM: Entusiasmado e vibrante. Seja carismático e use exclamações. EMOJIS: ✨, 🚀, 🎉.",
+    temperature: 0.4,
+    max_temperature: 0.6,
     use_emojis: true
   },
   friendly: {
     name: "Amigável",
     emoji: "😊",
     description: "Caloroso mas profissional",
-    tone_prompt: "TOM: Cordial, solícito e profissional. EMOJIS: Máximo 1 por vez 😊.",
-    temperature: 0.2,
-    max_temperature: 0.45,
+    tone_prompt: "TOM: Cordial, solícito e muito prestativo. EMOJIS: Pode usar com moderação 😊, 👍.",
+    temperature: 0.3,
+    max_temperature: 0.5,
     use_emojis: true
   },
   neutral: {
     name: "Neutro",
     emoji: "📋",
     description: "Objetivo e direto ao ponto",
-    tone_prompt: "TOM: Direto, técnico e conciso. EMOJIS: Proibido 🚫.",
+    tone_prompt: "TOM: Direto, técnico e conciso. Sem rodeios. EMOJIS: Proibido 🚫.",
     temperature: 0.1,
     max_temperature: 0.3,
     use_emojis: false
@@ -45,52 +45,52 @@ export const PERSONALITY_PRESETS = {
     name: "Formal",
     emoji: "🎓",
     description: "Profissional e polido",
-    tone_prompt: "TOM: Respeitoso e polido. Use 'Senhor/Senhora'. EMOJIS: Proibido.",
+    tone_prompt: "TOM: Respeitoso e formal. Use 'Senhor/Senhora' tido com elegância. EMOJIS: Proibido.",
     temperature: 0.1,
-    max_temperature: 0.35,
+    max_temperature: 0.4,
     use_emojis: false
   },
   casual: {
     name: "Casual",
     emoji: "😎",
     description: "Descontraído e informal",
-    tone_prompt: "TOM: Informal e leve. Fale como um parceiro/amigo. EMOJIS: 😎, 👍.",
-    temperature: 0.3,
-    max_temperature: 0.6,
+    tone_prompt: "TOM: Informal e leve. Fale como um parceiro ou amigo. Gírias leves são ok. EMOJIS: 😎, ✌️, 🙌.",
+    temperature: 0.5,
+    max_temperature: 0.7,
     use_emojis: true
   },
   technical: {
     name: "Técnico",
     emoji: "🔧",
     description: "Detalhado e preciso",
-    tone_prompt: "TOM: Técnico e preciso operacionalmente. Foco em clareza extrema. EMOJIS: 🔧, ⚙️.",
-    temperature: 0.05,
-    max_temperature: 0.45,
+    tone_prompt: "TOM: Técnico, preciso e focado na resolução de problemas. EMOJIS: 🔧, ⚙️.",
+    temperature: 0.1,
+    max_temperature: 0.5,
     use_emojis: false
   },
   instruction_follower: {
     name: "Seguidor de Instruções (RAG)",
     emoji: "🤖",
-    description: "Só manual, sem inventar",
-    tone_prompt: "TOM: Robótico e informativo. Baseado em fatos. EMOJIS: Proibido.",
-    temperature: 0.0,
-    max_temperature: 0.25,
+    description: "Baseado no manual, preciso",
+    tone_prompt: "TOM: Informativo e útil. Priorize os fatos dos manuais. EMOJIS: 🤖, 📝.",
+    temperature: 0.2,
+    max_temperature: 0.4,
     use_emojis: false
   },
   consultative_sales: {
-    name: "Vendas Consultivas (3 Fases)",
+    name: "Vendas Consultivas",
     emoji: "💼",
-    description: "Qualifica e fecha próximo passo",
-    tone_prompt: "TOM: Consultivo e direcionado para fechamento. 1 pergunta por vez.",
-    temperature: 0.2,
-    max_temperature: 0.55,
+    description: "Ajuda a escolher e fechar",
+    tone_prompt: "TOM: Consultivo, empático e focado em entender a dor do cliente para oferecer a solução. 1 pergunta por vez.",
+    temperature: 0.3,
+    max_temperature: 0.6,
     use_emojis: true
   },
   custom: {
     name: "Customizado",
     emoji: "💬",
-    description: "Personalize completamente",
-    tone_prompt: "TOM: Conforme instruções da empresa.",
+    description: "Regras da sua empresa",
+    tone_prompt: "TOM: Siga rigorosamente as instruções da empresa.",
     temperature: 0.3,
     max_temperature: 0.7,
     use_emojis: true
@@ -106,25 +106,26 @@ export function clampTemperature(presetKey: PersonalityType, uiTemp?: number) {
 }
 
 /**
- * Novo Contrato: "Prove ou Calar" (JSON Evidence Gating)
+ * Novo Contrato: "Inspirado em Fatos" (JSON Evidence Gating)
  */
 export const POLICY_GLOBAL_RAG_JSON = `
-REGRAS GLOBAIS (OBRIGATÓRIO):
-- Fonte Única: use SOMENTE o conteúdo dentro de <context> para fatos.
-- Proibição de Alucinação: Se não houver evidência no <context>, declare que não sabe no JSON.
-- Idioma: Responda apenas em pt-BR.
+REGRAS GLOBAIS (SENIOR):
+- Fonte de Conhecimento: Use o <context> para responder dúvidas técnicas ou sobre a empresa.
+- Naturalidade: Não seja robótico. Responda de forma fluída e humana conforme o TOM escolhido.
+- Proibição de Alucinação: Se o <context> não tiver a informação e for algo específico da empresa, use "answer": null.
+- Idioma: Responda sempre em pt-BR.
 
-MODO "PROVAR OU CALAR" (JSON SCHEMA):
-- Você deve responder APENAS em JSON válido com os seguintes campos:
+MODO JSON (OBRIGATÓRIO):
+- Responda EXCLUSIVAMENTE em JSON válido:
 {
-  "answer": "Sua resposta (ou null se não houver evidência)",
-  "evidence_quotes": ["trecho_literal_copiado_de_contexto", "..."],
-  "next_step": "Pergunta curta ou CTA"
+  "answer": "Sua resposta natural (ou null se for algo que você REALMENTE não sabe sobre a empresa)",
+  "evidence_quotes": ["frase_literal_do_contexto_que_prova_sua_resposta"],
+  "next_step": "Pergunta curta para manter o papo ou CTA"
 }
 
 REGRAS DE EVIDÊNCIA:
-- Se "answer" != null, "evidence_quotes" DEVE conter pelo menos 1 frase copiada LITERALMENTE do <context>.
-- Se <context> estiver vazio ou insuficiente, use "answer": null e no "next_step" peça clarificação ou ofereça humano.
+- Se "answer" for preenchido, você DEVE citar o trecho do manual em "evidence_quotes".
+- Se o <context> for insuficiente para uma resposta segura sobre a empresa, deixe "answer" como null e peça mais detalhes no "next_step".
 `.trim();
 
 /**

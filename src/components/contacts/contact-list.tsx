@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export interface Contact {
@@ -25,10 +26,12 @@ export interface Contact {
   name: string;
   email: string | null;
   phone: string | null;
-  company: string | null;
-  avatar_url: string | null; // Changed from avatar to avatar_url
-  type: string | null;      // lead, client
-  status: string | null;    // new, contacted
+  company: string | null; // Keep for fallback
+  company_id: string | null;
+  companies?: { name: string } | null;
+  avatar_url: string | null;
+  type: string | null;
+  status: string | null;
 }
 
 interface ContactListProps {
@@ -40,6 +43,7 @@ export function ContactList({ contacts }: ContactListProps) {
 
   const filteredContacts = contacts.filter(contact =>
     contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (contact.companies?.name && contact.companies.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (contact.company && contact.company.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (contact.email && contact.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -48,9 +52,10 @@ export function ContactList({ contacts }: ContactListProps) {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          {/* Header Content */}
+          <h1 className="text-3xl font-bold">Contatos</h1>
+          <p className="text-muted-foreground">Gerencie seus leads e clientes em um só lugar</p>
         </div>
-        <Button>
+        <Button className="bg-blue-600 hover:bg-blue-700">
           <Plus className="mr-2 h-4 w-4" />
           Novo Contato
         </Button>
@@ -74,7 +79,6 @@ export function ContactList({ contacts }: ContactListProps) {
             <TableRow>
               <TableHead>Contato</TableHead>
               <TableHead>Empresa</TableHead>
-              {/* Removed Cargo/Position Column */}
               <TableHead>Email</TableHead>
               <TableHead>Telefone</TableHead>
               <TableHead className="text-right">Ações</TableHead>
@@ -92,12 +96,20 @@ export function ContactList({ contacts }: ContactListProps) {
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="font-medium">{contact.name}</div>
-                      <div className="text-xs text-muted-foreground">{contact.type}</div>
+                      <div className="font-medium text-slate-800">{contact.name}</div>
+                      <div className="text-[10px] uppercase font-bold text-slate-400">{contact.type}</div>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>{contact.company || '-'}</TableCell>
+                <TableCell>
+                  {contact.companies?.name ? (
+                    <Badge variant="outline" className="text-blue-600 border-blue-200">
+                      {contact.companies.name}
+                    </Badge>
+                  ) : (
+                    <span className="text-slate-400 italic">{contact.company || '-'}</span>
+                  )}
+                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-muted-foreground" />
