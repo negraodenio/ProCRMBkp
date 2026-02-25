@@ -72,6 +72,9 @@ interface Proposal {
         name: string;
     };
     items?: ProposalItem[];
+    stage?: {
+        name: string;
+    };
 }
 
 const statusColors: Record<string, string> = {
