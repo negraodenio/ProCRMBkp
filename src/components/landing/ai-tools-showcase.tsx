@@ -17,7 +17,8 @@ import {
   ExternalLink,
   ChevronRight,
   Flame,
-  LineChart
+  LineChart,
+  MessageCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -111,6 +112,17 @@ const TOOLS: ToolCard[] = [
     group: "communication",
     color: "text-rose-600",
     fullExample: "Análise Comportamental:\n\nÚltimas 3 interações:\n1. E-mail: 'Preciso disso para ontem' (Tom: Urgência)\n2. WhatsApp: 'Gostei do demo' (Humor: Entusiasmo)\n3. Chamada: 'Preço é problema?' (Objeção: Financeiro)\n\nSentimento Geral: Muito Positivo. O lead está 'comprado' mas precisa de uma condição especial de pagamento."
+  },
+  {
+    id: "whatsapp-agent",
+    title: "Agente IA WhatsApp (Robo)",
+    description: "Atendimento humano e natural com status 'Digitando...', saudações dinâmicas e transbordo para humanos.",
+    icon: MessageCircle,
+    badge: "NOVIDADE 🔥",
+    preview: "Status: Digitando... IA respondendo de forma natural.",
+    group: "communication",
+    color: "text-green-600",
+    fullExample: "Interação Real:\n\nCliente: 'Oi, tudo bem? Quais os preços?'\nRobo (Status: Digitando...): 'Olá! Tudo ótimo por aqui. 😊 No CRMia temos planos a partir de R$ 129. Qual seu objetivo atual para eu te indicar o melhor?'\n\nBenefício: Redução de 40% no abandono de chat por falta de feedback visual."
   },
   {
     id: "framework",
@@ -244,7 +256,7 @@ export function AIToolsShowcase() {
       <div className="text-center max-w-4xl mx-auto mb-20 space-y-6">
         <Badge className="bg-primary text-white font-black px-4 py-1">⚡ ÚNICO NO MERCADO</Badge>
         <h2 className="text-4xl md:text-6xl font-black text-slate-900 leading-[1.1]">
-          11 Ferramentas de IA Que Só o <span className="text-primary italic">CRMia</span> Tem
+          13 Ferramentas de IA Que Só o <span className="text-primary italic">CRMia</span> Tem
         </h2>
         <p className="text-xl text-slate-600 max-w-2xl mx-auto">
           Cada ferramenta resolve um problema real de vendas.

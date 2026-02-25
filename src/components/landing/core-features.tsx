@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 
 const CORE_FEATURES = [
   {
-    title: "WhatsApp Integrado",
-    description: "Mensagens, histórico e resumos por IA nativos na plataforma.",
+    title: "WhatsApp com Typing",
+    description: "Status 'Digitando...', histórico e resumos por IA nativos na plataforma.",
     icon: MessageCircle,
     color: "bg-green-50 text-green-600"
   },
@@ -35,8 +35,8 @@ const CORE_FEATURES = [
     color: "bg-rose-50 text-rose-600"
   },
   {
-    title: "Pipeline Visual",
-    description: "Gestão por Drag & drop com automação de stages.",
+    title: "B2B & B2C Multicanal",
+    description: "Gestão flexível para empresas ou direto para o consumidor final (CPF).",
     icon: BarChart3,
     color: "bg-indigo-50 text-indigo-600"
   }
@@ -50,7 +50,7 @@ export function CoreFeatures() {
           Tudo Que Um CRM Precisa — E Mais
         </h2>
         <p className="text-slate-500 font-medium">
-          Além das 11 IA Tools, o CRMia tem todas as funcionalidades essenciais para escalar sua operação.
+          Além das 13 IA Tools, o CRMia tem todas as funcionalidades essenciais para escalar sua operação.
         </p>
       </div>
 
