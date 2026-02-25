@@ -17,16 +17,16 @@ export function LandingHeader() {
           </span>
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+          <a href="#features" className="text-slate-600 hover:text-primary transition-colors">Pipeline & Propostas</a>
           <a href="#tools" className="text-slate-600 hover:text-primary transition-colors">9 IA Tools</a>
-          <a href="#comparison" className="text-slate-600 hover:text-primary transition-colors">Porquê CRMia?</a>
-          <a href="#pricing" className="text-slate-600 hover:text-primary transition-colors">Preços</a>
+          <a href="#pricing" className="text-slate-600 hover:text-primary transition-colors">Planos</a>
           <div className="flex items-center gap-4 ml-4">
             <Link href="/login">
-              <Button variant="ghost" className="text-slate-600">Login</Button>
+              <Button variant="ghost" className="text-slate-600 font-semibold hover:text-primary hover:bg-primary/5">Acessar CRM</Button>
             </Link>
             <Link href="/register">
-              <Button className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
-                Começar Grátis
+              <Button className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 font-bold">
+                Criar Conta Grátis
               </Button>
             </Link>
           </div>
