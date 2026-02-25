@@ -430,8 +430,7 @@ export default function ProposalsPage() {
             .from("proposals")
             .update({
                 pipeline_id: transferData.pipelineId,
-                stage_id: transferData.stageId,
-                updated_at: new Date().toISOString()
+                stage_id: transferData.stageId
             })
             .eq("id", transferringProposal.id);
 

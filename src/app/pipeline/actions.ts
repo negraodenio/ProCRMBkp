@@ -16,8 +16,7 @@ export async function updateProposalStage(proposalId: string, newStageId: string
     const { error } = await supabase
         .from('proposals')
         .update({
-            stage_id: newStageId,
-            updated_at: new Date().toISOString()
+            stage_id: newStageId
         })
         .eq('id', proposalId)
 
@@ -36,8 +35,7 @@ export async function updateProposal(proposalId: string, data: { title?: string,
     const { error } = await supabase
         .from('proposals')
         .update({
-            ...data,
-            updated_at: new Date().toISOString()
+            ...data
         })
         .eq('id', proposalId)
 
@@ -182,10 +180,10 @@ export async function createPipeline(data: { name: string, organization_id: stri
 
     // Automatically create default stages for the new pipeline to prevent empty states
     const defaultStages = [
-        { pipeline_id: pipeline.id, organization_id: data.organization_id, name: 'Lead', color: 'bg-blue-500', order: 0 },
-        { pipeline_id: pipeline.id, organization_id: data.organization_id, name: 'Em Contato', color: 'bg-yellow-500', order: 1 },
-        { pipeline_id: pipeline.id, organization_id: data.organization_id, name: 'Negociação', color: 'bg-orange-500', order: 2 },
-        { pipeline_id: pipeline.id, organization_id: data.organization_id, name: 'Fechado', color: 'bg-green-500', order: 3 }
+        { pipeline_id: pipeline.id, name: 'Lead', color: 'bg-blue-500', order: 0 },
+        { pipeline_id: pipeline.id, name: 'Em Contato', color: 'bg-yellow-500', order: 1 },
+        { pipeline_id: pipeline.id, name: 'Negociação', color: 'bg-orange-500', order: 2 },
+        { pipeline_id: pipeline.id, name: 'Fechado', color: 'bg-green-500', order: 3 }
     ];
 
     const { error: stagesError } = await supabase
