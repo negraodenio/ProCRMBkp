@@ -18,7 +18,7 @@ export function LandingHeader() {
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
           <a href="#features" className="text-slate-600 hover:text-primary transition-colors">Pipeline & Propostas</a>
-          <a href="#tools" className="text-slate-600 hover:text-primary transition-colors">11 IA Tools</a>
+          <a href="#tools" className="text-slate-600 hover:text-primary transition-colors">13 IA Tools</a>
           <a href="#pricing" className="text-slate-600 hover:text-primary transition-colors">Planos</a>
           <div className="flex items-center gap-4 ml-4">
             <Link href="/login">
