@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Search, MoreHorizontal, Phone, Mail, Edit, Trash2, User, Building2, Loader2 } from "lucide-react";
+import Select from "react-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -42,7 +43,7 @@ export interface Contact {
   phone: string | null;
   company: string | null;
   company_id: string | null;
-  companies?: { name: string } | null;
+  contact_companies?: { companies: { id: string, name: string } }[] | null;
   avatar_url: string | null;
   type: string | null;
   status: string | null;
@@ -64,24 +65,45 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
     name: "",
     email: "",
     phone: "",
-    company: "",
+    companyIds: [] as string[],
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [availableCompanies, setAvailableCompanies] = useState<{ id: string, name: string }[]>([]);
 
   useEffect(() => {
     setContacts(initialContacts);
   }, [initialContacts]);
 
-  const filteredContacts = contacts.filter(contact =>
-    (contact.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-    (contact.companies?.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-    (contact.company?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-    (contact.email?.toLowerCase() || "").includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    async function fetchCompanies() {
+      if (!profile?.organization_id) return;
+      const { data } = await supabase
+        .from('companies')
+        .select('id, name')
+        .eq('organization_id', profile.organization_id)
+        .order('name');
+      if (data) setAvailableCompanies(data);
+    }
+    fetchCompanies();
+  }, [profile?.organization_id]);
+
+  const filteredContacts = contacts.filter(contact => {
+    const searchLower = searchTerm.toLowerCase();
+    const companyNamesMatch = contact.contact_companies?.some(
+      cc => cc.companies?.name.toLowerCase().includes(searchLower)
+    );
+
+    return (
+      (contact.name?.toLowerCase() || "").includes(searchLower) ||
+      companyNamesMatch ||
+      (contact.company?.toLowerCase() || "").includes(searchLower) ||
+      (contact.email?.toLowerCase() || "").includes(searchLower)
+    );
+  });
 
   const resetForm = () => {
-    setFormData({ name: "", email: "", phone: "", company: "" });
+    setFormData({ name: "", email: "", phone: "", companyIds: [] });
     setEditingId(null);
   };
 
@@ -90,7 +112,7 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
       name: contact.name || "",
       email: contact.email || "",
       phone: contact.phone || "",
-      company: contact.company || "",
+      companyIds: contact.contact_companies?.map(cc => cc.companies?.id).filter(Boolean) as string[] || [],
     });
     setEditingId(contact.id);
     setOpen(true);
@@ -118,6 +140,8 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
 
     setLoading(true);
     try {
+      let contactId = editingId;
+
       if (editingId) {
         const { error } = await supabase
           .from("contacts")
@@ -125,26 +149,52 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
             name: formData.name,
             email: formData.email,
             phone: formData.phone,
-            company: formData.company,
           })
           .eq("id", editingId);
 
         if (error) throw error;
         toast.success("Contato atualizado!");
       } else {
-        const { error } = await supabase
+        const { data: newContact, error } = await supabase
           .from("contacts")
           .insert({
             organization_id: profile.organization_id,
             name: formData.name,
             email: formData.email,
             phone: formData.phone,
-            company: formData.company,
             type: "customer",
-          });
+          })
+          .select()
+          .single();
 
         if (error) throw error;
+        contactId = newContact.id;
         toast.success("Contato criado!");
+      }
+
+      // 2. Handle Many-to-Many Companies
+      if (contactId) {
+        // First delete existing relations
+        await supabase
+          .from("contact_companies")
+          .delete()
+          .eq("contact_id", contactId);
+
+        // Then insert new ones
+        if (formData.companyIds.length > 0) {
+          const companiesToInsert = formData.companyIds.map(companyId => ({
+            contact_id: contactId,
+            company_id: companyId,
+            organization_id: profile.organization_id,
+            is_primary: true
+          }));
+
+          const { error: relationError } = await supabase
+            .from("contact_companies")
+            .insert(companiesToInsert);
+
+          if (relationError) throw relationError;
+        }
       }
 
       setOpen(false);
@@ -154,7 +204,7 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
       // Local update for immediate feedback
       const { data: updatedData } = await supabase
         .from('contacts')
-        .select('*, companies(name)')
+        .select('*, contact_companies(companies(name))')
         .eq('organization_id', profile.organization_id)
         .order('name', { ascending: true });
 
@@ -176,9 +226,12 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
           <p className="text-muted-foreground">Gerencie seus leads e clientes em um só lugar</p>
         </div>
 
-        <Dialog open={open} onOpenChange={(val) => { if(!val) resetForm(); setOpen(val); }}>
+        <Dialog open={open && !editingId} onOpenChange={(val) => {
+          if(!val) resetForm();
+          setOpen(val);
+        }}>
           <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { resetForm(); setOpen(true); }}>
               <Plus className="mr-2 h-4 w-4" />
               Novo Contato
             </Button>
@@ -218,11 +271,21 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="company">Empresa</Label>
-                <Input
-                  id="company"
-                  value={formData.company}
-                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                <Label htmlFor="company">Empresas</Label>
+                <Select
+                  isMulti
+                  name="companies"
+                  options={availableCompanies.map(c => ({ value: c.id, label: c.name }))}
+                  className="basic-multi-select"
+                  classNamePrefix="select"
+                  placeholder="Selecione as empresas..."
+                  value={availableCompanies
+                    .filter(c => formData.companyIds.includes(c.id))
+                    .map(c => ({ value: c.id, label: c.name }))}
+                  onChange={(selected) =>
+                    setFormData({ ...formData, companyIds: selected.map(s => s.value) })
+                  }
+                  noOptionsMessage={() => "Nenhuma empresa encontrada"}
                 />
               </div>
               <DialogFooter>
@@ -230,6 +293,74 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
                 <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700">
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {editingId ? "Salvar Alterações" : "Criar Contato"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Dialog */}
+        <Dialog open={open && !!editingId} onOpenChange={(val) => {
+          if(!val) resetForm();
+          setOpen(val);
+        }}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Editar Contato</DialogTitle>
+              <DialogDescription>
+                Atualize os dados básicos do seu contato.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Nome *</Label>
+                <Input
+                  id="edit-name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-email">Email</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-phone">Telefone</Label>
+                <Input
+                  id="edit-phone"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-company">Empresas</Label>
+                <Select
+                  isMulti
+                  name="edit-companies"
+                  options={availableCompanies.map(c => ({ value: c.id, label: c.name }))}
+                  className="basic-multi-select"
+                  classNamePrefix="select"
+                  placeholder="Selecione as empresas..."
+                  value={availableCompanies
+                    .filter(c => formData.companyIds.includes(c.id))
+                    .map(c => ({ value: c.id, label: c.name }))}
+                  onChange={(selected) =>
+                    setFormData({ ...formData, companyIds: selected.map(s => s.value) })
+                  }
+                  noOptionsMessage={() => "Nenhuma empresa encontrada"}
+                />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Salvar Alterações
                 </Button>
               </DialogFooter>
             </form>
@@ -278,13 +409,17 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
                   </div>
                 </TableCell>
                 <TableCell>
-                  {contact.companies?.name ? (
-                    <Badge variant="outline" className="text-blue-600 border-blue-200">
-                      {contact.companies.name}
-                    </Badge>
-                  ) : (
-                    <span className="text-slate-400 italic">{contact.company || '-'}</span>
-                  )}
+                  <div className="flex flex-wrap gap-1">
+                    {contact.contact_companies && contact.contact_companies.length > 0 ? (
+                      contact.contact_companies.map((cc, idx) => (
+                        <Badge key={idx} variant="outline" className="text-blue-600 border-blue-200">
+                          {cc.companies.name}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-slate-400 italic">{contact.company || '-'}</span>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
@@ -298,26 +433,26 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
                     {contact.phone || '-'}
                   </div>
                 </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Abrir menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEdit(contact)}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(contact.id)}>
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Abrir menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEdit(contact)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(contact.id)}>
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
               </TableRow>
             ))}
             {filteredContacts.length === 0 && (

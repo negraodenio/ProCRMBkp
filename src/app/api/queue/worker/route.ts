@@ -13,8 +13,7 @@ export async function POST(req: NextRequest) {
     // SECURITY: Validate a secret key to prevent unauthorized execution
     const authHeader = req.headers.get("authorization");
     if (authHeader !== `Bearer ${process.env.CRON_SECRET || "worker-secret"}`) {
-        // return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        // Commented out for easier testing, but highly recommended for production
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const supabase = createServiceRoleClient();

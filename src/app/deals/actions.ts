@@ -5,6 +5,9 @@ import { revalidatePath } from 'next/cache'
 
 export async function getDealProducts(dealId: string) {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: "Unauthorized" }
+
     const { data, error } = await supabase
         .from('deal_products')
         .select(`
@@ -23,6 +26,8 @@ export async function getDealProducts(dealId: string) {
 
 export async function addProductToDeal(dealId: string, data: { product_id: string, quantity: number, unit_price: number, organization_id: string }) {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: "Unauthorized" }
 
     const totalPrice = data.quantity * data.unit_price
 

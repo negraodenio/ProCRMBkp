@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache'
 
 export async function updateProposalStage(proposalId: string, newStageId: string) {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: "Unauthorized" }
 
     // 1. Fetch stage to get pipeline_id (fallback) and name
     const { data: stage } = await supabase
@@ -31,6 +33,8 @@ export async function updateProposalStage(proposalId: string, newStageId: string
 
 export async function updateProposal(proposalId: string, data: { title?: string, total?: number, notes?: string }) {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: "Unauthorized" }
 
     const { error } = await supabase
         .from('proposals')
@@ -50,6 +54,8 @@ export async function updateProposal(proposalId: string, data: { title?: string,
 
 export async function deleteProposal(proposalId: string) {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: "Unauthorized" }
 
     const { error } = await supabase
         .from('proposals')
@@ -68,6 +74,8 @@ export async function deleteProposal(proposalId: string) {
 // Keep old actions for fallback or internal use if needed, but primary is now proposal
 export async function updateDeal(dealId: string, data: { title?: string, value?: number, notes?: string }) {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: "Unauthorized" }
 
     const { error } = await supabase
         .from('deals')
@@ -149,6 +157,8 @@ export async function deleteStage(stageId: string) {
 
 export async function deleteDeal(dealId: string) {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: "Unauthorized" }
 
     const { error } = await supabase
         .from('deals')

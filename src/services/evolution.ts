@@ -253,6 +253,34 @@ export const EvolutionService = {
         return await res.json();
     },
 
+    async sendPresence(instanceName: string, remoteJid: string, presence: "composing" | "recording" | "paused") {
+        if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) return false;
+
+        let jid = remoteJid;
+        if (!remoteJid.includes("@")) {
+            const cleanPhone = normalizePhone(remoteJid);
+            jid = cleanPhone.length === 15 ? `${cleanPhone}@lid` : `${cleanPhone}@s.whatsapp.net`;
+        }
+
+        try {
+            const res = await fetchWithTimeout(`${EVOLUTION_API_URL}/chat/presence/${instanceName}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "apikey": EVOLUTION_API_KEY
+                },
+                body: JSON.stringify({
+                    number: jid,
+                    presence: presence
+                })
+            });
+            return res.ok;
+        } catch (error) {
+            console.error("Evolution Presence Error:", error);
+            return false;
+        }
+    },
+
     async deleteInstance(instanceName: string) {
         if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) throw new Error("Missing Config");
 

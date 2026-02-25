@@ -67,6 +67,9 @@ interface Proposal {
     created_at: string;
     valid_until: string | null;
     contact_id: string;
+    company_id?: string | null;
+    pipeline_id?: string | null;
+    stage_id?: string | null;
     content?: {
         description?: string;
     };
@@ -100,7 +103,7 @@ export default function ProposalsPage() {
     const [editingProposalId, setEditingProposalId] = useState<string | null>(null);
     const [viewingProposal, setViewingProposal] = useState<Proposal | null>(null);
     const [proposals, setProposals] = useState<Proposal[]>([]);
-    const [contacts, setContacts] = useState<{ id: string; name: string }[]>([]);
+    const [contacts, setContacts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [organizationId, setOrganizationId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
@@ -113,6 +116,8 @@ export default function ProposalsPage() {
     });
     const [formData, setFormData] = useState({
         contactId: "",
+        companyId: "", // Added companyId
+        pipelineId: "", // Added pipelineId
         title: "",
         value: "",
         currency: "BRL",
@@ -143,7 +148,8 @@ export default function ProposalsPage() {
                         loadProposals(profile.organization_id),
                         loadContacts(profile.organization_id),
                         loadPipelines(profile.organization_id),
-                        loadStages(profile.organization_id)
+                        loadStages(profile.organization_id),
+                        loadAvailableCompanies(profile.organization_id)
                     ]);
                 }
             }
@@ -188,20 +194,30 @@ export default function ProposalsPage() {
 
         const { data } = await supabase
             .from("contacts")
-            .select("id, name, type")
+            .select(`
+                id,
+                name,
+                type,
+                contact_companies(company_id)
+            `)
             .eq("organization_id", id)
             .order("name");
-        setContacts((data || []).map(c => ({ id: c.id, name: `${c.name}${c.type === 'client' ? ' (Cliente)' : ' (Lead)'}` })));
+
+        // Transform the data to the expected format if needed, but we keep the structure for filtering
+        setContacts(data || []);
     }
 
     async function loadPipelines(orgId: string) {
         const { data } = await supabase.from("pipelines").select("id, name").eq("organization_id", orgId);
         setPipelines(data || []);
+        // Set default pipeline if not editing
+        if (!editingProposalId && data && data.length > 0 && !formData.pipelineId) {
+            setFormData(prev => ({ ...prev, pipelineId: data[0].id }));
+        }
     }
 
     async function loadStages(orgId: string) {
         try {
-            // Step 1: Get all pipelines for this organization to use their IDs
             const { data: pipelinesData, error: pError } = await supabase
                 .from("pipelines")
                 .select("id")
@@ -215,7 +231,6 @@ export default function ProposalsPage() {
 
             const pipelineIds = pipelinesData.map(p => p.id);
 
-            // Step 2: Get all stages for these pipelines
             const { data, error } = await supabase
                 .from("stages")
                 .select("id, name, pipeline_id")
@@ -227,8 +242,18 @@ export default function ProposalsPage() {
             setAllStages(data || []);
         } catch (error: any) {
             console.error("ERROR: Failed to load stages:", error);
-            // Don't show toast for every load, but keep it for debugging if needed
         }
+    }
+
+    const [availableCompanies, setAvailableCompanies] = useState<{ id: string, name: string }[]>([]);
+
+    async function loadAvailableCompanies(orgId: string) {
+        const { data } = await supabase
+            .from('companies')
+            .select('id, name')
+            .eq('organization_id', orgId)
+            .order('name');
+        if (data) setAvailableCompanies(data);
     }
 
     async function handleSubmit(e: React.FormEvent) {
@@ -248,6 +273,7 @@ export default function ProposalsPage() {
                 .from("proposals")
                 .update({
                     contact_id: formData.contactId,
+                    company_id: formData.companyId || null,
                     title: formData.title,
                     total: parsedValue,
                     currency: formData.currency,
@@ -291,6 +317,11 @@ export default function ProposalsPage() {
             const { data: newProposal, error } = await supabase.from("proposals").insert({
                 organization_id: organizationId,
                 contact_id: formData.contactId,
+                company_id: formData.companyId || null,
+                pipeline_id: formData.pipelineId || null,
+                stage_id: formData.pipelineId
+                    ? allStages.find(s => s.pipeline_id === formData.pipelineId)?.id
+                    : null,
                 number: proposalNumber,
                 title: formData.title,
                 total: parsedValue,
@@ -332,7 +363,16 @@ export default function ProposalsPage() {
             toast.success("Proposta criada com sucesso!");
         }
 
-        setFormData({ contactId: "", title: "", value: "", currency: "BRL", validDays: "30", content: "" });
+        setFormData({
+            contactId: "",
+            companyId: "",
+            pipelineId: pipelines[0]?.id || "",
+            title: "",
+            value: "",
+            currency: "BRL",
+            validDays: "30",
+            content: ""
+        });
         setProposalItems([{ name: "", unit_price: 0, currency: "BRL" }]);
         setEditingProposalId(null);
         setOpen(false);
@@ -369,6 +409,8 @@ export default function ProposalsPage() {
     function handleEdit(proposal: Proposal) {
         setFormData({
             contactId: proposal.contact_id,
+            companyId: proposal.company_id || "",
+            pipelineId: proposal.pipeline_id || "",
             title: proposal.title,
             value: (proposal.total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
             currency: proposal.currency || "BRL",
@@ -385,6 +427,8 @@ export default function ProposalsPage() {
     function handleDuplicate(proposal: Proposal) {
         setFormData({
             contactId: proposal.contact_id,
+            companyId: proposal.company_id || "",
+            pipelineId: proposal.pipeline_id || "",
             title: proposal.title + " (Cópia)",
             value: (proposal.total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
             currency: proposal.currency || "BRL",
@@ -536,7 +580,16 @@ export default function ProposalsPage() {
                             <Dialog open={open} onOpenChange={(isOpen) => {
                                 setOpen(isOpen);
                                 if (!isOpen) {
-                                    setFormData({ contactId: "", title: "", value: "", currency: "BRL", validDays: "30", content: "" });
+                                    setFormData({
+                                        contactId: "",
+                                        companyId: "",
+                                        pipelineId: pipelines[0]?.id || "",
+                                        title: "",
+                                        value: "",
+                                        currency: "BRL",
+                                        validDays: "30",
+                                        content: ""
+                                    });
                                     setEditingProposalId(null);
                                 }
                             }}>
@@ -555,18 +608,19 @@ export default function ProposalsPage() {
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-2">
-                                                <Label htmlFor="contact">Cliente *</Label>
+                                                <Label htmlFor="pipeline">Funil de Vendas *</Label>
                                                 <Select
-                                                    value={formData.contactId}
-                                                    onValueChange={(v) => setFormData({ ...formData, contactId: v })}
+                                                    value={formData.pipelineId}
+                                                    onValueChange={(v) => setFormData({ ...formData, pipelineId: v })}
+                                                    disabled={!!editingProposalId}
                                                 >
                                                     <SelectTrigger>
-                                                        <SelectValue placeholder="Selecione o cliente" />
+                                                        <SelectValue placeholder="Selecione o funil" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {contacts.map((c) => (
-                                                            <SelectItem key={c.id} value={c.id}>
-                                                                {c.name}
+                                                        {pipelines.map((p) => (
+                                                            <SelectItem key={p.id} value={p.id}>
+                                                                {p.name}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>
@@ -578,7 +632,6 @@ export default function ProposalsPage() {
                                                     value={formData.currency}
                                                     onValueChange={(v) => {
                                                         setFormData({ ...formData, currency: v });
-                                                        // Update all items to the same currency for consistency
                                                         setProposalItems(prev => prev.map(item => ({ ...item, currency: v })));
                                                     }}
                                                 >
@@ -589,6 +642,54 @@ export default function ProposalsPage() {
                                                         <SelectItem value="BRL">Real (R$)</SelectItem>
                                                         <SelectItem value="USD">Dólar (USD)</SelectItem>
                                                         <SelectItem value="EUR">Euro (EUR)</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="company">Empresa (Opcional - B2B)</Label>
+                                                <Select
+                                                    value={formData.companyId || "none"}
+                                                    onValueChange={(v) => {
+                                                        const newCompanyId = v === "none" ? "" : v;
+                                                        setFormData({ ...formData, companyId: newCompanyId, contactId: "" });
+                                                    }}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Nenhuma (C2C/CPF)" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="none">Nenhuma (C2C/CPF)</SelectItem>
+                                                        {availableCompanies.map((c) => (
+                                                            <SelectItem key={c.id} value={c.id}>
+                                                                {c.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="contact">Contato *</Label>
+                                                <Select
+                                                    value={formData.contactId}
+                                                    onValueChange={(v) => setFormData({ ...formData, contactId: v })}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Selecione o contato" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {contacts
+                                                            .filter(c => {
+                                                                if (!formData.companyId) return true;
+                                                                return c.contact_companies?.some((cc: any) => cc.company_id === formData.companyId);
+                                                            })
+                                                            .map((c) => (
+                                                                <SelectItem key={c.id} value={c.id}>
+                                                                    {c.name}
+                                                                </SelectItem>
+                                                            ))}
                                                     </SelectContent>
                                                 </Select>
                                             </div>

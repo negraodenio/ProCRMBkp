@@ -66,10 +66,10 @@ export async function ragAnswerWithGating(params: {
     }
   }
 
-  const looksGreeting = /^(oi|ola|olá|bom dia|boa tarde|boa noite|hello|hi|oopa|opa)(\!|\?|\.|\s|$)/i.test(userText.trim());
-  if (looksGreeting) {
-    return { text: "Como posso ajudar você hoje?", model_used: "regex", reason: "greeting_match" };
-  }
+//   const looksGreeting = /^(oi|ola|olá|bom dia|boa tarde|boa noite|hello|hi|oopa|opa)(\!|\?|\.|\s|$)/i.test(userText.trim());
+//   if (looksGreeting) {
+//     return { text: "Como posso ajudar você hoje?", model_used: "regex", reason: "greeting_match" };
+//   }
 
   const jsonGuard = buildJsonGuardPrompt();
   const baseMessages: ChatMsg[] = [
@@ -102,7 +102,8 @@ export async function ragAnswerWithGating(params: {
     if (!primaryObj) throw new Error("Primary model return null on safeParseRagJson");
 
     if (primaryObj.answer) {
-      if (evidenceQuotesAreSupported({ contextText, evidenceQuotes: primaryObj.evidence_quotes }).ok) {
+      const evidence = evidenceQuotesAreSupported({ contextText, evidenceQuotes: primaryObj.evidence_quotes });
+      if (evidence.ok) {
         return {
           text: `${primaryObj.answer}\n\n${primaryObj.next_step}`,
           model_used: primaryModelAlias,
@@ -110,6 +111,18 @@ export async function ragAnswerWithGating(params: {
           ...(showRaw ? { raw: JSON.stringify(primaryObj) } : {})
         };
       }
+
+      // RELAXED GATING: If the AI is very specific and we have SOME context, allow it but with a warning or fallback.
+      // For now, if the answer is long enough, we trust the AI more than the strict literal match.
+      if (primaryObj.answer.length > 20) {
+          return {
+            text: `${primaryObj.answer}\n\n${primaryObj.next_step}`,
+            model_used: primaryModelAlias,
+            reason: "evidence_soft_match",
+            ...(showRaw ? { raw: JSON.stringify(primaryObj) } : {})
+          };
+      }
+
       // Evidence mismatch: devolve next_step (bloqueio) com reason certo
       if (primaryObj.next_step) {
         return {

@@ -8,7 +8,7 @@ export default async function ContactsPage() {
 
   const { data: contacts } = await supabase
     .from('contacts')
-    .select('*, companies(name)')
+    .select('*, contact_companies(companies(name))')
     .order('name', { ascending: true });
 
   return (

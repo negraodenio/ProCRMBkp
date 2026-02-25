@@ -22,6 +22,31 @@ export async function inviteUserAction(email: string, fullName: string, role: st
         return { success: false, error: "Organização do administrador não encontrada" };
     }
 
+    // --- PLAN LIMIT CHECK ---
+    const { data: orgData } = await supabase
+        .from('organizations')
+        .select('subscription_plan')
+        .eq('id', profile.organization_id)
+        .single();
+
+    const { count: usersCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', profile.organization_id);
+
+    const { checkPlanLimit } = await import('@/lib/stripe/limits');
+    const plan = (orgData?.subscription_plan || 'free') as any; // Cast safely later inside checkPlanLimit based on the exact enum type
+    const limitResult = checkPlanLimit(
+        plan,
+        { users_count: usersCount || 0, leads_count: 0, ia_tools_used_month: 0 },
+        'add_user'
+    );
+
+    if (!limitResult.allowed) {
+        return { success: false, error: limitResult.message, upgradeRequired: true };
+    }
+    // ------------------------
+
     // Now use service role client for the admin action
     const adminClient = createServiceRoleClient(supabaseUrl, supabaseServiceKey);
 

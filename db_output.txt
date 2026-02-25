@@ -1,0 +1,142 @@
+Fetching Pipelines...
+Pipelines: [
+  {
+    "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    "organization_id": "11111111-1111-1111-1111-111111111111",
+    "name": "Pipeline de Vendas",
+    "is_default": true,
+    "created_at": "2026-02-01T21:59:58.434611+00:00"
+  },
+  {
+    "id": "90a9eefc-d8ba-4b82-93be-663a310d982f",
+    "organization_id": "df02ea6d-561b-4e16-8185-42d35780f3b7",
+    "name": "Funil de Vendas",
+    "is_default": true,
+    "created_at": "2026-02-06T20:59:52.747957+00:00"
+  },
+  {
+    "id": "a1488990-ce69-4067-9867-f3286cd5c7bd",
+    "organization_id": "c6c96994-9b4f-4af0-9a83-f4cb06403864",
+    "name": "Funil de Vendas",
+    "is_default": true,
+    "created_at": "2026-02-09T18:37:53.082725+00:00"
+  },
+  {
+    "id": "e35d0917-9768-4722-ba55-e82ce86356e0",
+    "organization_id": "d2e5a46c-5a1a-4458-b0d9-6027f31647d4",
+    "name": "Funil de Vendas",
+    "is_default": true,
+    "created_at": "2026-02-09T21:12:07.292974+00:00"
+  },
+  {
+    "id": "a2844024-cb68-46fb-a56b-e8a92cb06be1",
+    "organization_id": "e2bc5394-bca8-4c3d-b789-dbe61cfe7413",
+    "name": "Funil de Vendas",
+    "is_default": true,
+    "created_at": "2026-02-10T17:13:57.834423+00:00"
+  },
+  {
+    "id": "15834373-85dc-4d86-87af-30a2f7b8ec91",
+    "organization_id": "d2b5e074-21cd-4382-a544-137139df4672",
+    "name": "Funil de Vendas",
+    "is_default": true,
+    "created_at": "2026-02-11T13:07:10.031216+00:00"
+  },
+  {
+    "id": "4408282a-38a6-4a1c-9f94-099d127d0aaf",
+    "organization_id": "e1ade2c7-ba45-4597-94e2-5f1f60bda451",
+    "name": "Funil de Vendas",
+    "is_default": true,
+    "created_at": "2026-02-11T13:07:30.169169+00:00"
+  },
+  {
+    "id": "b8cb4233-df4f-470c-a057-7bcaa30992bd",
+    "organization_id": "b41308d9-6744-466a-95d3-4366b3247d3c",
+    "name": "Funil de Vendas",
+    "is_default": true,
+    "created_at": "2026-02-18T13:36:47.497189+00:00"
+  },
+  {
+    "id": "2b81ba14-813e-49b6-938e-fc6b24b81d59",
+    "organization_id": "5e3e765f-fedb-4e82-abce-f6b489099a64",
+    "name": "Funil de Vendas",
+    "is_default": true,
+    "created_at": "2026-02-21T21:28:09.9225+00:00"
+  },
+  {
+    "id": "a057fdf3-7674-4341-b4ce-280fc1a5635d",
+    "organization_id": "11111111-1111-1111-1111-111111111111",
+    "name": "WhatsAPP",
+    "is_default": false,
+    "created_at": "2026-02-24T23:02:01.621299+00:00"
+  },
+  {
+    "id": "29ee777e-bae4-459c-a8a7-36ee4a0bacc9",
+    "organization_id": "11111111-1111-1111-1111-111111111111",
+    "name": "Instagram",
+    "is_default": false,
+    "created_at": "2026-02-24T23:45:52.233363+00:00"
+  }
+]
+
+Fetching Stages...
+Found 59 stages:
+- Qualificação (ID: 11111111-0001-0001-0001-000000000002, PipelineID: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa, OrgID: undefined)
+- Proposta (ID: 11111111-0001-0001-0001-000000000003, PipelineID: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa, OrgID: undefined)
+- Negociação (ID: 11111111-0001-0001-0001-000000000004, PipelineID: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa, OrgID: undefined)
+- Fechado (ID: 11111111-0001-0001-0001-000000000005, PipelineID: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa, OrgID: undefined)
+- Perdido (ID: 11111111-0001-0001-0001-000000000006, PipelineID: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa, OrgID: undefined)
+- Novo Lead (ID: 88c15892-a3f1-4885-924d-b9cc8abb6733, PipelineID: 90a9eefc-d8ba-4b82-93be-663a310d982f, OrgID: undefined)
+- Em Qualificação (ID: 4c16e1ef-4f38-46d1-8066-1576399b5c58, PipelineID: 90a9eefc-d8ba-4b82-93be-663a310d982f, OrgID: undefined)
+- Proposta Enviada (ID: 5b387719-23ee-4e24-8e57-e38f939c1048, PipelineID: 90a9eefc-d8ba-4b82-93be-663a310d982f, OrgID: undefined)
+- Negociação (ID: 15a4347d-6a88-424d-95ad-6a3510f0d28b, PipelineID: 90a9eefc-d8ba-4b82-93be-663a310d982f, OrgID: undefined)
+- Ganhos (ID: 4290a2d5-d84e-4d03-9371-49dc23f72881, PipelineID: 90a9eefc-d8ba-4b82-93be-663a310d982f, OrgID: undefined)
+- Novo Lead (ID: f4715738-c799-4ba4-a176-fa6b43f1752b, PipelineID: a1488990-ce69-4067-9867-f3286cd5c7bd, OrgID: undefined)
+- Em Qualificação (ID: eb832a1e-9611-4b5a-8836-90afca910f09, PipelineID: a1488990-ce69-4067-9867-f3286cd5c7bd, OrgID: undefined)
+- Proposta Enviada (ID: 4448ecd3-163a-4b0b-9777-e29e0c3d85fb, PipelineID: a1488990-ce69-4067-9867-f3286cd5c7bd, OrgID: undefined)
+- Negociação (ID: a32a83f5-fdf4-42c7-a1c1-cf913344a985, PipelineID: a1488990-ce69-4067-9867-f3286cd5c7bd, OrgID: undefined)
+- Ganhos (ID: 8a7b9bf4-3850-4c5e-a746-f6f2801fc2c0, PipelineID: a1488990-ce69-4067-9867-f3286cd5c7bd, OrgID: undefined)
+- Novo Lead (ID: a4a60997-4a54-49d2-9022-5cbc7f1a2a71, PipelineID: e35d0917-9768-4722-ba55-e82ce86356e0, OrgID: undefined)
+- Em Qualificação (ID: 9ed683a0-9f3b-48d3-949e-ff18a8876f84, PipelineID: e35d0917-9768-4722-ba55-e82ce86356e0, OrgID: undefined)
+- Proposta Enviada (ID: 43f09ec6-f321-4dee-9a21-0775c8698a09, PipelineID: e35d0917-9768-4722-ba55-e82ce86356e0, OrgID: undefined)
+- Negociação (ID: 7cf00bfd-8824-49c5-aa94-c7bfb254a826, PipelineID: e35d0917-9768-4722-ba55-e82ce86356e0, OrgID: undefined)
+- Ganhos (ID: 35e6f0ad-37cb-4609-87a7-5eda7d86f400, PipelineID: e35d0917-9768-4722-ba55-e82ce86356e0, OrgID: undefined)
+- Novo Lead (ID: 5c34310e-66e7-4481-832a-ffe8bf8c350f, PipelineID: a2844024-cb68-46fb-a56b-e8a92cb06be1, OrgID: undefined)
+- Em Qualificação (ID: 485d8d75-76b1-4c17-88ee-65f1553cb416, PipelineID: a2844024-cb68-46fb-a56b-e8a92cb06be1, OrgID: undefined)
+- Proposta Enviada (ID: 13769645-bcc8-4d43-9cf6-e02e492270a6, PipelineID: a2844024-cb68-46fb-a56b-e8a92cb06be1, OrgID: undefined)
+- Negociação (ID: c8431e88-8e4a-4f45-8a8c-d2f930464640, PipelineID: a2844024-cb68-46fb-a56b-e8a92cb06be1, OrgID: undefined)
+- Ganhos (ID: 6f887a2b-e5cc-40f2-b9f2-0253bd5b7acf, PipelineID: a2844024-cb68-46fb-a56b-e8a92cb06be1, OrgID: undefined)
+- Novo Lead (ID: 9026b93f-76f7-4616-a460-522146ffc122, PipelineID: 15834373-85dc-4d86-87af-30a2f7b8ec91, OrgID: undefined)
+- Em Qualificação (ID: 32cf44fd-7288-4b93-a4c6-f50488ee134d, PipelineID: 15834373-85dc-4d86-87af-30a2f7b8ec91, OrgID: undefined)
+- Proposta Enviada (ID: 152753a3-0ab5-4997-9b21-e82e2582ca53, PipelineID: 15834373-85dc-4d86-87af-30a2f7b8ec91, OrgID: undefined)
+- Negociação (ID: 1f10848e-a929-4b62-9b66-4f39adbf52a2, PipelineID: 15834373-85dc-4d86-87af-30a2f7b8ec91, OrgID: undefined)
+- Ganhos (ID: 22cdfeac-c622-4d7d-a80e-f65383cba3b3, PipelineID: 15834373-85dc-4d86-87af-30a2f7b8ec91, OrgID: undefined)
+- Novo Lead (ID: 00489ec9-526f-4cfb-90a5-719e6b7b6537, PipelineID: 4408282a-38a6-4a1c-9f94-099d127d0aaf, OrgID: undefined)
+- Em Qualificação (ID: 1e0d8952-fa05-480b-9289-3609b73360f1, PipelineID: 4408282a-38a6-4a1c-9f94-099d127d0aaf, OrgID: undefined)
+- Proposta Enviada (ID: 52e3be05-92db-4698-9746-56dec6ec6ce1, PipelineID: 4408282a-38a6-4a1c-9f94-099d127d0aaf, OrgID: undefined)
+- Negociação (ID: 528f244e-cedb-430b-af19-41271679d602, PipelineID: 4408282a-38a6-4a1c-9f94-099d127d0aaf, OrgID: undefined)
+- Ganhos (ID: d7a461f0-c166-402c-afe6-81f32f220402, PipelineID: 4408282a-38a6-4a1c-9f94-099d127d0aaf, OrgID: undefined)
+- TESTE (ID: e73d2d82-5406-4614-9cb7-0db6e15d55a6, PipelineID: a1488990-ce69-4067-9867-f3286cd5c7bd, OrgID: undefined)
+- Novo Lead (ID: 0fc6bbf0-7637-436c-8689-b7e6aa722bae, PipelineID: b8cb4233-df4f-470c-a057-7bcaa30992bd, OrgID: undefined)
+- Em Qualificação (ID: 244ee777-6c2a-49a8-868e-c3e6ca01046d, PipelineID: b8cb4233-df4f-470c-a057-7bcaa30992bd, OrgID: undefined)
+- Proposta Enviada (ID: a3c97f39-830e-4540-8f44-1c8dbf9156ce, PipelineID: b8cb4233-df4f-470c-a057-7bcaa30992bd, OrgID: undefined)
+- Negociação (ID: ff55c3ea-977e-408f-bd3f-b4eb123dd74e, PipelineID: b8cb4233-df4f-470c-a057-7bcaa30992bd, OrgID: undefined)
+- Ganhos (ID: 22b83180-7765-42e7-87b2-a9c104fb8b95, PipelineID: b8cb4233-df4f-470c-a057-7bcaa30992bd, OrgID: undefined)
+- Perdidos (ID: f5f5acc0-1c5c-4740-80b9-f73c7494c123, PipelineID: b8cb4233-df4f-470c-a057-7bcaa30992bd, OrgID: undefined)
+- Whatsapp (ID: ae12ccd1-04c8-423e-b3d0-3c1c7376c12f, PipelineID: b8cb4233-df4f-470c-a057-7bcaa30992bd, OrgID: undefined)
+- E-mail arketing (ID: cef7d899-c849-410b-bfa6-d8ada8ea7985, PipelineID: b8cb4233-df4f-470c-a057-7bcaa30992bd, OrgID: undefined)
+- Novo Lead (ID: d48e5439-2a40-474d-9a09-907c99a30a16, PipelineID: 2b81ba14-813e-49b6-938e-fc6b24b81d59, OrgID: undefined)
+- Em Qualificação (ID: ae17c831-cde5-4e95-bfaa-ee60d91b3d75, PipelineID: 2b81ba14-813e-49b6-938e-fc6b24b81d59, OrgID: undefined)
+- Proposta Enviada (ID: 15f3ebe6-586f-4a69-853d-7ea0ee420cc0, PipelineID: 2b81ba14-813e-49b6-938e-fc6b24b81d59, OrgID: undefined)
+- Negociação (ID: 48e921b4-d4c7-4821-9b78-2e6e094cb06b, PipelineID: 2b81ba14-813e-49b6-938e-fc6b24b81d59, OrgID: undefined)
+- Ganhos (ID: 4b7f6826-54db-4224-852c-52ad8a6750cd, PipelineID: 2b81ba14-813e-49b6-938e-fc6b24b81d59, OrgID: undefined)
+- Lead / Contato (ID: 0f1a576e-4273-493b-9ebc-3c438404aab0, PipelineID: a057fdf3-7674-4341-b4ce-280fc1a5635d, OrgID: undefined)
+- Qualificação (ID: e42aadad-dab9-4d9f-b7ee-26159a6e6c62, PipelineID: a057fdf3-7674-4341-b4ce-280fc1a5635d, OrgID: undefined)
+- Proposta / Negociação (ID: b0d0fe4c-bfc0-4e56-9a2d-f34b39ea1320, PipelineID: a057fdf3-7674-4341-b4ce-280fc1a5635d, OrgID: undefined)
+- Fechado (ID: 1d797fd0-1fb8-4d9a-a208-2edd483d11c8, PipelineID: a057fdf3-7674-4341-b4ce-280fc1a5635d, OrgID: undefined)
+- Lead / Contato (ID: 11c0f3c1-c757-41b1-8d73-45d8ab7b66e5, PipelineID: 29ee777e-bae4-459c-a8a7-36ee4a0bacc9, OrgID: undefined)
+- Qualificação (ID: 96d60f42-5b6a-45b6-b619-c37bc6541957, PipelineID: 29ee777e-bae4-459c-a8a7-36ee4a0bacc9, OrgID: undefined)
+- Proposta / Negociação (ID: 1afd6799-fd5b-450a-807f-e4378eaae144, PipelineID: 29ee777e-bae4-459c-a8a7-36ee4a0bacc9, OrgID: undefined)
+- Fechado (ID: 9ced2a4e-ebb9-43b2-baf7-813419ef5491, PipelineID: 29ee777e-bae4-459c-a8a7-36ee4a0bacc9, OrgID: undefined)
+- Prospecção (ID: 11111111-0001-0001-0001-000000000001, PipelineID: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa, OrgID: undefined)
+- Recuperado (ID: 5891b5c0-d595-4586-b501-8589616bc0cc, PipelineID: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa, OrgID: undefined)

@@ -19,6 +19,21 @@ export async function POST(req: NextRequest) {
         const { searchParams } = new URL(req.url);
         const queryOrgId = searchParams.get('org_id');
 
+        // --- SECURITY PATCH: Verify Webhook Secret ---
+        const expectedSecret = process.env.EVOLUTION_WEBHOOK_SECRET;
+        if (expectedSecret) {
+            const authHeader = req.headers.get("authorization")?.split(" ")[1] || req.headers.get("apikey");
+            const queryToken = searchParams.get('token') || searchParams.get('secret');
+            const providedSecret = authHeader || queryToken;
+
+            if (providedSecret !== expectedSecret) {
+                console.error("🚨 [Security] Evolution Webhook unauthorized attempt. Invalid or missing secret.");
+                return NextResponse.json({ error: "Unauthorized. Invalid secret." }, { status: 401 });
+            }
+        } else {
+            console.warn("⚠️ [Security] EVOLUTION_WEBHOOK_SECRET is not set. Webhook is vulnerable to spoofing.");
+        }
+
         if (!queryOrgId) {
             console.warn("⚠️ [Webhook] Missing org_id param. Will attempt to derive from Instance Name.");
         }
@@ -331,8 +346,8 @@ export async function POST(req: NextRequest) {
             const last = historicalMessages[0];
             const lastTime = new Date(last.created_at).getTime();
 
-            // 1. Cooldown Check (e.g. 3s between messages)
-            if (now - lastTime < 3000) {
+            // 1. Cooldown Check (e.g. 1.5s between messages)
+            if (now - lastTime < 1500) {
                 console.log(`[Webhook Debug] Cooldown triggered. Last message was ${now - lastTime}ms ago.`);
                 return NextResponse.json({ status: "ignored_cooldown" });
             }
@@ -346,9 +361,9 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json({ status: "ignored_loop_frequency" });
             }
 
-            // 3. Duplicate Content (ignore if same user text within 10s)
-            if (last.content === text && (now - lastTime < 10000)) {
-                console.log(`[Webhook Debug] Duplicate content detected within 10s.`);
+            // 3. Duplicate Content (ignore if same user text within 5s)
+            if (last.content === text && (now - lastTime < 5000)) {
+                console.log(`[Webhook Debug] Duplicate content detected within 5s.`);
                 return NextResponse.json({ status: "ignored_duplicate" });
             }
 
@@ -425,6 +440,14 @@ export async function POST(req: NextRequest) {
 
         // 5. Intelligence Section (RAG + AI)
         const startTime = Date.now();
+        const replyInstance = instanceName || ("bot-" + org.id);
+
+        // --- FEATURE: TYPING INDICATOR (three dots pulsing) ---
+        // We trigger this immediately to provide visual feedback while AI thinks.
+        EvolutionService.sendPresence(replyInstance, remoteJid, "composing").catch(e =>
+            console.warn("⚠️ [Webhook] Failed to send typing indicator:", e.message)
+        );
+
         let aiResponse = "";
         let botInteractionStatus = 'success';
         let botInteractionError = '';
@@ -490,10 +513,17 @@ export async function POST(req: NextRequest) {
             // --- SMART HANDOFF DETECTION (Phase 9 & 10 Hardening) ---
             if (routed.raw) {
                 try {
-                    // JSON RECOVERY: Se o parse direto falhar, tentamos limpar marcas de markdown
+                    // JSON RECOVERY: Se o parse direto falhar, tentamos limpar marcas de markdown ou prefixos
                     let cleanRaw = routed.raw.trim();
                     if (cleanRaw.includes("```")) {
                         cleanRaw = cleanRaw.replace(/```json|```/g, "").trim();
+                    }
+                    // Handle cases where AI might prefix with "Here is the response:" or similar
+                    if (cleanRaw.includes("{") && !cleanRaw.startsWith("{")) {
+                        cleanRaw = cleanRaw.substring(cleanRaw.indexOf("{"));
+                    }
+                    if (cleanRaw.includes("}") && !cleanRaw.endsWith("}")) {
+                        cleanRaw = cleanRaw.substring(0, cleanRaw.lastIndexOf("}") + 1);
                     }
 
                     const parsedRaw = JSON.parse(cleanRaw);
@@ -610,7 +640,6 @@ export async function POST(req: NextRequest) {
         }
 
         // 6. Send Message
-        const replyInstance = instanceName || ("bot-" + org.id);
         let targetJid = `${phone}@s.whatsapp.net`;
 
         if ((remoteJid && remoteJid.includes("@lid")) || (phone.length === 15)) {
