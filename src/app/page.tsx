@@ -55,7 +55,7 @@ export default async function LandingPage() {
 
                         <div className="relative z-10 space-y-8 max-w-4xl mx-auto">
                             <h2 className="text-4xl md:text-6xl font-black leading-tight">
-                                9 IA Tools. 0 Alucinações. <br />
+                                10 IA Tools. 0 Alucinações. <br />
                                 <span className="text-primary italic">1 CRM Que Pensa Por Si.</span>
                             </h2>
 

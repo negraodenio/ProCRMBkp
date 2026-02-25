@@ -13,6 +13,7 @@ import {
     Trash2,
     LayoutDashboard,
     Share2,
+    Wand2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +48,7 @@ import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { generateProposalPitch } from "./ai-actions";
 
 interface ProposalItem {
     id?: string;
@@ -120,6 +122,7 @@ export default function ProposalsPage() {
     const [proposalItems, setProposalItems] = useState<ProposalItem[]>([
         { name: "", unit_price: 0, currency: "BRL" }
     ]);
+    const [generatingPitch, setGeneratingPitch] = useState(false);
 
     const supabase = createClient();
 
@@ -446,6 +449,48 @@ export default function ProposalsPage() {
             loadProposals();
         }
     }
+    async function handleGeneratePitch() {
+        if (!formData.contactId) {
+            toast.error("Para gerar o pitch, selecione primeiro o cliente.");
+            return;
+        }
+
+        const validItems = proposalItems.filter(i => i.name.trim() !== "" && i.unit_price > 0);
+        if (validItems.length === 0) {
+            toast.error("Adicione os itens e valores da proposta antes de gerar o pitch.");
+            return;
+        }
+
+        // Find client name
+        const contact = contacts.find(c => c.id === formData.contactId);
+        if (!contact) return;
+
+        setGeneratingPitch(true);
+        try {
+            const rawTotal = formData.value.replace(/\./g, '').replace(',', '.');
+            const total = parseFloat(rawTotal) || 0;
+
+            const result = await generateProposalPitch({
+                clientName: contact.name,
+                items: validItems,
+                total: total
+            });
+
+            if (result.success && result.data) {
+                setFormData(prev => ({
+                    ...prev,
+                    content: result.data + (prev.content ? "\n\n" + prev.content : "")
+                }));
+                toast.success("Pitch comercial gerado com sucesso! ✨");
+            } else {
+                toast.error(result.error || "Erro ao gerar pitch.");
+            }
+        } catch (err) {
+            toast.error("Erro inesperado ao gerar o pitch.");
+        } finally {
+            setGeneratingPitch(false);
+        }
+    }
 
     const filteredProposals = proposals.filter(
         (p) =>
@@ -654,7 +699,20 @@ export default function ProposalsPage() {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label htmlFor="content">Descrição Adicional</Label>
+                                            <div className="flex items-center justify-between">
+                                                <Label htmlFor="content">Descrição & Escopo</Label>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    disabled={generatingPitch}
+                                                    className="h-8 text-xs font-semibold text-purple-600 bg-purple-50 hover:bg-purple-100 hover:text-purple-700"
+                                                    onClick={handleGeneratePitch}
+                                                >
+                                                    <Wand2 className={`h-3 w-3 mr-1.5 ${generatingPitch ? "animate-spin" : ""}`} />
+                                                    {generatingPitch ? "Escrevendo..." : "Gerar com IA"}
+                                                </Button>
+                                            </div>
                                             <Textarea
                                                 id="content"
                                                 placeholder="Descreva observações ou termos desta proposta..."

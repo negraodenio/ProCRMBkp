@@ -143,6 +143,17 @@ const TOOLS: ToolCard[] = [
     group: "closing",
     color: "text-cyan-600",
     fullExample: "Dossiê Estratégico:\n\nLead: Pedro Costa (CEO)\nEmpresa: StartupXYZ\nDores: Escalabilidade e Gestão de Equipe.\nRiscos: O lead usa um sistema caseiro e teme migração.\nObjetivo Reunião: Mostrar a simplicidade da importação via CSV/API.\nPauta Sugerida: 1. Demo Migração | 2. Dashboard Gestor | 3. IA Scoring."
+  },
+  {
+    id: "pitch-generator",
+    title: "AI Proposal Writer",
+    description: "Gera o pitch comercial persuasivo perfeito com base nos produtos da proposta em 4 segundos.",
+    icon: Sparkles,
+    badge: "NOVIDADE 🔥",
+    preview: "Pitch gerado com foco em ROI para a Empresa XYZ...",
+    group: "closing",
+    color: "text-fuchsia-600",
+    fullExample: "Proposta: Mentoria de Vendas B2B\n\nPitch Gerado:\n\nOlá Equipe XYZ,\n\nCom a Mentoria focada no pipeline, projetamos destravar os €45.000 que estão parados na etapa de Negociação nos últimos 2 meses. O treinamento atacará diretamente o contorno de objeções de preço e fechamento tático.\n\nO investimento do projeto se paga convertendo apenas 1 dia das vendas perdidas. Vamos avançar e blindar a equipe comercial?"
   }
 ];
 
@@ -209,7 +220,7 @@ export function AIToolsShowcase() {
       <div className="text-center max-w-4xl mx-auto mb-20 space-y-6">
         <Badge className="bg-primary text-white font-black px-4 py-1">⚡ ÚNICO NO MERCADO</Badge>
         <h2 className="text-4xl md:text-6xl font-black text-slate-900 leading-[1.1]">
-          9 Ferramentas de IA Que Só o <span className="text-primary italic">CRMia</span> Tem
+          10 Ferramentas de IA Que Só o <span className="text-primary italic">CRMia</span> Tem
         </h2>
         <p className="text-xl text-slate-600 max-w-2xl mx-auto">
           Cada ferramenta resolve um problema real de vendas.
