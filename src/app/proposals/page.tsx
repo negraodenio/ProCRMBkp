@@ -162,7 +162,8 @@ export default function ProposalsPage() {
             .select(`
                 *,
                 contact:contacts(name),
-                items:proposal_items(*)
+                items:proposal_items(*),
+                stage:stages(name)
             `)
             .eq("organization_id", id)
             .order("created_at", { ascending: false });
@@ -732,9 +733,15 @@ export default function ProposalsPage() {
                                                         {formatCurrency(proposal.total, proposal.currency)}
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Badge className={statusColors[proposal.status] || "bg-gray-100"}>
-                                                            {statusLabels[proposal.status] || proposal.status}
-                                                        </Badge>
+                                                        {proposal.stage?.name ? (
+                                                            <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
+                                                                {proposal.stage.name}
+                                                            </Badge>
+                                                        ) : (
+                                                            <Badge className={statusColors[proposal.status] || "bg-gray-100"}>
+                                                                {statusLabels[proposal.status] || proposal.status}
+                                                            </Badge>
+                                                        )}
                                                     </TableCell>
                                                     <TableCell>{formatDate(proposal.created_at)}</TableCell>
                                                     <TableCell>
