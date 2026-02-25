@@ -15,6 +15,7 @@ import {
 import { PipelineSelector } from "./pipeline-selector";
 import { KanbanBoard } from "./kanban-board";
 import { createPipeline, updatePipeline, deletePipeline } from "@/app/pipeline/actions";
+import { analyzeFunnelWithAI, FunnelAnalysisResult } from "@/app/pipeline/ai-actions";
 import { toast } from "sonner";
 
 interface Pipeline {
@@ -44,6 +45,11 @@ export function PipelineView({
     const [newPipelineName, setNewPipelineName] = useState("");
     const [editingPipelineId, setEditingPipelineId] = useState<string | null>(null);
     const [editingName, setEditingName] = useState("");
+
+    // AI Funnel Analysis State
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [analysisResult, setAnalysisResult] = useState<FunnelAnalysisResult | null>(null);
+    const [isInsightDialogOpen, setIsInsightDialogOpen] = useState(false);
 
     const handleCreatePipeline = async () => {
         if (!newPipelineName.trim()) return;
@@ -94,6 +100,46 @@ export function PipelineView({
         }
     };
 
+    const handleAnalyzeFunnel = async () => {
+        setIsAnalyzing(true);
+        const currentPipeline = pipelines.find(p => p.id === currentPipelineId);
+
+        try {
+            // Enrich proposals with days in stage for the AI
+            const enrichedProposals = proposals.map(p => {
+                const stage = stages.find(s => s.id === p.stage_id);
+                const dateStr = p.updated_at || p.created_at || new Date().toISOString();
+                const daysInStage = Math.floor((new Date().getTime() - new Date(dateStr).getTime()) / (1000 * 3600 * 24));
+
+                return {
+                    id: p.id,
+                    title: p.title,
+                    total: p.total,
+                    currency: p.currency || 'BRL',
+                    stageName: stage?.name || 'Desconhecida',
+                    daysInStage: daysInStage
+                };
+            });
+
+            const result = await analyzeFunnelWithAI({
+                funnelName: currentPipeline?.name || 'Principal',
+                stages: stages,
+                proposals: enrichedProposals
+            });
+
+            if (result.success && result.data) {
+                setAnalysisResult(result.data);
+                setIsInsightDialogOpen(true);
+            } else {
+                toast.error(result.error || "Erro ao analisar o funil.");
+            }
+        } catch (error) {
+            toast.error("Ocorreu um erro ao chamar o AI Deal Coach.");
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
     return (
         <div className="flex flex-col flex-1 overflow-hidden">
             <div className="flex items-center justify-between mb-8">
@@ -103,6 +149,14 @@ export function PipelineView({
                     onManagePipelines={() => setIsManageDialogOpen(true)}
                 />
                 <div className="flex items-center gap-2">
+                    <Button
+                        onClick={handleAnalyzeFunnel}
+                        disabled={isAnalyzing}
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-bold h-9 text-sm shadow-md shadow-purple-600/20"
+                    >
+                        {isAnalyzing ? "Analisando..." : "✨ AI Deal Coach"}
+                    </Button>
+                    <div className="h-6 w-[1px] bg-slate-200 mx-2" />
                     <div className="flex -space-x-2">
                         <div className="h-8 w-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-bold">RT</div>
                         <div className="h-8 w-8 rounded-full border-2 border-white bg-cyan-100 flex items-center justify-center text-[10px] font-bold text-cyan-700">+3</div>
@@ -194,6 +248,58 @@ export function PipelineView({
 
                     <DialogFooter>
                         <Button onClick={() => setIsManageDialogOpen(false)}>Fechar</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* AI Insights Dialog */}
+            <Dialog open={isInsightDialogOpen} onOpenChange={setIsInsightDialogOpen}>
+                <DialogContent className="sm:max-w-[600px] border-purple-200 bg-white shadow-xl shadow-purple-500/10">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-2xl font-black text-slate-900">
+                            <span className="p-2 bg-purple-100 rounded-lg text-purple-600">✨</span>
+                            AI Deal Coach
+                        </DialogTitle>
+                        <DialogDescription className="text-slate-500">
+                            Análise estratégica do seu funil gerada por inteligência artificial em tempo real.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {analysisResult && (
+                        <div className="py-6 space-y-6">
+                            {/* Insight 1 */}
+                            <div className="bg-red-50/50 border border-red-100 p-4 rounded-xl">
+                                <h4 className="text-red-800 font-bold text-sm uppercase tracking-wide mb-2 flex items-center gap-2">
+                                    <span className="text-red-500">🚨</span> Gargalo Financeiro
+                                </h4>
+                                <p className="text-slate-700 font-medium">{analysisResult.bottleneck}</p>
+                            </div>
+
+                            {/* Insight 2 */}
+                            <div className="bg-emerald-50/50 border border-emerald-100 p-4 rounded-xl">
+                                <h4 className="text-emerald-800 font-bold text-sm uppercase tracking-wide mb-2 flex items-center gap-2">
+                                    <span className="text-emerald-500">🎯</span> Oportunidade FOCO
+                                </h4>
+                                <p className="text-slate-700 font-medium">{analysisResult.focus_deal}</p>
+                            </div>
+
+                            {/* Insight 3 */}
+                            <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-xl">
+                                <h4 className="text-blue-800 font-bold text-sm uppercase tracking-wide mb-2 flex items-center gap-2">
+                                    <span className="text-blue-500">⚡</span> Ação Imediata
+                                </h4>
+                                <p className="text-slate-700 font-medium">{analysisResult.actionable_insight}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    <DialogFooter>
+                        <Button
+                            className="w-full bg-purple-600 hover:bg-purple-700 font-bold"
+                            onClick={() => setIsInsightDialogOpen(false)}
+                        >
+                            Voltar para o Funil
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

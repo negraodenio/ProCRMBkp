@@ -14,6 +14,8 @@ type Proposal = {
     notes?: string;
     stage_id: string;
     status: string;
+    created_at?: string;
+    updated_at?: string;
     contacts?: {
         name: string;
         companies?: { name: string } | null;
@@ -38,6 +40,21 @@ export function ProposalCard({ proposal, isDragging, onEdit, onDelete, stageColo
     const handleCardClick = () => {
         router.push(`/proposals/${proposal.id}`);
     };
+
+    const getLeadTemperature = (proposal: Proposal) => {
+        const dateStr = proposal.updated_at || proposal.created_at;
+        if (!dateStr) return { label: '❄️ Frio', color: 'bg-slate-100 text-slate-600 border-slate-200' };
+
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 3600 * 24));
+
+        if (diffDays <= 2) return { label: '🔥 Quente', color: 'bg-orange-100 text-orange-700 border-orange-200' };
+        if (diffDays <= 7) return { label: '☀️ Morno', color: 'bg-amber-100 text-amber-700 border-amber-200' };
+        return { label: '❄️ Frio', color: 'bg-blue-100 text-blue-700 border-blue-200' };
+    };
+
+    const temperature = getLeadTemperature(proposal);
 
     const getProposalStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
@@ -132,8 +149,13 @@ export function ProposalCard({ proposal, isDragging, onEdit, onDelete, stageColo
                 </div>
 
                 <div className="flex items-center justify-between gap-2">
-                    <div className={cn("text-[9px] px-1.5 rounded-full font-black border uppercase shrink-0", getProposalStatusColor(proposal.status))}>
-                        {getProposalStatusLabel(proposal.status)}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                        <div className={cn("text-[9px] px-1.5 rounded-full font-black border uppercase shrink-0", getProposalStatusColor(proposal.status))}>
+                            {getProposalStatusLabel(proposal.status)}
+                        </div>
+                        <div className={cn("text-[9px] px-1.5 rounded-full font-black border uppercase shrink-0", temperature.color)}>
+                            {temperature.label}
+                        </div>
                     </div>
                 </div>
 

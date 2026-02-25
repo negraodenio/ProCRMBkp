@@ -15,7 +15,9 @@ import {
   Mic,
   Briefcase,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Flame,
+  LineChart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -75,6 +77,17 @@ const TOOLS: ToolCard[] = [
     group: "qualification",
     color: "text-emerald-600",
     fullExample: "Análise Preditiva:\n\nLead: Carlos Innovate\nFase: Negociação\nSinais: Abriu proposta hoje, respondeu WhatsApp em < 5min.\nProbabilidade: 87%\nStatus: Hot. Movimentação detectada para assinatura digital."
+  },
+  {
+    id: "lead-temperature",
+    title: "Lead Temperature",
+    description: "Termômetro visual automático que indica esfriamento ou aquecimento de oportunidades no funil.",
+    icon: Flame,
+    badge: "NOVIDADE 🔥",
+    preview: "Status: Quente. Última interação há 2H.",
+    group: "qualification",
+    color: "text-orange-500",
+    fullExample: "Análise de Recência (Lead Temperature):\n\nA IA monitora a proximidade da última interação (WhatsApp, E-mail, Proposta Enviada). Se o contato ocorreu nas últimas 48h, a oportunidade recebe o selo estratégico 🔥 QUENTE direto no Kanban.\nSempre saiba onde focar a energia do seu dia para não perder o timing da venda."
   },
   // COMMUNICATION
   {
@@ -143,6 +156,17 @@ const TOOLS: ToolCard[] = [
     group: "closing",
     color: "text-cyan-600",
     fullExample: "Dossiê Estratégico:\n\nLead: Pedro Costa (CEO)\nEmpresa: StartupXYZ\nDores: Escalabilidade e Gestão de Equipe.\nRiscos: O lead usa um sistema caseiro e teme migração.\nObjetivo Reunião: Mostrar a simplicidade da importação via CSV/API.\nPauta Sugerida: 1. Demo Migração | 2. Dashboard Gestor | 3. IA Scoring."
+  },
+  {
+    id: "deal-coach",
+    title: "AI Deal Coach",
+    description: "Um Diretor de Vendas virtual que lê todo o seu Kanban e aponta gargalos e a próxima melhor ação.",
+    icon: LineChart,
+    badge: "NOVIDADE 🔥",
+    preview: "Alerta: R$ 45.000 parados na etapa de Negociação.",
+    group: "closing",
+    color: "text-violet-600",
+    fullExample: "Insight Estratégico do Deal Coach:\n\n🚨 Gargalo Financeiro:\nSeu maior volume de capital parado (R$ 84.000) está concentrado na etapa de 'Apresentação'.\n\n🎯 Oportunidade FOCO:\nConcentre-se na Proposta 'Enterprise SoftwareXYZ'. O tempo médico deste deal esgota amanhã.\n\n⚡ Ação Sugerida:\nAgende o follow-up dos 4 leads na etapa Base que estão completando 15 dias sem retorno."
   },
   {
     id: "pitch-generator",

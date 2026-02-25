@@ -50,7 +50,7 @@ export function CoreFeatures() {
           Tudo Que Um CRM Precisa — E Mais
         </h2>
         <p className="text-slate-500 font-medium">
-          Além das 10 IA Tools, o CRMia tem todas as funcionalidades essenciais para escalar sua operação.
+          Além das 11 IA Tools, o CRMia tem todas as funcionalidades essenciais para escalar sua operação.
         </p>
       </div>
 
