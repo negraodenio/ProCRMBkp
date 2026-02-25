@@ -27,7 +27,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "CRMia - O CRM que pensa por si",
-  description: "Sistema CRM inteligente com 9 ferramentas de IA para acelerar suas vendas",
+  description: "Sistema CRM inteligente com 11 ferramentas de IA para acelerar suas vendas",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

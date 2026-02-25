@@ -244,7 +244,7 @@ export function AIToolsShowcase() {
       <div className="text-center max-w-4xl mx-auto mb-20 space-y-6">
         <Badge className="bg-primary text-white font-black px-4 py-1">⚡ ÚNICO NO MERCADO</Badge>
         <h2 className="text-4xl md:text-6xl font-black text-slate-900 leading-[1.1]">
-          10 Ferramentas de IA Que Só o <span className="text-primary italic">CRMia</span> Tem
+          11 Ferramentas de IA Que Só o <span className="text-primary italic">CRMia</span> Tem
         </h2>
         <p className="text-xl text-slate-600 max-w-2xl mx-auto">
           Cada ferramenta resolve um problema real de vendas.

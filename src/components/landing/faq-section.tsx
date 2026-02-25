@@ -10,7 +10,7 @@ import {
 const FAQS = [
   {
     question: "O que são os IA Tools?",
-    answer: "São 9 ferramentas de inteligência artificial integradas no CRM que automatizam tarefas como análise de leads, geração de business cases, coaching de negociação e mais. Funcionam com 1 clique.",
+    answer: "São 11 ferramentas de inteligência artificial integradas no CRM que automatizam tarefas como análise de leads, geração de business cases, coaching de negociação e mais. Funcionam com 1 clique.",
   },
   {
     question: "Quanto custa usar a IA?",

@@ -27,7 +27,7 @@ export function LandingFooter() {
           <div>
             <h4 className="font-bold text-slate-900 mb-6 uppercase text-[10px] tracking-widest">Produto</h4>
             <ul className="space-y-4 text-sm text-slate-500 font-medium">
-              <li><a href="#tools" className="hover:text-primary transition-colors">9 IA Tools</a></li>
+              <li><a href="#tools" className="hover:text-primary transition-colors">11 IA Tools</a></li>
               <li><a href="#comparison" className="hover:text-primary transition-colors">Comparação</a></li>
               <li><a href="#pricing" className="hover:text-primary transition-colors">Preços</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Integrações</a></li>

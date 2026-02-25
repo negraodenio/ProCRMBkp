@@ -51,7 +51,7 @@ export function HeroSection() {
         <div className="space-y-8 animate-in fade-in slide-in-from-left duration-700">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/5 border border-primary/10 rounded-full text-sm font-bold text-primary">
             <Sparkles className="h-4 w-4 animate-pulse" />
-            <span>9 Ferramentas de IA integradas — Único no mercado</span>
+            <span>11 Ferramentas de IA integradas — Único no mercado</span>
           </div>
 
           <h1 className="text-5xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight text-slate-900">
@@ -74,7 +74,7 @@ export function HeroSection() {
               </Button>
             </Link>
             <Button size="lg" variant="outline" className="text-lg h-14 px-10 border-slate-200 hover:bg-slate-50" asChild>
-              <a href="#tools">Ver os 9 IA Tools ↓</a>
+              <a href="#tools">Ver os 11 IA Tools ↓</a>
             </Button>
           </div>
 
@@ -159,7 +159,7 @@ export function HeroSection() {
               </div>
 
               <Button variant="ghost" className="w-full text-slate-400 text-xs font-bold uppercase tracking-widest hover:text-primary" asChild>
-                <a href="#tools">Ver todas as 9 ferramentas</a>
+                <a href="#tools">Ver todas as 11 ferramentas</a>
               </Button>
             </div>
           </div>

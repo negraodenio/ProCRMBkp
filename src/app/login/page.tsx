@@ -142,7 +142,7 @@ export default function LoginPage() {
                                     <CheckCircle2 className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <h3 className="text-white font-bold mb-1">9 Ferramentas de IA Integradas</h3>
+                                    <h3 className="text-white font-bold mb-1">11 Ferramentas de IA Integradas</h3>
                                     <p className="text-slate-400 text-sm leading-relaxed">
                                         Da transcrição de áudios no WhatsApp à geração de perfis corporativos completos no LinkedIn.
                                     </p>

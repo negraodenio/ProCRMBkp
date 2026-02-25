@@ -99,7 +99,7 @@ export function AIToolsHeader({ selectedLeadId, onSelectLead, orgId }: AIToolsHe
             IA Tools
           </h2>
           <p className="text-slate-500 text-sm">
-            9 ferramentas de inteligência artificial para acelerar suas vendas
+            11 ferramentas de inteligência artificial para acelerar suas vendas
           </p>
         </div>
 

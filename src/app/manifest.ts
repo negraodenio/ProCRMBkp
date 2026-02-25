@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'CRMia System',
     short_name: 'CRMia',
-    description: 'Sistema CRM inteligente com 9 ferramentas de IA para acelerar suas vendas',
+    description: 'Sistema CRM inteligente com 11 ferramentas de IA para acelerar suas vendas',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',
