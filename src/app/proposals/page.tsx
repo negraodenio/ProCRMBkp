@@ -886,18 +886,29 @@ export default function ProposalsPage() {
                                 <Select
                                     value={transferData.stageId}
                                     onValueChange={(v) => setTransferData({ ...transferData, stageId: v })}
-                                    disabled={!transferData.pipelineId}
+                                    disabled={!transferData.pipelineId || allStages.filter(s => s.pipeline_id === transferData.pipelineId).length === 0}
                                 >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Escolha uma etapa" />
+                                        <SelectValue placeholder={
+                                            !transferData.pipelineId
+                                                ? "Escolha um funil primeiro"
+                                                : allStages.filter(s => s.pipeline_id === transferData.pipelineId).length === 0
+                                                    ? "Este funil não tem etapas"
+                                                    : "Escolha uma etapa"
+                                        } />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {allStages
-                                            .filter(s => s.pipeline_id === transferData.pipelineId)
-                                            .map(s => (
-                                                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                                            ))
-                                        }
+                                        {allStages.filter(s => s.pipeline_id === transferData.pipelineId).length > 0 ? (
+                                            allStages
+                                                .filter(s => s.pipeline_id === transferData.pipelineId)
+                                                .map(s => (
+                                                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                                ))
+                                        ) : (
+                                            <div className="p-2 text-sm text-muted-foreground text-center">
+                                                Crie etapas neste funil na página de Pipeline.
+                                            </div>
+                                        )}
                                     </SelectContent>
                                 </Select>
                             </div>

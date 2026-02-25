@@ -180,6 +180,23 @@ export async function createPipeline(data: { name: string, organization_id: stri
         return { success: false, error: error.message }
     }
 
+    // Automatically create default stages for the new pipeline to prevent empty states
+    const defaultStages = [
+        { pipeline_id: pipeline.id, organization_id: data.organization_id, name: 'Lead', color: 'bg-blue-500', order: 0 },
+        { pipeline_id: pipeline.id, organization_id: data.organization_id, name: 'Em Contato', color: 'bg-yellow-500', order: 1 },
+        { pipeline_id: pipeline.id, organization_id: data.organization_id, name: 'Negociação', color: 'bg-orange-500', order: 2 },
+        { pipeline_id: pipeline.id, organization_id: data.organization_id, name: 'Fechado', color: 'bg-green-500', order: 3 }
+    ];
+
+    const { error: stagesError } = await supabase
+        .from('stages')
+        .insert(defaultStages);
+
+    if (stagesError) {
+        console.error('Error creating default stages:', stagesError);
+        // We still return success for the pipeline, but the user will have an empty pipeline
+    }
+
     revalidatePath('/pipeline')
     return { success: true, data: pipeline }
 }
