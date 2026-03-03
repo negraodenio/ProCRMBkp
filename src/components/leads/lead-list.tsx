@@ -33,6 +33,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { cn, formatPhoneNumber } from "@/lib/utils";
 import { usePlanLimit } from "@/hooks/use-plan-limit";
 import { UpgradeModal } from "@/components/billing/upgrade-modal";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Lead {
   id: string;
@@ -340,8 +341,6 @@ export function LeadList() {
   }
 
   async function deleteLead(id: string) {
-    if (!confirm("Tem certeza que deseja excluir este lead?")) return;
-
     const { error } = await supabase.from("contacts").delete().eq("id", id);
     if (error) {
       toast.error("Erro ao excluir lead");
@@ -366,11 +365,9 @@ export function LeadList() {
             setSelectedLeadForWhatsApp(null);
             setWaMessage("");
         } else {
-            toast.error("Erro via API: " + res.error);
-            if (confirm("Deseja tentar enviar manualmente pelo WhatsApp Web?")) {
-                const phone = selectedLeadForWhatsApp.phone.replace(/\D/g, "");
-                window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(waMessage)}`, "_blank");
-            }
+            toast.error("Erro via API: " + res.error + ". Tentando WhatsApp Web...");
+            const phone = selectedLeadForWhatsApp.phone.replace(/\D/g, "");
+            window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(waMessage)}`, "_blank");
         }
     } catch (e) {
         toast.error("Erro inesperado ao enviar mensagem.");
@@ -719,14 +716,17 @@ export function LeadList() {
                     Editar
                   </Button>
 
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => deleteLead(lead.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <ConfirmDialog
+                    title="Excluir Lead"
+                    description="Tem certeza que deseja excluir este lead? Esta ação não pode ser desfeita."
+                    confirmLabel="Excluir"
+                    onConfirm={() => deleteLead(lead.id)}
+                    trigger={
+                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    }
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -768,8 +768,8 @@ export function LeadList() {
               </DialogHeader>
 
               <div className="py-4 space-y-4">
-                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <div className="bg-muted/50 p-3 rounded-lg border flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Phone className="h-4 w-4" />
                           {formatPhoneNumber(selectedLeadForWhatsApp?.phone || "")}
                       </div>

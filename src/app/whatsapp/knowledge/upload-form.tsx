@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Upload, Loader2, FileType, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { uploadDocument, deleteDocument } from "./actions";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export function UploadForm() {
     const [loading, setLoading] = useState(false);
@@ -107,7 +108,6 @@ export function DeleteButton({ id }: { id: string }) {
     // import { deleteDocument } from "./actions"; // Already imported at top? Need to check.
 
     async function handleDelete() {
-        if (!confirm("Tem certeza?")) return;
         setLoading(true);
         try {
             await deleteDocument(id);
@@ -119,13 +119,17 @@ export function DeleteButton({ id }: { id: string }) {
         }
     }
 
-    // Reuse Loader2 or Trash icon
-    const { Trash2 } = require("lucide-react"); // Dynamic require or just import top level.
-    // Let's rely on top level import updates.
-
     return (
-        <Button variant="ghost" size="icon" onClick={handleDelete} disabled={loading} className="text-red-500 hover:text-red-700 hover:bg-red-50">
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-        </Button>
+        <ConfirmDialog
+            title="Excluir Documento"
+            description="Tem certeza que deseja excluir este documento e todo o seu conteúdo de treinamento?"
+            confirmLabel="Excluir"
+            onConfirm={handleDelete}
+            trigger={
+                <Button variant="ghost" size="icon" disabled={loading} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                </Button>
+            }
+        />
     );
 }

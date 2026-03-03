@@ -29,6 +29,7 @@ import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Template {
     id: string;
@@ -176,8 +177,6 @@ export default function TemplatesPage() {
     }
 
     async function deleteTemplate(id: string) {
-        if (!confirm("Tem certeza que deseja excluir este template?")) return;
-
         const { error } = await supabase.from("proposal_templates").delete().eq("id", id);
         if (error) {
             toast.error("Erro ao excluir template");
@@ -394,8 +393,8 @@ export default function TemplatesPage() {
                                                 <Badge
                                                     className={
                                                         template.is_active
-                                                            ? "bg-green-100 text-green-700"
-                                                            : "bg-gray-100 text-gray-700"
+                                                            ? "bg-success/10 text-success"
+                                                            : "bg-muted text-muted-foreground"
                                                     }
                                                 >
                                                     {template.is_active ? "Ativo" : "Inativo"}
@@ -438,14 +437,17 @@ export default function TemplatesPage() {
                                                     <Copy className="h-4 w-4 mr-1" />
                                                     Duplicar
                                                 </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="text-red-600 hover:text-red-700"
-                                                    onClick={() => deleteTemplate(template.id)}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                                <ConfirmDialog
+                                                    title="Excluir Template"
+                                                    description="Tem certeza que deseja excluir este template? Esta ação não pode ser desfeita."
+                                                    confirmLabel="Excluir"
+                                                    onConfirm={() => deleteTemplate(template.id)}
+                                                    trigger={
+                                                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    }
+                                                />
                                             </div>
                                         </CardContent>
                                     </Card>

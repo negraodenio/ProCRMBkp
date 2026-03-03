@@ -29,6 +29,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 
 interface Strategy {
@@ -155,8 +156,6 @@ export default function StrategiesPage() {
     }
 
     async function deleteStrategy(id: string) {
-        if (!confirm("Tem certeza que deseja excluir esta estratégia?")) return;
-
         const { error } = await supabase.from("marketing_strategies").delete().eq("id", id);
         if (error) {
             toast.error("Erro ao excluir");
@@ -397,8 +396,8 @@ export default function StrategiesPage() {
                                                     <Badge
                                                         className={
                                                             strategy.is_active
-                                                                ? "bg-green-100 text-green-700"
-                                                                : "bg-gray-100 text-gray-700"
+                                                                ? "bg-success/10 text-success"
+                                                                : "bg-muted text-muted-foreground"
                                                         }
                                                     >
                                                         {strategy.is_active ? "ON" : "OFF"}
@@ -411,7 +410,7 @@ export default function StrategiesPage() {
                                                         <span className="font-medium">Gatilho:</span>{" "}
                                                         {getTriggerLabel(strategy.trigger_type)} ({strategy.days_after} dias)
                                                     </div>
-                                                    <div className="bg-slate-50 rounded p-2 text-sm line-clamp-2">
+                                                    <div className="bg-muted/50 rounded p-2 text-sm line-clamp-2">
                                                         {strategy.message_template || "Sem mensagem"}
                                                     </div>
                                                 </div>
@@ -432,14 +431,17 @@ export default function StrategiesPage() {
                                                         <Edit className="h-4 w-4 mr-1" />
                                                         Editar
                                                     </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="text-red-600 hover:text-red-700"
-                                                        onClick={() => deleteStrategy(strategy.id)}
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
+                                                    <ConfirmDialog
+                                                        title="Excluir Estratégia"
+                                                        description="Tem certeza que deseja excluir esta estratégia? Esta ação não pode ser desfeita."
+                                                        confirmLabel="Excluir"
+                                                        onConfirm={() => deleteStrategy(strategy.id)}
+                                                        trigger={
+                                                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        }
+                                                    />
                                                 </div>
                                             </CardContent>
                                         </Card>

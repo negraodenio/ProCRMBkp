@@ -28,7 +28,7 @@ export async function retrieveContextText(params: {
 
   const contextText = chunks?.length
     ? chunks.map((c: any) => {
-        const source = c.metadata?.document_name || c.metadata?.source || "Manual";
+        const source = c.metadata?.filename || c.metadata?.document_name || c.metadata?.source || "Manual";
         return `[Fonte: ${source}]\n${c.content}`;
       }).join("\n\n---\n\n")
     : "";

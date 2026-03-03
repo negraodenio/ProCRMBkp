@@ -276,11 +276,30 @@ export async function POST(req: NextRequest) {
                 .maybeSingle();
 
             if (createConvError) {
-                console.error("❌ [Webhook] Error creating conversation:", createConvError);
-                return NextResponse.json({ error: "Failed to create conversation", details: createConvError.message }, { status: 500 });
+                // Race condition: another concurrent webhook may have just created this conversation.
+                // Retry the SELECT instead of failing hard.
+                console.warn("⚠️ [Webhook] Insert conversation failed (possible race condition). Retrying SELECT...", createConvError.message);
+
+                const { data: racedConv } = await serviceClient
+                    .from("conversations")
+                    .select("*")
+                    .eq("contact_phone", phone)
+                    .eq("organization_id", org.id)
+                    .eq("status", "open")
+                    .maybeSingle();
+
+                if (racedConv) {
+                    console.log("✅ [Webhook] Race condition resolved: found conversation from concurrent request:", racedConv.id);
+                    conversation = racedConv;
+                } else {
+                    console.error("❌ [Webhook] Error creating conversation (non-race):", createConvError);
+                    return NextResponse.json({ error: "Failed to create conversation", details: createConvError.message }, { status: 500 });
+                }
+            } else {
+                conversation = newConv;
             }
-            conversation = newConv;
         }
+
 
         if (!conversation) {
             console.error("❌ [Webhook] Critical failure: conversation remains null after creation attempt");

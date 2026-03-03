@@ -732,9 +732,9 @@ export default function ProposalsPage() {
 
                                             <div className="space-y-3">
                                                 {proposalItems.map((item, index) => (
-                                                    <div key={index} className="flex gap-2 items-end bg-slate-50 p-3 rounded-lg border">
+                                                    <div key={index} className="flex gap-2 items-end bg-muted/30 dark:bg-muted/20 p-3 rounded-lg border border-border">
                                                         <div className="flex-1 space-y-1">
-                                                            <Label className="text-[10px] uppercase text-slate-500">Produto #{index + 1}</Label>
+                                                            <Label className="text-[10px] uppercase text-muted-foreground">Produto #{index + 1}</Label>
                                                             <Input
                                                                 placeholder="Nome do produto/serviço"
                                                                 value={item.name}
@@ -742,9 +742,9 @@ export default function ProposalsPage() {
                                                             />
                                                         </div>
                                                         <div className="w-32 space-y-1">
-                                                            <Label className="text-[10px] uppercase text-slate-500">Valor</Label>
+                                                            <Label className="text-[10px] uppercase text-muted-foreground">Valor</Label>
                                                             <div className="relative">
-                                                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-medium text-slate-400">
+                                                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-medium text-muted-foreground">
                                                                     {item.currency === 'BRL' ? 'R$' : item.currency === 'USD' ? '$' : '€'}
                                                                 </span>
                                                                 <Input
@@ -760,7 +760,7 @@ export default function ProposalsPage() {
                                                             </div>
                                                         </div>
                                                         <div className="w-24 space-y-1">
-                                                            <Label className="text-[10px] uppercase text-slate-500">Moeda</Label>
+                                                            <Label className="text-[10px] uppercase text-muted-foreground">Moeda</Label>
                                                             <Select
                                                                 value={item.currency}
                                                                 onValueChange={(v) => handleUpdateItem(index, "currency", v)}
@@ -788,9 +788,9 @@ export default function ProposalsPage() {
                                                 ))}
                                             </div>
 
-                                            <div className="flex justify-between items-center bg-blue-50 p-3 rounded-lg border border-blue-100">
-                                                <div className="text-sm font-medium text-blue-700">Total da Proposta</div>
-                                                <div className="text-lg font-bold text-blue-900">
+                                            <div className="flex justify-between items-center bg-primary/10 p-3 rounded-lg border border-primary/20">
+                                                <div className="text-sm font-medium text-primary">Total da Proposta</div>
+                                                <div className="text-lg font-bold text-foreground">
                                                     {formData.currency === 'BRL' && 'R$ '}
                                                     {formData.currency === 'USD' && '$ '}
                                                     {formData.currency === 'EUR' && '€ '}
@@ -807,7 +807,7 @@ export default function ProposalsPage() {
                                                     variant="ghost"
                                                     size="sm"
                                                     disabled={generatingPitch}
-                                                    className="h-8 text-xs font-semibold text-purple-600 bg-purple-50 hover:bg-purple-100 hover:text-purple-700"
+                                                    className="h-8 text-xs font-semibold text-secondary bg-secondary/10 hover:bg-secondary/20 hover:text-secondary"
                                                     onClick={handleGeneratePitch}
                                                 >
                                                     <Wand2 className={`h-3 w-3 mr-1.5 ${generatingPitch ? "animate-spin" : ""}`} />

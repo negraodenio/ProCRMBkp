@@ -13,6 +13,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { usePlanLimit } from "@/hooks/use-plan-limit";
 import { UpgradeModal } from "@/components/billing/upgrade-modal";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function WhatsAppPage() {
     const [qrCode, setQrCode] = useState<string | null>(null);
@@ -88,7 +89,6 @@ export default function WhatsAppPage() {
     };
 
     const handleDisconnect = async () => {
-        if (!confirm("Tem certeza que deseja desconectar?")) return;
         await logoutWhatsApp();
         setQrCode(null);
         setInstanceName("");
@@ -199,8 +199,8 @@ export default function WhatsAppPage() {
 
                                     {instanceName && !qrCode && (
                                         <div className="text-center space-y-6 animate-in fade-in zoom-in duration-500">
-                                            <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-2 ring-8 ring-green-50">
-                                                <div className="bg-green-500 p-2 rounded-full">
+                                            <div className="mx-auto w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mb-2 ring-8 ring-success/5">
+                                                <div className="bg-success p-2 rounded-full">
                                                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
                                                 </div>
                                             </div>
@@ -210,9 +210,17 @@ export default function WhatsAppPage() {
                                                     Instância: <span className="font-mono bg-muted px-2 py-1 rounded text-foreground text-xs">{instanceName}</span>
                                                 </p>
                                             </div>
-                                            <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={handleDisconnect}>
-                                                <LogOut className="mr-2 h-4 w-4" /> Desconectar
-                                            </Button>
+                                            <ConfirmDialog
+                                                title="Desconectar WhatsApp"
+                                                description="Tem certeza que deseja desconectar? Você precisará escanear o QR Code novamente para reconectar."
+                                                confirmLabel="Desconectar"
+                                                onConfirm={handleDisconnect}
+                                                trigger={
+                                                    <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10">
+                                                        <LogOut className="mr-2 h-4 w-4" /> Desconectar
+                                                    </Button>
+                                                }
+                                            />
                                         </div>
                                     )}
                                 </CardContent>

@@ -17,6 +17,7 @@ import { KanbanBoard } from "./kanban-board";
 import { createPipeline, updatePipeline, deletePipeline } from "@/app/pipeline/actions";
 import { analyzeFunnelWithAI, FunnelAnalysisResult } from "@/app/pipeline/ai-actions";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Pipeline {
     id: string;
@@ -89,14 +90,12 @@ export function PipelineView({
             return;
         }
 
-        if (confirm("Tem certeza que deseja excluir este funil? Todas as etapas serão removidas.")) {
-            const result = await deletePipeline(id);
-            if (result.success) {
-                toast.success("Funil excluído!");
-                window.location.reload();
-            } else {
-                toast.error(result.error || "Erro ao excluir funil");
-            }
+        const result = await deletePipeline(id);
+        if (result.success) {
+            toast.success("Funil excluído!");
+            window.location.reload();
+        } else {
+            toast.error(result.error || "Erro ao excluir funil");
         }
     };
 
@@ -185,7 +184,7 @@ export function PipelineView({
                     <div className="py-4 space-y-4">
                         <div className="space-y-2">
                             {pipelines.map((p) => (
-                                <div key={p.id} className="flex items-center justify-between p-3 rounded-lg border bg-slate-50/50">
+                                <div key={p.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
                                     {editingPipelineId === p.id ? (
                                         <div className="flex items-center gap-2 flex-1 mr-4">
                                             <Input
@@ -203,7 +202,7 @@ export function PipelineView({
                                         </div>
                                     ) : (
                                         <>
-                                            <div className="font-medium text-sm flex-1">{p.name} {p.is_default && <span className="text-[10px] bg-slate-200 px-1 rounded ml-2">Padrão</span>}</div>
+                                            <div className="font-medium text-sm flex-1">{p.name} {p.is_default && <span className="text-[10px] bg-muted px-1 rounded ml-2">Padrão</span>}</div>
                                             <div className="flex items-center gap-1">
                                                 <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => {
                                                     setEditingPipelineId(p.id);
@@ -211,9 +210,17 @@ export function PipelineView({
                                                 }}>
                                                     <Edit2 className="h-3.5 w-3.5" />
                                                 </Button>
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500 hover:bg-red-50" onClick={() => handleDeletePipeline(p.id)}>
-                                                    <Trash2 className="h-3.5 w-3.5" />
-                                                </Button>
+                                                <ConfirmDialog
+                                                    title="Excluir Funil"
+                                                    description="Tem certeza que deseja excluir este funil? Todas as etapas serão removidas."
+                                                    confirmLabel="Excluir"
+                                                    onConfirm={() => handleDeletePipeline(p.id)}
+                                                    trigger={
+                                                        <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:bg-destructive/10">
+                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                    }
+                                                />
                                             </div>
                                         </>
                                     )}
@@ -238,7 +245,7 @@ export function PipelineView({
                         ) : (
                             <Button
                                 variant="outline"
-                                className="w-full border-dashed border-slate-300"
+                                className="w-full border-dashed"
                                 onClick={() => setIsCreating(true)}
                             >
                                 <Plus className="mr-2 h-4 w-4" /> Novo Funil

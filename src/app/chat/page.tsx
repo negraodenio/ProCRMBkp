@@ -20,6 +20,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { TransferDialog } from "@/components/chat/transfer-dialog";
 import { MoveRight, History } from "lucide-react";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 type Conversation = {
     id: string;
@@ -258,13 +259,7 @@ export default function ChatPage() {
         }
     };
 
-    const handleDelete = async (e: React.MouseEvent, conversationId: string) => {
-        e.stopPropagation(); // Prevent selecting the chat when clicking delete
-
-        if (!confirm("Tem certeza que deseja excluir esta conversa? Todas as mensagens serão perdidas.")) {
-            return;
-        }
-
+    const handleDelete = async (conversationId: string) => {
         try {
             // Optimistic update
             setConversations(prev => prev.filter(c => c.id !== conversationId));
@@ -276,8 +271,6 @@ export default function ChatPage() {
 
             if (result.error) {
                 toast.error(result.error);
-                // Re-fetch or revert if possible, but for now just show error
-                // In a real app we might want to revert the optimistic update
             } else {
                 toast.success("Conversa excluída com sucesso");
             }
@@ -306,10 +299,6 @@ export default function ChatPage() {
     };
 
     const handleClearHistory = async (conversationId: string) => {
-        if (!confirm("Tem certeza que deseja limpar todo o histórico desta conversa? Isso resetará a 'memória' da IA para este contato. Esta ação não pode ser desfeita.")) {
-            return;
-        }
-
         try {
             const result = await clearChatMessagesAction(conversationId);
             if (result.error) {
@@ -408,15 +397,23 @@ export default function ChatPage() {
                                                 </div>
 
                                                 <div className="flex flex-col items-end gap-2">
-                                                    <button
-                                                        onClick={(e) => handleDelete(e, chat.id)}
-                                                        className="p-1 text-muted-foreground/40 hover:text-red-500 transition-colors"
-                                                        title="Excluir conversa"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </button>
+                                                    <ConfirmDialog
+                                                    title="Excluir Conversa"
+                                                    description="Tem certeza que deseja excluir esta conversa? Todas as mensagens serão perdidas."
+                                                    confirmLabel="Excluir"
+                                                    onConfirm={() => handleDelete(chat.id)}
+                                                    trigger={
+                                                        <button
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="p-1 text-muted-foreground/40 hover:text-destructive transition-colors"
+                                                            title="Excluir conversa"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
+                                                    }
+                                                />
                                                     {chat.departments?.name && (
-                                                        <Badge variant="outline" className={`text-[9px] px-1 py-0 h-4 border-none shadow-none font-black ${chat.departments.color || 'bg-slate-200'} text-white`}>
+                                                        <Badge variant="outline" className={`text-[9px] px-1 py-0 h-4 border-none shadow-none font-black ${chat.departments.color || 'bg-muted'} text-white`}>
                                                             {chat.departments.name.toUpperCase()}
                                                         </Badge>
                                                     )}
@@ -468,7 +465,7 @@ export default function ChatPage() {
                                                 </div>
                                                 <div className="flex items-center gap-2 pt-1">
                                                     {selectedChat?.departments?.name && (
-                                                        <Badge variant="outline" className="text-[10px] font-bold border-cyan-200 bg-cyan-50 text-cyan-700 flex items-center gap-1">
+                                                        <Badge variant="outline" className="text-[10px] font-bold border-cyan-200 bg-cyan-50 text-cyan-700 flex items-center gap-1 dark:bg-cyan-950/30 dark:text-cyan-300 dark:border-cyan-800">
                                                             <Building2 className="h-3 w-3" /> {selectedChat.departments.name}
                                                         </Badge>
                                                     )}
@@ -485,16 +482,23 @@ export default function ChatPage() {
                                     {/* AI and History Controls */}
                                     <div className="flex items-center gap-3">
                                         {/* Reset Button */}
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => handleClearHistory(selectedChat!.id)}
-                                            className="h-9 px-3 text-xs border-orange-200 text-orange-600 hover:bg-orange-50 hover:text-orange-700 bg-orange-50/30 font-bold gap-1.5 rounded-xl hidden sm:flex"
-                                            title="Limpar memória do contato (IA)"
-                                        >
-                                            <Eraser className="h-4 w-4" />
-                                            Resetar IA
-                                        </Button>
+                                        <ConfirmDialog
+                                            title="Resetar Memória da IA"
+                                            description="Isso limpará todo o histórico desta conversa e a IA perderá o contexto deste contato. Esta ação não pode ser desfeita."
+                                            confirmLabel="Resetar"
+                                            onConfirm={() => handleClearHistory(selectedChat!.id)}
+                                            trigger={
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-9 px-3 text-xs border-orange-200 text-orange-600 hover:bg-orange-50 hover:text-orange-700 bg-orange-50/30 font-bold gap-1.5 rounded-xl hidden sm:flex"
+                                                    title="Limpar memória do contato (IA)"
+                                                >
+                                                    <Eraser className="h-4 w-4" />
+                                                    Resetar IA
+                                                </Button>
+                                            }
+                                        />
 
                                         {/* Transfer Button */}
                                         <Button

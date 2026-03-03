@@ -25,6 +25,7 @@ import { ProposalCard } from "./proposal-card";
 import { updateProposalStage, updateProposal, createStage, updateStage, deleteStage, deleteProposal } from "@/app/pipeline/actions";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 // Types matching Supabase
 type Proposal = {
@@ -123,8 +124,6 @@ export function KanbanBoard({ initialStages, initialProposals }: KanbanBoardProp
     };
 
     const handleDeleteProposal = async (proposalId: string) => {
-        if (!confirm("Tem certeza que deseja excluir esta proposta?")) return;
-
         try {
             const result = await deleteProposal(proposalId);
             if (result.success) {
@@ -211,8 +210,6 @@ export function KanbanBoard({ initialStages, initialProposals }: KanbanBoardProp
             toast.error(`Não é possível excluir. Existem ${stageProposals.length} propostas nesta etapa.`);
             return;
         }
-
-        if (!confirm("Tem certeza que deseja excluir esta etapa?")) return;
 
         const result = await deleteStage(stageId);
 
@@ -351,13 +348,21 @@ export function KanbanBoard({ initialStages, initialProposals }: KanbanBoardProp
                                                             <Edit2 className="h-4 w-4 mr-2" />
                                                             Renomear
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem
-                                                            onClick={() => handleDeleteStage(stage.id)}
-                                                            className="text-red-600"
-                                                        >
-                                                            <Trash2 className="h-4 w-4 mr-2" />
-                                                            Excluir
-                                                        </DropdownMenuItem>
+                                                        <ConfirmDialog
+                                                            title="Excluir Etapa"
+                                                            description="Tem certeza que deseja excluir esta etapa? Propostas precisam ser movidas antes."
+                                                            confirmLabel="Excluir"
+                                                            onConfirm={() => handleDeleteStage(stage.id)}
+                                                            trigger={
+                                                                <DropdownMenuItem
+                                                                    className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
+                                                                    onSelect={(e) => e.preventDefault()}
+                                                                >
+                                                                    <Trash2 className="h-4 w-4 mr-2" />
+                                                                    Excluir
+                                                                </DropdownMenuItem>
+                                                            }
+                                                        />
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </>
@@ -501,7 +506,7 @@ export function KanbanBoard({ initialStages, initialProposals }: KanbanBoardProp
                     <div className="space-y-6 py-4">
                         <div className="space-y-4 border-b pb-6">
                             <div className="space-y-2">
-                                <Label htmlFor="proposal-title" className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                <Label htmlFor="proposal-title" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                     Título da Proposta
                                 </Label>
                                 <Input
@@ -516,7 +521,7 @@ export function KanbanBoard({ initialStages, initialProposals }: KanbanBoardProp
                                     Valor Total (R$)
                                 </Label>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">R$</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground">R$</span>
                                     <Input
                                         id="proposal-total"
                                         type="text"

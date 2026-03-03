@@ -35,6 +35,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export interface Contact {
   id: string;
@@ -119,8 +120,6 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este contato?")) return;
-
     const { error } = await supabase.from("contacts").delete().eq("id", id);
     if (error) {
       toast.error("Erro ao excluir contato");
@@ -403,8 +402,8 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="font-medium text-slate-800">{contact.name}</div>
-                      <div className="text-[10px] uppercase font-bold text-slate-400">{contact.type || 'CLIENTE'}</div>
+                      <div className="font-medium">{contact.name}</div>
+                      <div className="text-[10px] uppercase font-bold text-muted-foreground">{contact.type || 'CLIENTE'}</div>
                     </div>
                   </div>
                 </TableCell>
@@ -417,7 +416,7 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-slate-400 italic">{contact.company || '-'}</span>
+                      <span className="text-muted-foreground italic">{contact.company || '-'}</span>
                     )}
                   </div>
                 </TableCell>
@@ -446,10 +445,21 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
                           <Edit className="mr-2 h-4 w-4" />
                           Editar
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(contact.id)}>
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Excluir
-                        </DropdownMenuItem>
+                        <ConfirmDialog
+                          title="Excluir Contato"
+                          description="Tem certeza que deseja excluir este contato? Esta ação não pode ser desfeita."
+                          confirmLabel="Excluir"
+                          onConfirm={() => handleDelete(contact.id)}
+                          trigger={
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Excluir
+                            </DropdownMenuItem>
+                          }
+                        />
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

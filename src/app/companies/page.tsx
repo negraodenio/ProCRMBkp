@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
     Table,
     TableBody,
@@ -167,7 +168,6 @@ export default function CompaniesPage() {
 
     async function deleteCompany(id: string) {
         if (!profile?.organization_id) return;
-        if (!confirm("Tem certeza que deseja excluir esta empresa? Isso não excluirá os contatos vinculados.")) return;
 
         const { error } = await supabase
             .from("companies")
@@ -422,14 +422,17 @@ export default function CompaniesPage() {
                                                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500" onClick={() => handleEditCompany(company)}>
                                                                     <Edit className="h-4 w-4" />
                                                                 </Button>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
-                                                                    onClick={() => deleteCompany(company.id)}
-                                                                >
-                                                                    <Trash2 className="h-4 w-4" />
-                                                                </Button>
+                                                                <ConfirmDialog
+                                                                    title="Excluir Empresa"
+                                                                    description="Tem certeza que deseja excluir esta empresa? Os contatos vinculados não serão excluídos."
+                                                                    confirmLabel="Excluir"
+                                                                    onConfirm={() => deleteCompany(company.id)}
+                                                                    trigger={
+                                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-destructive/10">
+                                                                            <Trash2 className="h-4 w-4" />
+                                                                        </Button>
+                                                                    }
+                                                                />
                                                             </div>
                                                         </TableCell>
                                                     </TableRow>

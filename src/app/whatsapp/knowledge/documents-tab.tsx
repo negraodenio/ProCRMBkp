@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { FileText, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface DocumentsTabProps {
   documents: Array<{
@@ -40,8 +41,6 @@ export function DocumentsTab({ documents, chunksCount }: DocumentsTabProps) {
   };
 
   const handleDelete = async (filename: string) => {
-    if (!confirm(`Tem certeza que deseja excluir o documento "${filename}" e todo o seu conteúdo de treinamento?`)) return;
-
     try {
       await deleteDocument(filename);
       toast.success('Documento e chunks excluídos com sucesso');
@@ -52,8 +51,6 @@ export function DocumentsTab({ documents, chunksCount }: DocumentsTabProps) {
   };
 
   const handlePurge = async () => {
-    if (!confirm('ATENÇÃO: Isso excluirá TODOS os documentos e conhecimentos do robô. Esta ação não pode ser desfeita. Deseja continuar?')) return;
-
     try {
       const result = await purgeAllDocuments();
       if (result.error) throw new Error(result.error);
@@ -110,15 +107,22 @@ export function DocumentsTab({ documents, chunksCount }: DocumentsTabProps) {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">📚 Seus Documentos</h3>
           {documents.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handlePurge}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 text-xs"
-            >
-              <Trash2 className="h-3.5 w-3.5 mr-1" />
-              Limpar Tudo
-            </Button>
+          <ConfirmDialog
+            title="Limpar Base de Conhecimento"
+            description="ATENÇÃO: Isso excluirá TODOS os documentos e conhecimentos do robô. Esta ação não pode ser desfeita."
+            confirmLabel="Limpar Tudo"
+            onConfirm={handlePurge}
+            trigger={
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10 text-xs"
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                Limpar Tudo
+              </Button>
+            }
+          />
           )}
         </div>
 

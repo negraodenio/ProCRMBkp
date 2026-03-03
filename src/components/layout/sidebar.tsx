@@ -80,9 +80,9 @@ export function Sidebar({ mobile }: SidebarProps) {
 
   if (mobile) {
       return (
-         <div className="flex flex-col h-full bg-slate-950 text-slate-300">
+         <div className="flex flex-col h-full bg-card text-foreground border-r border-border">
            {/* Mobile Header */}
-            <div className="flex items-center h-16 px-4 border-b border-slate-800">
+            <div className="flex items-center h-16 px-4 border-b border-border">
              <div className="flex items-center gap-2">
                  <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
                    <Sparkles className="h-4 w-4 text-white" />
@@ -105,7 +105,7 @@ export function Sidebar({ mobile }: SidebarProps) {
                                href={item.href}
                                className={cn(
                                    "flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
-                                   isActive ? "bg-primary text-white" : "hover:bg-slate-800 text-slate-400"
+                                   isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted text-muted-foreground hover:text-foreground"
                                )}
                            >
                                <Icon className="w-5 h-5 mr-3" />
@@ -117,8 +117,8 @@ export function Sidebar({ mobile }: SidebarProps) {
             </div>
 
             {/* Logout Footer Mobile */}
-            <div className="p-4 border-t border-slate-800">
-                <Button variant="ghost" className="w-full justify-start text-red-400 hover:text-red-500 hover:bg-slate-900" onClick={handleLogout}>
+            <div className="p-4 border-t border-border">
+                <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleLogout}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Sair
                 </Button>
