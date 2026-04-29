@@ -50,7 +50,7 @@ export default function MissionControlPage() {
                     body { background: white !important; }
                 }
             `}</style>
-            <Sidebar className="sidebar" />
+            <Sidebar />
             <div className="flex flex-1 flex-col md:ml-64">
                 <Header />
                 <main className="flex-1 p-8">

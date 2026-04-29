@@ -139,15 +139,18 @@ export async function POST(req: NextRequest) {
 
         // Update job status to 'failed' and log the error
         const supabase = createServiceRoleClient();
-        await supabase
-            .from("queue")
-            .update({ 
-                status: "failed", 
-                error_message: error.message,
-                attempts: (job?.attempts || 0) + 1,
-                updated_at: new Date().toISOString() 
-            })
-            .eq("id", job?.id);
+        const jobId = (error as any).jobId;
+
+        if (jobId) {
+            await supabase
+                .from("queue")
+                .update({ 
+                    status: "failed", 
+                    error_message: error.message,
+                    updated_at: new Date().toISOString() 
+                })
+                .eq("id", jobId);
+        }
 
         return NextResponse.json({ error: error.message }, { status: 500 });
     }

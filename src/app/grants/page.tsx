@@ -21,10 +21,10 @@ export default function GrantDiscoveryPage() {
         try {
             const res = await searchGrants(topic);
             if (res.success) {
-                setGrants(res.grants);
+                setGrants(res.grants || []);
                 toast.success("Editais encontrados!");
             } else {
-                toast.error(res.error);
+                toast.error(res.error || "Erro desconhecido");
             }
         } catch (err) {
             toast.error("Erro na busca.");
