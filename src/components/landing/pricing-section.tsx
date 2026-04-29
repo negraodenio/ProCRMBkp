@@ -29,6 +29,7 @@ export function PricingSection({ currency, prices }: PricingSectionProps) {
       ],
       buttonText: "Começar Grátis",
       variant: "outline" as const,
+      footerNote: null
     },
     {
       name: "Starter",
@@ -43,6 +44,7 @@ export function PricingSection({ currency, prices }: PricingSectionProps) {
       ],
       buttonText: "Começar Agora",
       variant: "outline" as const,
+      footerNote: null
     },
     {
       name: "Pro",
@@ -78,6 +80,7 @@ export function PricingSection({ currency, prices }: PricingSectionProps) {
       ],
       buttonText: "Falar com Vendas",
       variant: "outline" as const,
+      footerNote: null
     }
   ];
 
