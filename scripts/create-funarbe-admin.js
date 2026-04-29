@@ -18,7 +18,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 
 async function setupFunarbeAdmin() {
   const email = 'admin@ia4all.com.br';
-  const password = 'Funarbe2026!@#';
+  const password = process.env.ADMIN_PASSWORD || 'Mudar@Senha#123'; // Use variável de ambiente para produção
   const fullName = 'Diretor de Inovação (IA4ALL)';
 
   console.log(`Configurando acesso admin: ${email}...`);
