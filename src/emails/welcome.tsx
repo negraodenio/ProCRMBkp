@@ -19,8 +19,8 @@ interface WelcomeEmailProps {
   name: string;
 }
 
-export const WelcomeEmail = ({ name = "Novo Usuário" }: WelcomeEmailProps) => {
-  const previewText = `A Nexum deu as boas-vindas a você, ${name}!`;
+export const WelcomeEmail = ({ name = "Novo UsuÃ¡rio" }: WelcomeEmailProps) => {
+  const previewText = `A Nexum deu as boas-vindas a vocÃª, ${name}!`;
 
   return (
     <Html>
@@ -33,30 +33,30 @@ export const WelcomeEmail = ({ name = "Novo Usuário" }: WelcomeEmailProps) => {
               <div className="flex items-center gap-2 justify-center mb-8">
                  {/* Logo placeholder - replace with actual URL in production */}
                  <Text className="text-2xl font-bold text-purple-600 text-center">
-                    ✨ Nexum
+                    âœ¨ Nexum
                  </Text>
               </div>
             </Section>
 
             <Heading className="text-black text-[24px] font-bold text-center p-0 my-[30px] mx-0">
-              Bem-vindo ao Futuro das Vendas! 🚀
+              Bem-vindo ao Futuro das Vendas! ðŸš€
             </Heading>
 
             <Text className="text-black text-[14px] leading-[24px]">
-              Olá {name},
+              OlÃ¡ {name},
             </Text>
 
             <Text className="text-black text-[14px] leading-[24px]">
-              Estamos muito felizes em ter você a bordo. A Nexum foi criada para ajudar você a vender muito mais usando Inteligência Artificial de ponta.
+              Estamos muito felizes em ter vocÃª a bordo. A Nexum foi criada para ajudar vocÃª a vender muito mais usando InteligÃªncia Artificial de ponta.
             </Text>
 
             <Section className="bg-slate-50 p-4 rounded-lg my-4 border border-slate-100">
               <Text className="text-slate-800 font-semibold mb-2 m-0">
-                Seus Próximos Passos:
+                Seus PrÃ³ximos Passos:
               </Text>
-              <Text className="text-slate-600 text-sm mt-1 m-0">✓ Completar seu perfil de empresa</Text>
-              <Text className="text-slate-600 text-sm mt-1 m-0">✓ Importar seus primeiros leads</Text>
-              <Text className="text-slate-600 text-sm mt-1 m-0">✓ Configurar o assistente de IA</Text>
+              <Text className="text-slate-600 text-sm mt-1 m-0">âœ“ Completar seu perfil de empresa</Text>
+              <Text className="text-slate-600 text-sm mt-1 m-0">âœ“ Importar seus primeiros leads</Text>
+              <Text className="text-slate-600 text-sm mt-1 m-0">âœ“ Configurar o assistente de IA</Text>
             </Section>
 
             <Section className="text-center mt-[32px] mb-[32px]">
@@ -69,7 +69,7 @@ export const WelcomeEmail = ({ name = "Novo Usuário" }: WelcomeEmailProps) => {
             </Section>
 
             <Text className="text-black text-[14px] leading-[24px]">
-              Se tiver qualquer dúvida, nosso suporte está disponível 24/7.
+              Se tiver qualquer dÃºvida, nosso suporte estÃ¡ disponÃ­vel 24/7.
               <br />
               Basta responder a este email.
             </Text>
@@ -77,9 +77,9 @@ export const WelcomeEmail = ({ name = "Novo Usuário" }: WelcomeEmailProps) => {
             <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full" />
 
             <Text className="text-[#666666] text-[12px] leading-[24px] text-center">
-              © 2026 Nexum. Todos os direitos reservados.
+              Â© 2026 Nexum. Todos os direitos reservados.
               <br />
-              Feito com ❤️ por Denio & AI AntiGravity.
+              Feito com â¤ï¸ por Denio & AI AntiGravity.
             </Text>
           </Container>
         </Body>

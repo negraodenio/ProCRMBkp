@@ -6,13 +6,13 @@ import { cn } from "@/lib/utils";
 const CORE_FEATURES = [
   {
     title: "WhatsApp com Typing",
-    description: "Status 'Digitando...', histórico e resumos por IA nativos na plataforma.",
+    description: "Status 'Digitando...', histÃ³rico e resumos por IA nativos na plataforma.",
     icon: MessageCircle,
     color: "bg-green-50 text-green-600"
   },
   {
     title: "Dashboard Analytics",
-    description: "Funil visual, métricas de conversão e insights acionáveis.",
+    description: "Funil visual, mÃ©tricas de conversÃ£o e insights acionÃ¡veis.",
     icon: LayoutDashboard,
     color: "bg-blue-50 text-blue-600"
   },
@@ -23,8 +23,8 @@ const CORE_FEATURES = [
     color: "bg-purple-50 text-purple-600"
   },
   {
-    title: "Automações Inteligentes",
-    description: "Workflows 24/7 de follow-up e qualificação automática.",
+    title: "AutomaÃ§Ãµes Inteligentes",
+    description: "Workflows 24/7 de follow-up e qualificaÃ§Ã£o automÃ¡tica.",
     icon: Zap,
     color: "bg-amber-50 text-amber-600"
   },
@@ -36,7 +36,7 @@ const CORE_FEATURES = [
   },
   {
     title: "B2B & B2C Multicanal",
-    description: "Gestão flexível para empresas ou direto para o consumidor final (CPF).",
+    description: "GestÃ£o flexÃ­vel para empresas ou direto para o consumidor final (CPF).",
     icon: BarChart3,
     color: "bg-indigo-50 text-indigo-600"
   }
@@ -47,10 +47,10 @@ export function CoreFeatures() {
     <section id="features" className="container mx-auto px-4 py-24">
       <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
         <h2 className="text-3xl md:text-5xl font-black text-slate-900 leading-tight">
-          Tudo Que Um CRM Precisa — E Mais
+          Tudo Que Um CRM Precisa â€” E Mais
         </h2>
         <p className="text-slate-500 font-medium">
-          Além das 5 IA Tools, o Nexum tem todas as funcionalidades essenciais para escalar sua operação.
+          AlÃ©m das 5 IA Tools, o Nexum tem todas as funcionalidades essenciais para escalar sua operaÃ§Ã£o.
         </p>
       </div>
 

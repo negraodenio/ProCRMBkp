@@ -9,32 +9,32 @@ import {
 
 const FAQS = [
   {
-    question: "O que são os IA Tools?",
-    answer: "São 5 ferramentas de inteligência artificial integradas no CRM que automatizam tarefas como análise de leads, geração de business cases, coaching de negociação e mais. Funcionam com 1 clique.",
+    question: "O que sÃ£o os IA Tools?",
+    answer: "SÃ£o 5 ferramentas de inteligÃªncia artificial integradas no CRM que automatizam tarefas como anÃ¡lise de leads, geraÃ§Ã£o de business cases, coaching de negociaÃ§Ã£o e mais. Funcionam com 1 clique.",
   },
   {
     question: "Quanto custa usar a IA?",
-    answer: "Os IA Tools estão incluídos em todos os planos. O plano Free inclui 3 usos/mês. O Pro inclui uso ilimitado sem custos adicionais.",
+    answer: "Os IA Tools estÃ£o incluÃ­dos em todos os planos. O plano Free inclui 3 usos/mÃªs. O Pro inclui uso ilimitado sem custos adicionais.",
   },
   {
-    question: "É mais barato que HubSpot/Salesforce?",
-    answer: "Sim. O Nexum Pro custa €79/mês e inclui funcionalidades que no Salesforce custam €300+/mês por utilizador, além de ter ferramentas exclusivas que eles não oferecem.",
+    question: "Ã‰ mais barato que HubSpot/Salesforce?",
+    answer: "Sim. O Nexum Pro custa â‚¬79/mÃªs e inclui funcionalidades que no Salesforce custam â‚¬300+/mÃªs por utilizador, alÃ©m de ter ferramentas exclusivas que eles nÃ£o oferecem.",
   },
   {
     question: "Funciona com WhatsApp?",
-    answer: "Sim. Integração nativa com WhatsApp Business. As mensagens são analisadas por IA automaticamente para identificar sentimento e intenção.",
+    answer: "Sim. IntegraÃ§Ã£o nativa com WhatsApp Business. As mensagens sÃ£o analisadas por IA automaticamente para identificar sentimento e intenÃ§Ã£o.",
   },
   {
-    question: "Suporta português de Portugal e Brasil?",
-    answer: "Sim. Interface 100% em português, com suporte para ambos os mercados, incluindo multi-moeda (EUR/BRL) e suporte localizado.",
+    question: "Suporta portuguÃªs de Portugal e Brasil?",
+    answer: "Sim. Interface 100% em portuguÃªs, com suporte para ambos os mercados, incluindo multi-moeda (EUR/BRL) e suporte localizado.",
   },
   {
-    question: "Pode-se experimentar grátis?",
-    answer: "Sim. Oferecemos 14 dias grátis no plano Pro, sem necessidade de cartão de crédito. Temos também o plano Free que é gratuito para sempre.",
+    question: "Pode-se experimentar grÃ¡tis?",
+    answer: "Sim. Oferecemos 14 dias grÃ¡tis no plano Pro, sem necessidade de cartÃ£o de crÃ©dito. Temos tambÃ©m o plano Free que Ã© gratuito para sempre.",
   },
   {
-    question: "Os meus dados estão seguros?",
-    answer: "Sim. Dados encriptados, servidores na Europa e conformidade total com RGPD. Aplicamos uma política de privacy-first para todo o processamento de IA.",
+    question: "Os meus dados estÃ£o seguros?",
+    answer: "Sim. Dados encriptados, servidores na Europa e conformidade total com RGPD. Aplicamos uma polÃ­tica de privacy-first para todo o processamento de IA.",
   },
 ];
 
@@ -46,7 +46,7 @@ export function FAQSection() {
           Perguntas Frequentes
         </h2>
         <p className="text-slate-500 font-medium">
-          Tudo o que você precisa saber sobre o primeiro CRM Inteligente do mercado.
+          Tudo o que vocÃª precisa saber sobre o primeiro CRM Inteligente do mercado.
         </p>
       </div>
 

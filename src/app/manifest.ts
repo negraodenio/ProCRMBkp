@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Nexum Platform',
     short_name: 'Nexum',
-    description: 'Plataforma de IA para Transfer�ncia de Tecnologia � NIT UFV',
+    description: 'Plataforma de IA para TransferÃªncia de Tecnologia â€” NIT UFV',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

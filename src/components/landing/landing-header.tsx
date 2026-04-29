@@ -26,7 +26,7 @@ export function LandingHeader() {
             </Link>
             <Link href="/register">
               <Button className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 font-bold">
-                Criar Conta Grátis
+                Criar Conta GrÃ¡tis
               </Button>
             </Link>
           </div>

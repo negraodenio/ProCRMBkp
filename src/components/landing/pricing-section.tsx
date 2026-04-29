@@ -19,15 +19,15 @@ export function PricingSection({ currency, prices }: PricingSectionProps) {
     {
       name: "Free",
       price: "0",
-      description: "Para experimentação inicial",
+      description: "Para experimentaÃ§Ã£o inicial",
       features: [
-        "Até 100 leads",
-        "1 usuário",
-        "3 IA Tools/mês (Qualquer uma)",
+        "AtÃ© 100 leads",
+        "1 usuÃ¡rio",
+        "3 IA Tools/mÃªs (Qualquer uma)",
         "Pipeline visual",
-        "Dashboard básico",
+        "Dashboard bÃ¡sico",
       ],
-      buttonText: "Começar Grátis",
+      buttonText: "ComeÃ§ar GrÃ¡tis",
       variant: "outline" as const,
     },
     {
@@ -35,13 +35,13 @@ export function PricingSection({ currency, prices }: PricingSectionProps) {
       price: prices.starter,
       description: "Para pequenos times em crescimento",
       features: [
-        "Até 1.000 leads",
-        "2 usuários",
-        "50 IA Tools/mês",
+        "AtÃ© 1.000 leads",
+        "2 usuÃ¡rios",
+        "50 IA Tools/mÃªs",
         "WhatsApp integrado",
-        "Automações básicas",
+        "AutomaÃ§Ãµes bÃ¡sicas",
       ],
-      buttonText: "Começar Agora",
+      buttonText: "ComeÃ§ar Agora",
       variant: "outline" as const,
     },
     {
@@ -50,30 +50,30 @@ export function PricingSection({ currency, prices }: PricingSectionProps) {
       description: "Para times que buscam alta performance",
       popular: true,
       features: [
-        "Até 10.000 leads",
-        "10 usuários",
-        "5 IA Tools ILIMITADOS ⚡",
+        "AtÃ© 10.000 leads",
+        "10 usuÃ¡rios",
+        "5 IA Tools ILIMITADOS âš¡",
         "WhatsApp ilimitado",
-        "Automações ilimitadas",
+        "AutomaÃ§Ãµes ilimitadas",
         "Propostas digitais",
         "RAG Chatbot (Assistente IA)",
-        "Relatórios avançados",
+        "RelatÃ³rios avanÃ§ados",
       ],
       buttonText: "Dominar o Mercado",
       variant: "default" as const,
-      footerNote: "Inclui tudo que Salesforce cobra €300+/mês"
+      footerNote: "Inclui tudo que Salesforce cobra â‚¬300+/mÃªs"
     },
     {
       name: "Enterprise",
       price: prices.enterprise,
-      description: "Para operações de grande escala",
+      description: "Para operaÃ§Ãµes de grande escala",
       features: [
         "Leads ilimitados",
-        "Usuários ilimitados",
+        "UsuÃ¡rios ilimitados",
         "Tudo do plano Pro",
         "API Access",
         "White label",
-        "Suporte prioritário",
+        "Suporte prioritÃ¡rio",
         "SLA garantido",
       ],
       buttonText: "Falar com Vendas",
@@ -85,11 +85,11 @@ export function PricingSection({ currency, prices }: PricingSectionProps) {
     <section id="pricing" className="container mx-auto px-4 py-24">
       <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
         <h2 className="text-3xl md:text-5xl font-black text-slate-900 leading-tight">
-          Preços Simples para <span className="text-primary italic">IA Real</span>
+          PreÃ§os Simples para <span className="text-primary italic">IA Real</span>
         </h2>
         <p className="text-slate-500 font-medium">
           Escolha o plano ideal para a escala da sua empresa.
-          Cancele quando quiser, sem letras miúdas.
+          Cancele quando quiser, sem letras miÃºdas.
         </p>
       </div>
 
@@ -104,7 +104,7 @@ export function PricingSection({ currency, prices }: PricingSectionProps) {
           >
             {plan.popular && (
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-primary/20">
-                🏆 MAIS POPULAR
+                ðŸ† MAIS POPULAR
               </div>
             )}
 
@@ -116,7 +116,7 @@ export function PricingSection({ currency, prices }: PricingSectionProps) {
 
               <div className="mb-8 flex items-baseline gap-1">
                 <span className="text-4xl font-black text-slate-900">{plan.price !== "Custom" ? currency : ""}{plan.price}</span>
-                {plan.price !== "Custom" && <span className="text-slate-400 font-bold">/mês</span>}
+                {plan.price !== "Custom" && <span className="text-slate-400 font-bold">/mÃªs</span>}
               </div>
 
               <div className="space-y-4 mb-10">
@@ -155,8 +155,8 @@ export function PricingSection({ currency, prices }: PricingSectionProps) {
 
       <div className="mt-16 text-center max-w-2xl mx-auto p-6 bg-slate-50 rounded-2xl border border-slate-100">
          <p className="text-slate-500 text-sm font-medium">
-            Cada plano inclui acesso às <span className="text-primary font-bold">5 IA Tools</span>.
-            A diferença é o volume de uso. Todos os planos incluem atualizações e novas IA Tools automaticamente.
+            Cada plano inclui acesso Ã s <span className="text-primary font-bold">5 IA Tools</span>.
+            A diferenÃ§a Ã© o volume de uso. Todos os planos incluem atualizaÃ§Ãµes e novas IA Tools automaticamente.
          </p>
       </div>
     </section>

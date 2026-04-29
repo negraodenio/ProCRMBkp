@@ -36,7 +36,7 @@ import { Button } from "@/components/ui/button";
 import { logout } from "@/app/auth/actions";
 
 const navigation = [
-  // === Inovação & TTO ===
+  // === InovaÃ§Ã£o & TTO ===
   { name: "Mission Control", href: "/mission-control", icon: LayoutDashboard },
   { name: "Autopilot", href: "/autopilot", icon: Zap },
   { name: "Matchmaking", href: "/match", icon: Target },
@@ -52,9 +52,9 @@ const navigation = [
   { name: "Conversas", href: "/chat", icon: MessageSquare },
   { name: "WhatsApp", href: "/whatsapp", icon: Smartphone },
   { name: "IA Tools", href: "/ai-tools", icon: Sparkles },
-  { name: "Estratégias", href: "/strategies", icon: Rocket },
+  { name: "EstratÃ©gias", href: "/strategies", icon: Rocket },
   { name: "Audit Log", href: "/audit", icon: ShieldCheck },
-  { name: "Usuários", href: "/users", icon: UserCog },
+  { name: "UsuÃ¡rios", href: "/users", icon: UserCog },
 ];
 
 import { useProfile } from "@/hooks/use-profile";
@@ -204,7 +204,7 @@ export function Sidebar({ mobile }: SidebarProps) {
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate">
-                {loading ? "Carregando..." : profile?.full_name || "Usuário"}
+                {loading ? "Carregando..." : profile?.full_name || "UsuÃ¡rio"}
               </p>
               <p className="text-xs text-muted-foreground capitalize">
                 {loading ? "..." : profile?.role || "Operador"}
