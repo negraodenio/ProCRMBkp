@@ -6,10 +6,11 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, RefreshCw, CheckCircle2, User, BookOpen, Microscope } from "lucide-react";
+import { Search, RefreshCw, CheckCircle2, BookOpen, Microscope, GraduationCap, Hash, FlaskConical, ArrowRight } from "lucide-react";
 import { syncLattesProfile } from "../actions/lattes-actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 export default function LattesSyncPage() {
     const [name, setName] = useState("");
@@ -54,15 +55,16 @@ export default function LattesSyncPage() {
                                 Buscar Pesquisador
                             </CardTitle>
                             <CardDescription>
-                                Digite o nome completo ou ID Lattes para importar as publicações e patentes.
+                                Digite o nome completo do pesquisador para importar suas publicações e patentes.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex gap-4">
                                 <Input 
-                                    placeholder="Ex: Dr. José Silva..." 
+                                    placeholder="Ex: José Carlos Silva, Maria Helena Costa..." 
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleSync()}
                                     className="text-lg h-12"
                                 />
                                 <Button 
@@ -76,52 +78,75 @@ export default function LattesSyncPage() {
                             </div>
 
                             {loading && (
-                                <div className="py-12 flex flex-col items-center gap-4 animate-pulse">
+                                <div className="py-12 flex flex-col items-center gap-4">
                                     <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
-                                        <div className="h-full bg-primary animate-progress-indefinite" />
+                                        <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: '70%' }} />
                                     </div>
-                                    <p className="text-xs font-bold text-primary uppercase tracking-widest">Acessando API CNPq / Lattes...</p>
+                                    <p className="text-xs font-bold text-primary uppercase tracking-widest">Processando perfil acadêmico via IA...</p>
                                 </div>
                             )}
 
                             {result && (
                                 <div className="pt-6 grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                    <StatsCard 
-                                        icon={BookOpen} 
-                                        label="Publicações" 
-                                        value={result.publicationsFound} 
-                                        color="blue"
-                                    />
-                                    <StatsCard 
-                                        icon={Microscope} 
-                                        label="Patentes" 
-                                        value={result.patentsIdentified} 
-                                        color="orange"
-                                    />
-                                    <StatsCard 
-                                        icon={CheckCircle2} 
-                                        label="Status" 
-                                        value="Sincronizado" 
-                                        color="emerald"
-                                    />
+                                    <StatsCard icon={BookOpen} label="Publicações" value={result.publicationsFound} color="blue" />
+                                    <StatsCard icon={Microscope} label="Patentes" value={result.patentsIdentified} color="orange" />
+                                    <StatsCard icon={Hash} label="Índice-H" value={result.hIndex} color="emerald" />
                                 </div>
                             )}
                         </CardContent>
                     </Card>
 
                     {result && (
-                        <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl flex items-start gap-4">
-                            <div className="p-2 bg-emerald-100 rounded-full text-emerald-600">
-                                <CheckCircle2 className="h-6 w-6" />
+                        <>
+                            <Card className="border-indigo-200">
+                                <CardContent className="p-6 space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <GraduationCap className="h-5 w-5 text-indigo-600" />
+                                        <h3 className="font-bold text-lg">Detalhes do Perfil</h3>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-xs text-slate-500 uppercase font-bold">Departamento</p>
+                                            <p className="font-medium">{result.department}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-slate-500 uppercase font-bold">Última Atualização</p>
+                                            <p className="font-medium">{result.lastUpdate}</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-slate-500 uppercase font-bold mb-2">Expertises Identificadas</p>
+                                        <div className="flex gap-2 flex-wrap">
+                                            {(result.expertise || []).map((e: string) => (
+                                                <span key={e} className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium">
+                                                    {e}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl flex items-start gap-4">
+                                <div className="p-2 bg-emerald-100 rounded-full text-emerald-600">
+                                    <CheckCircle2 className="h-6 w-6" />
+                                </div>
+                                <div className="space-y-2 flex-1">
+                                    <h4 className="font-bold text-emerald-900">Mapeamento Concluído</h4>
+                                    <p className="text-sm text-emerald-700">
+                                        As publicações identificadas foram indexadas no Neural Engine. 
+                                        Agora você pode usar o <strong>Matchmaking</strong> para encontrar empresas interessadas nestas pesquisas.
+                                    </p>
+                                    <Link href="/match">
+                                        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 gap-2 mt-2">
+                                            <FlaskConical className="h-4 w-4" />
+                                            Ir para Matchmaking
+                                            <ArrowRight className="h-3 w-3" />
+                                        </Button>
+                                    </Link>
+                                </div>
                             </div>
-                            <div className="space-y-1">
-                                <h4 className="font-bold text-emerald-900">Mapeamento Concluído</h4>
-                                <p className="text-sm text-emerald-700">
-                                    As publicações identificadas foram indexadas no nosso **Neural Engine**. 
-                                    Agora você pode usar o **Matchmaking** para encontrar empresas interessadas nestas pesquisas.
-                                </p>
-                            </div>
-                        </div>
+                        </>
                     )}
                 </main>
             </div>

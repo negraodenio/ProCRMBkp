@@ -45,10 +45,24 @@ export async function getDashboardMetrics() {
         return acc;
     }, {});
 
+    // Count researchers
+    const { count: researcherCount } = await supabase
+        .from("researchers")
+        .select("*", { count: 'exact', head: true })
+        .eq("organization_id", profile.organization_id);
+
+    // Count campaigns
+    const { count: campaignCount } = await supabase
+        .from("outreach_campaigns")
+        .select("*", { count: 'exact', head: true })
+        .eq("organization_id", profile.organization_id);
+
     return {
         assets: assetsCount || 0,
-        matches: (matchesCount || 0) + 120, // Adding some base number for visual impact
-        contacts: (contactsCount || 0) + 312,
+        matches: matchesCount || 0,
+        contacts: contactsCount || 0,
+        researchers: researcherCount || 0,
+        campaigns: campaignCount || 0,
         sectors: sectors || {}
     };
 }

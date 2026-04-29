@@ -99,10 +99,14 @@ export default function GrantDiscoveryPage() {
                                     <p className="text-xs text-muted-foreground line-clamp-3">
                                         {grant.justificativa || grant.justification}
                                     </p>
-                                    <Button variant="ghost" className="w-full justify-between text-indigo-600 p-0 h-auto hover:bg-transparent hover:text-indigo-700">
-                                        Ver Detalhes do Edital
-                                        <ArrowRight className="h-4 w-4" />
-                                    </Button>
+                                    {grant.url ? (
+                                        <a href={grant.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-indigo-600 hover:text-indigo-700 text-sm font-medium">
+                                            Ver Detalhes do Edital
+                                            <ArrowRight className="h-4 w-4" />
+                                        </a>
+                                    ) : (
+                                        <span className="text-xs text-slate-400">Detalhes não disponíveis</span>
+                                    )}
                                 </CardContent>
                             </Card>
                         ))}

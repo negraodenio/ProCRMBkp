@@ -20,11 +20,16 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { IAToolsSuite } from "@/components/dashboard/ia-tools-suite";
 import { useEffect, useState } from "react";
 import { getDashboardMetrics } from "@/app/actions/dashboard-actions";
-import { Landmark } from "lucide-react";
+import { Landmark, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function MissionControlPage() {
     const [metrics, setMetrics] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState("overview");
+    const [seeding, setSeeding] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
         async function load() {
@@ -74,17 +79,31 @@ export default function MissionControlPage() {
                                 <Button 
                                     variant="destructive" 
                                     size="sm" 
-                                    className="gap-2 animate-pulse" 
+                                    className="gap-2" 
+                                    disabled={seeding}
                                     onClick={async () => {
-                                        const res = await fetch('/api/seed');
-                                        if(res.ok) {
-                                            alert('Banco de dados populado com sucesso para o NIT UFV!');
-                                            window.location.reload();
+                                        setSeeding(true);
+                                        try {
+                                            const res = await fetch('/api/seed');
+                                            const data = await res.json();
+                                            if(res.ok) {
+                                                toast.success('Banco de dados populado com sucesso para o NIT UFV!', {
+                                                    description: data.details?.join(', '),
+                                                });
+                                                // Refresh metrics
+                                                const newMetrics = await getDashboardMetrics();
+                                                setMetrics(newMetrics);
+                                            } else {
+                                                toast.error('Falha no seed: ' + (data.error || 'Erro desconhecido'));
+                                            }
+                                        } catch (e) {
+                                            toast.error('Erro de conexão com o servidor.');
                                         }
+                                        setSeeding(false);
                                     }}
                                 >
-                                    <Zap className="h-4 w-4" />
-                                    Inicializar Dados Demo
+                                    {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                                    {seeding ? 'Populando...' : 'Inicializar Dados Demo'}
                                 </Button>
                                 <Badge variant="outline" className="border-slate-300 text-slate-500 gap-1">
                                     <ShieldCheck className="h-3 w-3" />
@@ -98,20 +117,31 @@ export default function MissionControlPage() {
                         {/* Top Stats */}
                         <div className="grid gap-4 md:grid-cols-5">
                             <StatCard title="Ativos de Pesquisa" value={loading ? "..." : metrics?.assets} icon={FileText} trend="+5 este mês" />
-                            <StatCard title="Matches IA" value={loading ? "..." : metrics?.matches} icon={Target} trend="+12% vs last week" />
-                            <StatCard title="Empresas na Base" value="512K+" icon={Landmark} trend="API Apollo/Lusha Sync" />
-                            <StatCard title="Decisores Mapeados" value={loading ? "..." : metrics?.contacts} icon={Users} trend="+45 novos" />
-                            <StatCard title="Taxa de Resposta" value="18.5%" icon={TrendingUp} trend="+2.1% spike" />
+                            <StatCard title="Matches IA" value={loading ? "..." : metrics?.matches} icon={Target} trend="Busca vetorial" />
+                            <StatCard title="Pesquisadores" value={loading ? "..." : metrics?.researchers} icon={Landmark} trend="Lattes Sync" />
+                            <StatCard title="Decisores Mapeados" value={loading ? "..." : metrics?.contacts} icon={Users} trend="People Search" />
+                            <StatCard title="Campanhas" value={loading ? "..." : metrics?.campaigns} icon={TrendingUp} trend="Outreach" />
                         </div>
 
                         {/* Middle Section */}
                         {/* Tabs System - NEW COMPLIANCE ITEM */}
                         <div className="flex items-center gap-6 border-b border-slate-200 no-print">
-                            <button className="pb-4 px-2 border-b-2 border-indigo-600 text-indigo-600 font-bold text-sm">Overview</button>
-                            <button className="pb-4 px-2 border-b-2 border-transparent text-slate-500 font-medium text-sm hover:text-slate-700">Top Authors</button>
-                            <button className="pb-4 px-2 border-b-2 border-transparent text-slate-500 font-medium text-sm hover:text-slate-700">Top Works</button>
-                            <button className="pb-4 px-2 border-b-2 border-transparent text-slate-500 font-medium text-sm hover:text-slate-700">Top Grants</button>
-                            <button className="pb-4 px-2 border-b-2 border-transparent text-slate-500 font-medium text-sm hover:text-slate-700">Recommended Campaigns</button>
+                            {["overview", "authors", "works", "grants", "campaigns"].map((tab) => {
+                                const labels: Record<string, string> = { overview: "Overview", authors: "Top Authors", works: "Top Works", grants: "Top Grants", campaigns: "Recommended Campaigns" };
+                                return (
+                                    <button 
+                                        key={tab}
+                                        className={`pb-4 px-2 border-b-2 font-medium text-sm transition-colors ${
+                                            activeTab === tab 
+                                                ? 'border-indigo-600 text-indigo-600 font-bold' 
+                                                : 'border-transparent text-slate-500 hover:text-slate-700'
+                                        }`}
+                                        onClick={() => setActiveTab(tab)}
+                                    >
+                                        {labels[tab]}
+                                    </button>
+                                );
+                            })}
                         </div>
 
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

@@ -11,43 +11,74 @@ export async function searchGrants(researchTopic: string) {
         const { data: userData } = await supabase.auth.getUser();
         if (!userData.user) return { success: false, error: "Não autorizado" };
 
-        // Log the search
-        await supabase.from("ai_operations").insert({
-            organization_id: (await supabase.from("profiles").select("organization_id").eq("id", userData.user.id).single()).data?.organization_id,
-            user_id: userData.user.id,
-            tool_used: "grant_discovery",
-            input_params: { researchTopic },
-            output_result: { status: "success", topic: researchTopic }
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("organization_id")
+            .eq("id", userData.user.id)
+            .single();
+
+        if (!profile?.organization_id) return { success: false, error: "Org não encontrada" };
+
+        // 1. Fetch grants from DB
+        const { data: dbGrants, error } = await supabase
+            .from("grants")
+            .select("*")
+            .eq("organization_id", profile.organization_id)
+            .order("relevance_score", { ascending: false });
+
+        if (error) throw error;
+
+        // 2. Use AI to rank and add justification for each grant based on research topic
+        const grantsWithJustification = await Promise.all(
+            (dbGrants || []).map(async (grant) => {
+                const prompt = `Analise a aderência do seguinte edital de fomento à pesquisa do usuário.
+
+Edital: ${grant.name} (${grant.agency}) - ${grant.description}
+Pesquisa do Usuário: ${researchTopic}
+
+Em exatamente 2 frases, explique por que este edital é (ou não é) adequado para esta pesquisa. 
+Mencione aspectos específicos do edital que conectam com a pesquisa. Responda em Português do Brasil.`;
+
+                try {
+                    const justification = await aiChat({
+                        model: "fast",
+                        messages: [{ role: "user", content: prompt }],
+                        max_tokens: 150
+                    });
+
+                    return {
+                        ...grant,
+                        justificativa: justification,
+                        nome: grant.name,
+                        agencia: grant.agency,
+                        valor: grant.value,
+                        prazo: grant.deadline
+                    };
+                } catch {
+                    return {
+                        ...grant,
+                        justificativa: grant.description,
+                        nome: grant.name,
+                        agencia: grant.agency,
+                        valor: grant.value,
+                        prazo: grant.deadline
+                    };
+                }
+            })
+        );
+
+        // 3. Log the search
+        await supabase.from("audit_logs").insert({
+            action: "GRANT_SEARCH",
+            entity_type: "grants",
+            details: { researchTopic, grantsFound: grantsWithJustification.length },
+            organization_id: profile.organization_id,
+            user_id: userData.user.id
         });
 
-        // Hardcoded grants for guaranteed demo success
-        const grants = [
-            {
-                nome: "Edital Finep - Mais Inovação Brasil",
-                agencia: "Finep",
-                valor: "Até R$ 10.000.000",
-                prazo: "Fluxo Contínuo",
-                justificativa: "Foco em tecnologias críticas e soberania nacional. Ideal para o seu tópico de pesquisa."
-            },
-            {
-                nome: "Universal CNPq 2024",
-                agencia: "CNPq",
-                valor: "Até R$ 200.000",
-                prazo: "Dezembro 2024",
-                justificativa: "Apoio a projetos de pesquisa científica e tecnológica em todas as áreas do conhecimento."
-            },
-            {
-                nome: "BNDES Fundo Tecnológico (FUNTEC)",
-                agencia: "BNDES",
-                valor: "Sob Consulta (R$ 5M+)",
-                prazo: "Aberto",
-                justificativa: "Apoio financeiro a projetos de P&D que visem inovação de alto impacto no setor produtivo."
-            }
-        ];
-
-        return { success: true, grants };
-    } catch (error) {
+        return { success: true, grants: grantsWithJustification };
+    } catch (error: any) {
         console.error("Grant Search Error:", error);
-        return { success: false, error: "Falha ao buscar editais." };
+        return { success: false, error: "Falha ao buscar editais: " + error.message };
     }
 }

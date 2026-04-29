@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Zap, Sparkles, Target, Users, Mail, Loader2, CheckCircle2, ChevronRight, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,11 +12,13 @@ import { toast } from "sonner";
 import { generateAIContent } from "@/app/actions/ai-actions";
 import { findCorporateMatches } from "@/app/actions/match-actions";
 import { findCompanyContacts } from "@/app/actions/engage-actions";
+import { createOutreachCampaign } from "@/app/actions/outreach-actions";
 import { extractTextFromPDF } from "@/app/actions/pdf-actions";
 import { cn } from "@/lib/utils";
 import { Upload, FileUp } from "lucide-react";
 
 export default function AutopilotPage() {
+    const router = useRouter();
     const [step, setStep] = useState(0); // 0: Input, 1: Processing, 2: Result
     const [inputText, setInputText] = useState("");
     const [status, setStatus] = useState("");
@@ -226,7 +229,7 @@ export default function AutopilotPage() {
                                             <p className="text-lg font-bold">Resumo Executivo</p>
                                             <p className="text-xs text-slate-500 mt-2 line-clamp-3">{results.teaser}</p>
                                         </div>
-                                        <Button variant="link" className="text-blue-400 p-0 h-auto text-xs" onClick={() => window.location.href='/ai-tools'}>Ver completo <ChevronRight className="h-3 w-3" /></Button>
+                                        <Button variant="link" className="text-blue-400 p-0 h-auto text-xs" onClick={() => router.push('/ai-tools')}>Ver completo <ChevronRight className="h-3 w-3" /></Button>
                                     </Card>
 
                                     <Card className="bg-slate-800/50 border-slate-700 p-6 space-y-4">
@@ -238,7 +241,7 @@ export default function AutopilotPage() {
                                             <p className="text-lg font-bold">{results.matches.length} Empresas</p>
                                             <p className="text-xs text-slate-500 mt-2">Identificadas com fit tecnológico.</p>
                                         </div>
-                                        <Button variant="link" className="text-orange-400 p-0 h-auto text-xs" onClick={() => window.location.href='/match'}>Ver empresas <ChevronRight className="h-3 w-3" /></Button>
+                                        <Button variant="link" className="text-orange-400 p-0 h-auto text-xs" onClick={() => router.push('/match')}>Ver empresas <ChevronRight className="h-3 w-3" /></Button>
                                     </Card>
 
                                     <Card className="bg-slate-800/50 border-slate-700 p-6 space-y-4">
@@ -250,7 +253,7 @@ export default function AutopilotPage() {
                                             <p className="text-lg font-bold">{results.contactsCount} Decisores</p>
                                             <p className="text-xs text-slate-500 mt-2">Prontos para contato imediato.</p>
                                         </div>
-                                        <Button variant="link" className="text-purple-400 p-0 h-auto text-xs" onClick={() => window.location.href='/match'}>Iniciar envio <ChevronRight className="h-3 w-3" /></Button>
+                                        <Button variant="link" className="text-purple-400 p-0 h-auto text-xs" onClick={() => router.push('/outreach')}>Iniciar envio <ChevronRight className="h-3 w-3" /></Button>
                                     </Card>
 
                                     <Card className="bg-slate-800/50 border-slate-700 p-6 space-y-4 md:col-span-3 border-dashed border-indigo-500/30">
@@ -279,7 +282,7 @@ export default function AutopilotPage() {
                                                 </div>
                                             </div>
                                         </div>
-                                        <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-12 gap-2 mt-4">
+                                        <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-12 gap-2 mt-4" onClick={() => { window.print(); toast.success('Relatório enviado para impressão.'); }}>
                                             <Download className="h-4 w-4" />
                                             Baixar Relatório Estratégico Completo (PDF)
                                         </Button>
@@ -287,7 +290,13 @@ export default function AutopilotPage() {
                                 </div>
 
                                 <div className="flex justify-center pt-8">
-                                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-12 h-14 rounded-xl font-bold gap-2">
+                                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-12 h-14 rounded-xl font-bold gap-2" onClick={async () => {
+                                        toast.loading('Criando campanha de outreach...');
+                                        const res = await createOutreachCampaign({ name: `Campanha: ${inputText.substring(0, 50)}`, targetTechnology: 'Autopilot' });
+                                        toast.dismiss();
+                                        if (res.success) { toast.success('Campanha criada! Redirecionando...'); router.push('/outreach'); }
+                                        else { toast.error(res.error || 'Falha ao criar campanha'); }
+                                    }}>
                                         <Mail className="h-5 w-5" />
                                         Disparar Campanha Sequencial
                                     </Button>

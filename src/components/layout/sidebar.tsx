@@ -36,18 +36,25 @@ import { Button } from "@/components/ui/button";
 import { logout } from "@/app/auth/actions";
 
 const navigation = [
+  // === Inovação & TTO ===
   { name: "Mission Control", href: "/mission-control", icon: LayoutDashboard },
   { name: "Autopilot", href: "/autopilot", icon: Zap },
-  { name: "IA Suite", href: "/mission-control#ia-tools", icon: Sparkles },
-  { name: "Estratégias", href: "/autopilot", icon: Rocket },
   { name: "Matchmaking", href: "/match", icon: Target },
   { name: "People Search", href: "/people-search", icon: UserCheck },
   { name: "Email Outreach", href: "/outreach", icon: Mail },
   { name: "Grant Discovery", href: "/grants", icon: Landmark },
   { name: "Lattes Sync", href: "/lattes", icon: RefreshCw },
-  { name: "WhatsApp", href: "/whatsapp", icon: Smartphone },
-  { name: "Audit Log", href: "/audit", icon: ShieldCheck },
+  // === CRM Base ===
+  { name: "Empresas", href: "/companies", icon: Building2 },
+  { name: "Contatos", href: "/contacts", icon: Users },
   { name: "Pipeline", href: "/pipeline", icon: KanbanSquare },
+  { name: "Propostas", href: "/proposals", icon: FileText },
+  { name: "Conversas", href: "/chat", icon: MessageSquare },
+  { name: "WhatsApp", href: "/whatsapp", icon: Smartphone },
+  { name: "IA Tools", href: "/ai-tools", icon: Sparkles },
+  { name: "Estratégias", href: "/strategies", icon: Rocket },
+  { name: "Audit Log", href: "/audit", icon: ShieldCheck },
+  { name: "Usuários", href: "/users", icon: UserCog },
 ];
 
 import { useProfile } from "@/hooks/use-profile";
