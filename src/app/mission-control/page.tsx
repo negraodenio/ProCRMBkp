@@ -145,37 +145,75 @@ export default function MissionControlPage() {
                         </div>
 
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {/* Research Landscape */}
+                            {/* Sector Interest — computed from real industries in DB */}
                             <Card className="col-span-1 lg:col-span-2">
                                 <CardHeader className="flex flex-row items-center justify-between">
                                     <div>
                                         <CardTitle>Interesse Corporativo por Setor</CardTitle>
-                                        <p className="text-xs text-slate-500">Setores mais ativos em busca de tecnologia.</p>
+                                        <p className="text-xs text-slate-500">
+                                            {loading ? "Carregando..." : `Baseado em ${metrics?.contacts || 0} decisores mapeados na base.`}
+                                        </p>
                                     </div>
                                     <PieChart className="h-4 w-4 text-slate-400" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="space-y-4">
-                                        <SectorProgress name="Biotecnologia" value={85} color="bg-blue-500" />
-                                        <SectorProgress name="Energias Renováveis" value={62} color="bg-orange-500" />
-                                        <SectorProgress name="IA & Robótica" value={94} color="bg-purple-500" />
-                                        <SectorProgress name="Materiais Compostos" value={45} color="bg-emerald-500" />
-                                    </div>
+                                    {loading ? (
+                                        <div className="space-y-4">
+                                            {[1,2,3,4].map(i => <div key={i} className="h-8 bg-slate-100 rounded animate-pulse" />)}
+                                        </div>
+                                    ) : Object.keys(metrics?.sectors || {}).length > 0 ? (
+                                        <div className="space-y-4">
+                                            {Object.entries(metrics.sectors as Record<string, number>)
+                                                .sort(([,a], [,b]) => (b as number) - (a as number))
+                                                .slice(0, 5)
+                                                .map(([sector, count]: [string, any], i) => {
+                                                    const colors = ["bg-blue-500", "bg-orange-500", "bg-purple-500", "bg-emerald-500", "bg-rose-500"];
+                                                    const max = Math.max(...Object.values(metrics.sectors as Record<string, number>) as number[]);
+                                                    return <SectorProgress key={sector} name={sector} value={Math.round((count / max) * 100)} color={colors[i % colors.length]} />;
+                                                })
+                                            }
+                                        </div>
+                                    ) : (
+                                        <div className="py-8 text-center text-slate-400 text-sm">
+                                            Clique em "Inicializar Dados Demo" para ver os setores.
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
 
-                            {/* Recent Autopilot Runs */}
+                            {/* Outreach Campaigns — real from DB */}
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="text-sm font-bold flex items-center gap-2">
                                         <Zap className="h-4 w-4 text-orange-500" />
-                                        Últimos Autopilots
+                                        Campanhas Ativas
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <AutopilotItem title="Patente Grafeno V2" status="Completed" count={12} />
-                                    <AutopilotItem title="Artigo Bio-Polímero" status="Completed" count={8} />
-                                    <AutopilotItem title="Nova Sensor IoT" status="In Progress" count={3} />
+                                <CardContent className="space-y-3">
+                                    {loading ? (
+                                        <div className="space-y-3">
+                                            {[1,2,3].map(i => <div key={i} className="h-14 bg-slate-100 rounded-lg animate-pulse" />)}
+                                        </div>
+                                    ) : (metrics?.campaigns || 0) > 0 ? (
+                                        <div className="space-y-2">
+                                            <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                                                <p className="text-sm font-bold text-indigo-900">{metrics.campaigns} campanhas</p>
+                                                <p className="text-xs text-indigo-600">Email Outreach ativo</p>
+                                            </div>
+                                            <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                                                <p className="text-sm font-bold text-emerald-900">{metrics.contacts} decisores</p>
+                                                <p className="text-xs text-emerald-600">People Search mapeados</p>
+                                            </div>
+                                            <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
+                                                <p className="text-sm font-bold text-orange-900">{metrics.researchers} pesquisadores</p>
+                                                <p className="text-xs text-orange-600">Lattes sincronizados</p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="py-8 text-center text-slate-400 text-sm">
+                                            Inicialize os dados para ver campanhas.
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         </div>
@@ -185,21 +223,26 @@ export default function MissionControlPage() {
                             <IAToolsSuite />
                         </div>
 
-                        {/* Bottom: Conversion Funnel */}
+                        {/* Bottom: Conversion Funnel — real counts from DB */}
                         <Card>
                             <CardHeader>
                                 <CardTitle>Funil de Transferência de Tecnologia</CardTitle>
+                                <p className="text-xs text-slate-500">Baseado nos dados reais da sua organização.</p>
                             </CardHeader>
                             <CardContent>
-                                <div className="flex flex-col md:flex-row items-center justify-between gap-8 py-4">
-                                    <FunnelStep label="Pesquisas" value="100%" count="42" color="bg-slate-200" />
-                                    <ArrowUpRight className="h-4 w-4 text-slate-300 hidden md:block rotate-90" />
-                                    <FunnelStep label="Matches" value="82%" count="34" color="bg-orange-200" />
-                                    <ArrowUpRight className="h-4 w-4 text-slate-300 hidden md:block rotate-90" />
-                                    <FunnelStep label="Contatos" value="65%" count="27" color="bg-orange-400" />
-                                    <ArrowUpRight className="h-4 w-4 text-slate-300 hidden md:block rotate-90" />
-                                    <FunnelStep label="Reuniões" value="12%" count="5" color="bg-emerald-500" />
-                                </div>
+                                {loading ? (
+                                    <div className="h-20 bg-slate-100 rounded animate-pulse" />
+                                ) : (
+                                    <div className="flex flex-col md:flex-row items-center justify-between gap-8 py-4">
+                                        <FunnelStep label="Ativos (Patentes/Art.)" value="100%" count={String(metrics?.assets || 0)} color="bg-slate-200" />
+                                        <ArrowUpRight className="h-4 w-4 text-slate-300 hidden md:block rotate-90" />
+                                        <FunnelStep label="Matches IA" value={metrics?.assets > 0 ? `${Math.round((metrics.matches / Math.max(metrics.assets, 1)) * 100)}%` : "0%"} count={String(metrics?.matches || 0)} color="bg-orange-200" />
+                                        <ArrowUpRight className="h-4 w-4 text-slate-300 hidden md:block rotate-90" />
+                                        <FunnelStep label="Decisores" value={metrics?.assets > 0 ? `${Math.round((metrics.contacts / Math.max(metrics.assets, 1)) * 100)}%` : "0%"} count={String(metrics?.contacts || 0)} color="bg-orange-400" />
+                                        <ArrowUpRight className="h-4 w-4 text-slate-300 hidden md:block rotate-90" />
+                                        <FunnelStep label="Campanhas" value={metrics?.contacts > 0 ? `${Math.round((metrics.campaigns / Math.max(metrics.contacts, 1)) * 100)}%` : "0%"} count={String(metrics?.campaigns || 0)} color="bg-emerald-500" />
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </div>
@@ -240,17 +283,6 @@ function SectorProgress({ name, value, color }: any) {
     );
 }
 
-function AutopilotItem({ title, status, count }: any) {
-    return (
-        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
-            <div>
-                <p className="text-sm font-bold text-slate-900">{title}</p>
-                <p className="text-[10px] text-slate-500 uppercase">{status} • {count} empresas</p>
-            </div>
-            <ArrowUpRight className="h-4 w-4 text-slate-300" />
-        </div>
-    );
-}
 
 function FunnelStep({ label, value, count, color }: any) {
     return (
