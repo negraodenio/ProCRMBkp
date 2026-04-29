@@ -4,27 +4,23 @@ import { cn } from "@/lib/utils";
 
 const METRICS = [
   {
-    label: "Protocolos de IA",
-    value: "13",
-    description: "Soberania Tecnológica",
+    label: "Protocolos de IA — Soberania Tecnológica",
+    value: "5",
     color: "text-indigo-400"
   },
   {
-    label: "Aderência Industrial",
-    value: "98.2%",
-    description: "Precisão Semântica",
+    label: "Acurácia Preditiva — Matching Semântico",
+    value: "87%",
     color: "text-emerald-400"
   },
   {
-    label: "Ativos Monitorados",
+    label: "Ativos Monitorados — Ecossistema Universitário",
     value: "R$ 2.4B",
-    description: "Valor do Ecossistema",
     color: "text-blue-400"
   },
   {
-    label: "Efficiency Index",
+    label: "Efficiency Index — Aceleração de TRL",
     value: "12x",
-    description: "Aceleração de TRL",
     color: "text-purple-400"
   }
 ];
@@ -47,11 +43,8 @@ export function MetricsBar() {
                 <span className={cn("text-4xl md:text-5xl font-black tracking-tighter", metric.color)}>
                   {metric.value}
                 </span>
-                <span className="text-white font-bold text-sm tracking-wide uppercase mt-1">
+                <span className="text-white font-bold text-xs tracking-wider uppercase mt-3 px-4">
                   {metric.label}
-                </span>
-                <span className="text-slate-500 text-[10px] font-medium uppercase tracking-widest mt-1">
-                  {metric.description}
                 </span>
               </div>
             </div>
