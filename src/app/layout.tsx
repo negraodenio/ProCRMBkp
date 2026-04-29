@@ -24,13 +24,13 @@ export const viewport: Viewport = {
 
 
 export const metadata: Metadata = {
-  title: "CRMia - O CRM que pensa por si",
-  description: "Sistema CRM inteligente com 11 ferramentas de IA para acelerar suas vendas",
+  title: "Nexum - Plataforma de Transferência Tecnológica",
+  description: "Plataforma de IA para Transferência de Tecnologia e Matchmaking Corporativo — NIT UFV",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "CRMia",
+    title: "Nexum",
   },
   formatDetection: {
     telephone: false,

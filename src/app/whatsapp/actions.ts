@@ -35,7 +35,7 @@ export async function getQrCode() {
         }
 
         // AUTO-CONFIGURE WEBHOOK (SaaS Mode) with org_id parameter
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://crmia.eu";
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://nexum.com.br";
         const webhookUrl = `${appUrl}/api/webhooks/evolution?org_id=${profile.organization_id}`;
 
         console.log(`Configuring Webhook for ${instanceName} to ${webhookUrl}`);
@@ -144,3 +144,4 @@ export async function getBotStatus() {
         settings: org?.bot_settings || {}
     };
 }
+

@@ -13,7 +13,7 @@ export function LandingHeader() {
             <Brain className="h-6 w-6 text-primary" />
           </div>
           <span className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-            CRMia
+            Nexum
           </span>
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium">

@@ -52,7 +52,7 @@ export function PricingSection({ currency, prices }: PricingSectionProps) {
       features: [
         "Até 10.000 leads",
         "10 usuários",
-        "11 IA Tools ILIMITADOS ⚡",
+        "5 IA Tools ILIMITADOS ⚡",
         "WhatsApp ilimitado",
         "Automações ilimitadas",
         "Propostas digitais",
@@ -155,7 +155,7 @@ export function PricingSection({ currency, prices }: PricingSectionProps) {
 
       <div className="mt-16 text-center max-w-2xl mx-auto p-6 bg-slate-50 rounded-2xl border border-slate-100">
          <p className="text-slate-500 text-sm font-medium">
-            Cada plano inclui acesso às <span className="text-primary font-bold">11 IA Tools</span>.
+            Cada plano inclui acesso às <span className="text-primary font-bold">5 IA Tools</span>.
             A diferença é o volume de uso. Todos os planos incluem atualizações e novas IA Tools automaticamente.
          </p>
       </div>

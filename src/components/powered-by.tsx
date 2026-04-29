@@ -7,7 +7,7 @@ export const PoweredBy = () => {
         rel="noopener noreferrer"
         className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
       >
-        CRMia - Made by Ia4all.eu
+        Nexum - Made by Ia4all.eu
       </a>
     </div>
   );

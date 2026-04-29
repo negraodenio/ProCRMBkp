@@ -54,8 +54,8 @@ export async function POST(req: Request) {
         price: plan.stripe_price_id,
         quantity: 1,
       }],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.crmia.eu'}/dashboard/settings/billing?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.crmia.eu'}/dashboard/settings/billing?canceled=true`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.Nexum.eu'}/dashboard/settings/billing?success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.Nexum.eu'}/dashboard/settings/billing?canceled=true`,
       metadata: {
         organizationId: orgId,
         plan: planId,
@@ -74,3 +74,4 @@ export async function POST(req: Request) {
     return new NextResponse(error.message, { status: 500 });
   }
 }
+

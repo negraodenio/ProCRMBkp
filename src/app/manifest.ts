@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'CRMia System',
-    short_name: 'CRMia',
-    description: 'Sistema CRM inteligente com 11 ferramentas de IA para acelerar suas vendas',
+    name: 'Nexum Platform',
+    short_name: 'Nexum',
+    description: 'Plataforma de IA para Transferência de Tecnologia — NIT UFV',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

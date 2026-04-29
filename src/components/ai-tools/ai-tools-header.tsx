@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { User, Building2, ChevronDown, Search, Sparkles, X } from "lucide-react";
@@ -99,7 +99,7 @@ export function AIToolsHeader({ selectedLeadId, onSelectLead, orgId }: AIToolsHe
             IA Tools
           </h2>
           <p className="text-slate-500 text-sm">
-            11 ferramentas de inteligência artificial para acelerar suas vendas
+            5 ferramentas de IA especializadas em transferência de tecnologia
           </p>
         </div>
 

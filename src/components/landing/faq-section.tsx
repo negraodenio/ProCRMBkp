@@ -10,7 +10,7 @@ import {
 const FAQS = [
   {
     question: "O que são os IA Tools?",
-    answer: "São 11 ferramentas de inteligência artificial integradas no CRM que automatizam tarefas como análise de leads, geração de business cases, coaching de negociação e mais. Funcionam com 1 clique.",
+    answer: "São 5 ferramentas de inteligência artificial integradas no CRM que automatizam tarefas como análise de leads, geração de business cases, coaching de negociação e mais. Funcionam com 1 clique.",
   },
   {
     question: "Quanto custa usar a IA?",
@@ -18,7 +18,7 @@ const FAQS = [
   },
   {
     question: "É mais barato que HubSpot/Salesforce?",
-    answer: "Sim. O CRMia Pro custa €79/mês e inclui funcionalidades que no Salesforce custam €300+/mês por utilizador, além de ter ferramentas exclusivas que eles não oferecem.",
+    answer: "Sim. O Nexum Pro custa €79/mês e inclui funcionalidades que no Salesforce custam €300+/mês por utilizador, além de ter ferramentas exclusivas que eles não oferecem.",
   },
   {
     question: "Funciona com WhatsApp?",

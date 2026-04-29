@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, ArrowRight, Brain } from "lucide-react";
 
@@ -76,7 +76,7 @@ export default function ObrigadoPage() {
 
         {/* Footer Note */}
         <p className="text-sm text-slate-400 mt-8">
-          CRMia - O CRM que pensa por si 🇵🇹 🇧🇷
+          Nexum - Plataforma de TT com IA 🇵🇹 🇧🇷
         </p>
       </div>
     </div>

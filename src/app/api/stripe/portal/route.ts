@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
     const session = await stripe.billingPortal.sessions.create({
       customer: org.stripe_customer_id,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.crmia.eu'}/dashboard/settings/billing`,
+      return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.Nexum.eu'}/dashboard/settings/billing`,
     });
 
     return NextResponse.json({ url: session.url });
@@ -37,3 +37,4 @@ export async function POST(req: Request) {
     return new NextResponse(error.message, { status: 500 });
   }
 }
+

@@ -12,7 +12,7 @@ export function LandingFooter() {
               <div className="p-1 bg-primary/10 rounded">
                 <Brain className="h-5 w-5 text-primary" />
               </div>
-              <span className="text-xl font-bold">CRMia</span>
+              <span className="text-xl font-bold">Nexum</span>
             </div>
             <p className="text-slate-500 text-sm leading-relaxed mb-6">
               O primeiro CRM com inteligência artificial real que pensa estrategicamente junto com seu time de vendas.
@@ -27,7 +27,7 @@ export function LandingFooter() {
           <div>
             <h4 className="font-bold text-slate-900 mb-6 uppercase text-[10px] tracking-widest">Produto</h4>
             <ul className="space-y-4 text-sm text-slate-500 font-medium">
-              <li><a href="#tools" className="hover:text-primary transition-colors">11 IA Tools</a></li>
+              <li><a href="#tools" className="hover:text-primary transition-colors">5 IA Tools</a></li>
               <li><a href="#comparison" className="hover:text-primary transition-colors">Comparação</a></li>
               <li><a href="#pricing" className="hover:text-primary transition-colors">Preços</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Integrações</a></li>
@@ -68,7 +68,7 @@ export function LandingFooter() {
 
         <div className="border-t border-slate-200 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-            © 2026 CRMia. Todos os direitos reservados. 🇵🇹 🇧🇷 🛡️
+            © 2026 Nexum. Todos os direitos reservados. 🇵🇹 🇧🇷 🛡️
           </p>
           <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
              <span className="w-2 h-2 bg-emerald-500 rounded-full" />

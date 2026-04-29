@@ -29,7 +29,7 @@ export async function sendOutreachEmail(params: OutreachEmailParams) {
             
             <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
             <p style="font-size: 12px; color: #94a3b8;">
-                Este é um convite de parceria tecnológica enviado via ProCRM Evolution.
+                Este é um convite de parceria tecnológica enviado via Nexum Platform.
             </p>
         </div>
     `;

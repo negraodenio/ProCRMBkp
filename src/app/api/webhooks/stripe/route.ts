@@ -41,13 +41,13 @@ async function sendWelcomeEmail(email: string, planName: string) {
   try {
     if (!resend) return;
     await resend.emails.send({
-      from: "CRMia <noreply@crmia.eu>",
+      from: "Nexum <noreply@Nexum.eu>",
       to: email,
-      subject: `🎉 Bem-vindo ao CRMia ${planName}!`,
+      subject: `🎉 Bem-vindo ao Nexum ${planName}!`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; padding: 20px 0;">
-            <h1 style="color: #7c3aed; margin: 0;">CRMia</h1>
+            <h1 style="color: #7c3aed; margin: 0;">Nexum</h1>
           </div>
 
           <div style="background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%); border-radius: 12px; padding: 30px; color: white; text-align: center;">
@@ -57,10 +57,10 @@ async function sendWelcomeEmail(email: string, planName: string) {
 
           <div style="padding: 30px 0;">
             <p>Olá!</p>
-            <p>O teu plano <strong>CRMia ${planName}</strong> está agora ativo. Já podes usar todas as funcionalidades incluídas.</p>
+            <p>O teu plano <strong>Nexum ${planName}</strong> está agora ativo. Já podes usar todas as funcionalidades incluídas.</p>
 
             <div style="text-align: center; padding: 20px 0;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://crmia.eu'}/dashboard"
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://Nexum.eu'}/dashboard"
                  style="background: #7c3aed; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
                 Ir para o Dashboard →
               </a>
@@ -70,7 +70,7 @@ async function sendWelcomeEmail(email: string, planName: string) {
           </div>
 
           <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; text-align: center; color: #9ca3af; font-size: 13px;">
-            <p>CRMia — O CRM inteligente para o teu negócio</p>
+            <p>Nexum — O CRM inteligente para o teu negócio</p>
           </div>
         </div>
       `,
@@ -85,13 +85,13 @@ async function sendPaymentFailedEmail(email: string) {
   try {
     if (!resend) return;
     await resend.emails.send({
-      from: "CRMia <noreply@crmia.eu>",
+      from: "Nexum <noreply@Nexum.eu>",
       to: email,
-      subject: `⚠️ Problema com o teu pagamento — CRMia`,
+      subject: `⚠️ Problema com o teu pagamento — Nexum`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; padding: 20px 0;">
-            <h1 style="color: #7c3aed; margin: 0;">CRMia</h1>
+            <h1 style="color: #7c3aed; margin: 0;">Nexum</h1>
           </div>
 
           <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 30px; text-align: center;">
@@ -101,10 +101,10 @@ async function sendPaymentFailedEmail(email: string) {
 
           <div style="padding: 30px 0;">
             <p>Olá,</p>
-            <p>O último pagamento da tua subscrição CRMia falhou. Para evitar a suspensão do teu plano, por favor atualiza o teu método de pagamento.</p>
+            <p>O último pagamento da tua subscrição Nexum falhou. Para evitar a suspensão do teu plano, por favor atualiza o teu método de pagamento.</p>
 
             <div style="text-align: center; padding: 20px 0;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://crmia.eu'}/dashboard/settings/billing"
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://Nexum.eu'}/dashboard/settings/billing"
                  style="background: #dc2626; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
                 Atualizar Pagamento →
               </a>
@@ -112,7 +112,7 @@ async function sendPaymentFailedEmail(email: string) {
           </div>
 
           <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; text-align: center; color: #9ca3af; font-size: 13px;">
-            <p>CRMia — O CRM inteligente para o teu negócio</p>
+            <p>Nexum — O CRM inteligente para o teu negócio</p>
           </div>
         </div>
       `,
@@ -127,13 +127,13 @@ async function sendCancellationEmail(email: string) {
   try {
     if (!resend) return;
     await resend.emails.send({
-      from: "CRMia <noreply@crmia.eu>",
+      from: "Nexum <noreply@Nexum.eu>",
       to: email,
-      subject: `😢 Subscrição cancelada — CRMia`,
+      subject: `😢 Subscrição cancelada — Nexum`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; padding: 20px 0;">
-            <h1 style="color: #7c3aed; margin: 0;">CRMia</h1>
+            <h1 style="color: #7c3aed; margin: 0;">Nexum</h1>
           </div>
 
           <div style="background: #fefce8; border: 1px solid #fde68a; border-radius: 12px; padding: 30px; text-align: center;">
@@ -143,11 +143,11 @@ async function sendCancellationEmail(email: string) {
 
           <div style="padding: 30px 0;">
             <p>Olá,</p>
-            <p>A tua subscrição CRMia foi cancelada. O teu acesso continuará ativo até ao fim do período atual.</p>
+            <p>A tua subscrição Nexum foi cancelada. O teu acesso continuará ativo até ao fim do período atual.</p>
             <p>Se mudares de ideia, podes reativar a qualquer momento:</p>
 
             <div style="text-align: center; padding: 20px 0;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://crmia.eu'}/pricing"
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://Nexum.eu'}/pricing"
                  style="background: #7c3aed; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
                 Reativar Plano →
               </a>
@@ -155,7 +155,7 @@ async function sendCancellationEmail(email: string) {
           </div>
 
           <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; text-align: center; color: #9ca3af; font-size: 13px;">
-            <p>CRMia — O CRM inteligente para o teu negócio</p>
+            <p>Nexum — O CRM inteligente para o teu negócio</p>
           </div>
         </div>
       `,
@@ -451,3 +451,4 @@ export async function POST(req: Request) {
 
   return new NextResponse(null, { status: 200 });
 }
+

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { login, signup } from '@/app/auth/actions'
@@ -44,7 +44,7 @@ export default function LoginPage() {
                         <Brain className="h-6 w-6 text-primary" />
                     </div>
                     <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                        CRMia
+                        Nexum
                     </span>
                 </Link>
 
@@ -131,7 +131,7 @@ export default function LoginPage() {
                             </span>
                         </h2>
                         <p className="text-xl text-slate-300 font-medium max-w-lg leading-relaxed">
-                            O CRMia agora integra seu Kanban de vendas com automação de propostas financeiras em múltiplas moedas. Tudo no piloto automático.
+                            O Nexum integra seu Kanban de vendas com automação de propostas financeiras em múltiplas moedas. Tudo no piloto automático.
                         </p>
                     </div>
 
@@ -142,7 +142,7 @@ export default function LoginPage() {
                                     <CheckCircle2 className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <h3 className="text-white font-bold mb-1">11 Ferramentas de IA Integradas</h3>
+                                    <h3 className="text-white font-bold mb-1">5 IA Tools especializadas</h3>
                                     <p className="text-slate-400 text-sm leading-relaxed">
                                         Da qualificação automática de leads ao Conselheiro de Vendas virtual guiando seu funil em tempo real.
                                     </p>

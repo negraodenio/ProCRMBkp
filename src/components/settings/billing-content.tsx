@@ -195,7 +195,7 @@ export function BillingContent({ subscription, usage, user }: BillingContentProp
                     </CardContent>
                     <CardFooter>
                         <Button variant="ghost" className="w-full border" asChild>
-                            <a href="mailto:contato@crmia.eu">Contactar Vendas</a>
+                            <a href="mailto:contato@nexum.com.br">Contactar Vendas</a>
                         </Button>
                     </CardFooter>
                 </Card>

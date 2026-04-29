@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Rocket, Target, Zap, Users, BarChart3, ChevronRight, FileText, Sparkles, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";

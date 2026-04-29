@@ -101,7 +101,7 @@ export function Sidebar({ mobile }: SidebarProps) {
                    <Sparkles className="h-4 w-4 text-white" />
                  </div>
                  <h1 className="text-xl font-bold text-white">
-                   {loading ? "..." : profile?.organizations?.name || "CRMia"}
+                   {loading ? "..." : profile?.organizations?.name || "Nexum"}
                  </h1>
                </div>
             </div>
@@ -151,7 +151,7 @@ export function Sidebar({ mobile }: SidebarProps) {
               <Sparkles className="h-4 w-4 text-white" />
             </div>
             <h1 className="text-xl font-bold truncate bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-              {loading ? "..." : profile?.organizations?.name || "CRMia"}
+              {loading ? "..." : profile?.organizations?.name || "Nexum"}
             </h1>
           </div>
         </div>
