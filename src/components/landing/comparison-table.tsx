@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, X, AlertTriangle } from "lucide-react";
+import { Check, X, AlertTriangle, Shield } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const COMPARISON_DATA = [

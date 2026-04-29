@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 

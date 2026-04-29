@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Sparkles, ArrowRight, CheckCircle2, Target, Brain, MessageSquare } from "lucide-react";
+import { Sparkles, ArrowRight, CheckCircle2, Target, Brain, MessageSquare, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 

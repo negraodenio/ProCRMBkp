@@ -18,7 +18,8 @@ import {
   ChevronRight,
   Flame,
   LineChart,
-  MessageCircle
+  MessageCircle,
+  Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
