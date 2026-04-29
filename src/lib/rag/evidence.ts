@@ -1,5 +1,5 @@
 /**
- * Normaliza uma string para comparação, removendo acentos, pontuação extra
+ * Normaliza uma string para comparaçío, removendo acentos, pontuaçío extra
  * e normalizando espaços e maiúsculas/minúsculas.
  */
 export function normalizeForMatch(s: string): string {
@@ -8,13 +8,13 @@ export function normalizeForMatch(s: string): string {
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "") // remove acentos
     .replace(/[“”‘’"]/g, '"')
-    .replace(/[^\p{L}\p{N}\s]/gu, " ") // remove pontuação mantendo letras e números
+    .replace(/[^\p{L}\p{N}\s]/gu, " ") // remove pontuaçío mantendo letras e números
     .replace(/\s+/g, " ")
     .trim();
 }
 
 /**
- * Interface para o resultado da validação de evidência
+ * Interface para o resultado da validaçío de evidência
  */
 export interface EvidenceValidationResult {
   ok: boolean;
@@ -30,7 +30,7 @@ export function evidenceQuotesAreSupported(params: {
   contextText: string;
   evidenceQuotes: string[];
   minQuotes?: number;        // Mínimo de citações válidas necessárias (default 1)
-  minQuoteLen?: number;      // Tamanho mínimo para uma citação ser considerada (default 12)
+  minQuoteLen?: number;      // Tamanho mínimo para uma citaçío ser considerada (default 12)
   minTokenOverlap?: number;  // Overlap mínimo para match fuzzy (default 0.55)
   minTokensForFuzzy?: number; // Mínimo de tokens para considerar fuzzy (default 6)
 }): EvidenceValidationResult {
@@ -59,7 +59,7 @@ export function evidenceQuotesAreSupported(params: {
   // Dividir o contexto em segmentos (linhas/chunks) para evitar tokens espalhados
   const ctxSegments = ctxN.split("\n").map(s => s.trim()).filter(s => s.length > 5);
 
-  // 2. Processar cada citação
+  // 2. Processar cada citaçío
   for (const q of evidenceQuotes) {
     const qRaw = String(q || "").trim();
     if (qRaw.length < minQuoteLen) {
@@ -104,7 +104,7 @@ export function evidenceQuotesAreSupported(params: {
     }
   }
 
-  // 3. Verificação Final
+  // 3. Verificaçío Final
   if (matched.length < minQuotes) {
     if (reasons.length === 0) reasons.push("insufficient_supported_quotes");
   }

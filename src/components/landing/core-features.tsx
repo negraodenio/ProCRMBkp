@@ -6,13 +6,13 @@ import { cn } from "@/lib/utils";
 const CORE_FEATURES = [
   {
     title: "WhatsApp com Typing",
-    description: "Status 'Digitando...', histÃ³rico e resumos por IA nativos na plataforma.",
+    description: "Status 'Digitando...', histórico e resumos por IA nativos na plataforma.",
     icon: MessageCircle,
     color: "bg-green-50 text-green-600"
   },
   {
     title: "Dashboard Analytics",
-    description: "Funil visual, mÃ©tricas de conversÃ£o e insights acionÃ¡veis.",
+    description: "Funil visual, métricas de conversío e insights acionáveis.",
     icon: LayoutDashboard,
     color: "bg-blue-50 text-blue-600"
   },
@@ -23,8 +23,8 @@ const CORE_FEATURES = [
     color: "bg-purple-50 text-purple-600"
   },
   {
-    title: "AutomaÃ§Ãµes Inteligentes",
-    description: "Workflows 24/7 de follow-up e qualificaÃ§Ã£o automÃ¡tica.",
+    title: "Automações Inteligentes",
+    description: "Workflows 24/7 de follow-up e qualificaçío automática.",
     icon: Zap,
     color: "bg-amber-50 text-amber-600"
   },
@@ -36,7 +36,7 @@ const CORE_FEATURES = [
   },
   {
     title: "B2B & B2C Multicanal",
-    description: "GestÃ£o flexÃ­vel para empresas ou direto para o consumidor final (CPF).",
+    description: "Gestío flexí­vel para empresas ou direto para o consumidor final.",
     icon: BarChart3,
     color: "bg-indigo-50 text-indigo-600"
   }
@@ -50,7 +50,7 @@ export function CoreFeatures() {
           Tudo Que Um CRM Precisa â€” E Mais
         </h2>
         <p className="text-slate-500 font-medium">
-          AlÃ©m das 5 IA Tools, o Nexum tem todas as funcionalidades essenciais para escalar sua operaÃ§Ã£o.
+          Além das 5 IA Tools, o Nexum tem todas as funcionalidades essenciais para escalar sua operaçío.
         </p>
       </div>
 

@@ -106,7 +106,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                 <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <Input id="email" name="email" defaultValue={profile?.email || ""} disabled className="bg-slate-50" />
-                    <p className="text-[10px] text-muted-foreground">O email não pode ser alterado.</p>
+                    <p className="text-[10px] text-muted-foreground">O email nío pode ser alterado.</p>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="phone">Telefone</Label>

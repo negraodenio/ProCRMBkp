@@ -22,12 +22,12 @@ export function DealDetailsPanel({ deal }: DealDetailsPanelProps) {
 
   return (
     <div className="space-y-6">
-      {/* 1. Negociação (Opportunity) */}
+      {/* 1. Negociaçío (Opportunity) */}
       <Card className="shadow-sm border-slate-200">
         <CardHeader className="pb-3 border-b bg-slate-50/50">
           <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-600 flex items-center gap-2">
             <Briefcase className="h-4 w-4 text-blue-500" />
-            Negociação
+            Negociaçío
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-4 space-y-4">

@@ -11,9 +11,9 @@ import { createServiceRoleClient } from "@/lib/supabase/service-scoped";
  * - Este Webhook APENAS salva no banco e responde em 100ms.
  *
  * VANTAGENS:
- * 1. Não dá timeout no Vercel (Serverless Function).
+ * 1. Nío dá timeout no Vercel (Serverless Function).
  * 2. Se a OpenAI cair, a mensagem fica salva no banco para processar depois.
- * 3. O WhatsApp não fica reenviando mensagem porque recebeu resposta rápida (200 OK).
+ * 3. O WhatsApp nío fica reenviando mensagem porque recebeu resposta rápida (200 OK).
  */
 
 export async function POST(req: NextRequest) {
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
         const messageData = body.data;
         if (!messageData) return NextResponse.json({ status: "ignored_no_data" });
 
-        // 2. EXTRAÇÃO BÁSICA (Apenas o necessário para identificar)
+        // 2. EXTRAÇíO BÁSICA (Apenas o necessário para identificar)
         const remoteJid = messageData.key?.remoteJid || messageData.remoteJid;
         const msgId = messageData.key?.id;
         const fromMe = messageData.key?.fromMe === true || messageData.fromMe === true;
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
         if (!remoteJid || remoteJid.includes("@g.us")) return NextResponse.json({ status: "ignored_group" });
 
         // 3. IDEMPOTÊNCIA (Evitar duplicidade)
-        // O ID único do evento é a combinação de remoteJid + msgId
+        // O ID único do evento é a combinaçío de remoteJid + msgId
         const eventId = `${remoteJid}_${msgId}`;
         const supabase = createServiceRoleClient();
 
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ status: "ignored_duplicate" });
         }
 
-        // 4. DERIVAR ORG_ID (Otimização: Extrair aqui ou deixar pro worker?)
+        // 4. DERIVAR ORG_ID (Otimizaçío: Extrair aqui ou deixar pro worker?)
         // Melhor extrair aqui para facilitar query no Worker
         const { searchParams } = new URL(req.url);
         let orgId = searchParams.get('org_id');
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
 
     } catch (error: any) {
         console.error("[Webhook V2] Error:", error);
-        // Em V2, erros aqui são raros (só se banco cair).
+        // Em V2, erros aqui sío raros (só se banco cair).
         // Se banco cair, retornamos 500 e WhatsApp tenta de novo (correto).
         return NextResponse.json({ error: error.message }, { status: 500 });
     }

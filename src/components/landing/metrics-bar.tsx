@@ -4,22 +4,22 @@ import { cn } from "@/lib/utils";
 
 const METRICS = [
   {
-    label: "Protocolos de IA — Soberania Tecnológica",
+    label: "Protocolos de IA â€” Soberania Tecnológica",
     value: "5",
     color: "text-indigo-400"
   },
   {
-    label: "Acurácia Preditiva — Matching Semântico",
+    label: "Acurácia Preditiva â€” Matching Semí¢ntico",
     value: "87%",
     color: "text-emerald-400"
   },
   {
-    label: "Ativos Monitorados — Ecossistema Universitário",
+    label: "Ativos Monitorados â€” Ecossistema Universitário",
     value: "R$ 2.4B",
     color: "text-blue-400"
   },
   {
-    label: "Efficiency Index — Aceleração de TRL",
+    label: "Efficiency Index â€” Aceleraçío de TRL",
     value: "12x",
     color: "text-purple-400"
   }

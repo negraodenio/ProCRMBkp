@@ -95,7 +95,7 @@ export default function CompaniesPage() {
         e.preventDefault();
 
         if (!profile?.organization_id) {
-            toast.error("Organização não encontrada");
+            toast.error("Organizaçío nío encontrada");
             return;
         }
 
@@ -252,7 +252,7 @@ export default function CompaniesPage() {
                                                 />
                                             </div>
                                             <div className="space-y-2 col-span-2">
-                                                <Label htmlFor="summary">Resumo / Descrição</Label>
+                                                <Label htmlFor="summary">Resumo / Descriçío</Label>
                                                 <Textarea
                                                     id="summary"
                                                     placeholder="Descreva a empresa..."
@@ -294,7 +294,7 @@ export default function CompaniesPage() {
                                                 <Label htmlFor="city">Cidade</Label>
                                                 <Input
                                                     id="city"
-                                                    placeholder="São Paulo"
+                                                    placeholder="Sío Paulo"
                                                     value={formData.city}
                                                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                                                 />
@@ -350,7 +350,7 @@ export default function CompaniesPage() {
                                             <TableRow>
                                                 <TableHead>Empresa</TableHead>
                                                 <TableHead>Segmento</TableHead>
-                                                <TableHead>Localização</TableHead>
+                                                <TableHead>Localizaçío</TableHead>
                                                 <TableHead>Website</TableHead>
                                                 <TableHead>Status</TableHead>
                                                 <TableHead className="text-right">Ações</TableHead>
@@ -393,7 +393,7 @@ export default function CompaniesPage() {
                                                         <TableCell>
                                                             <div className="flex items-center gap-1 text-slate-600 text-xs">
                                                                 <MapPin className="h-3 w-3" />
-                                                                {company.city ? `${company.city}, ${company.state}` : "Não informado"}
+                                                                {company.city ? `${company.city}, ${company.state}` : "Nío informado"}
                                                             </div>
                                                         </TableCell>
                                                         <TableCell>
@@ -424,7 +424,7 @@ export default function CompaniesPage() {
                                                                 </Button>
                                                                 <ConfirmDialog
                                                                     title="Excluir Empresa"
-                                                                    description="Tem certeza que deseja excluir esta empresa? Os contatos vinculados não serão excluídos."
+                                                                    description="Tem certeza que deseja excluir esta empresa? Os contatos vinculados nío serío excluídos."
                                                                     confirmLabel="Excluir"
                                                                     onConfirm={() => deleteCompany(company.id)}
                                                                     trigger={

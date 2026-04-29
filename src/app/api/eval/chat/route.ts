@@ -6,7 +6,7 @@ import { retrieveContextText } from "@/lib/rag/retrieve";
 export const runtime = "nodejs";
 
 /**
- * Endpoint interno para testes de regressão do RAG.
+ * Endpoint interno para testes de regressío do RAG.
  * Simula o pipeline do WhatsApp com paridade total de retrieval e routing.
  */
 export async function POST(req: Request) {
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     if (!query) return NextResponse.json({ error: "missing query" }, { status: 400 });
     if (!org_id) return NextResponse.json({ error: "missing org_id" }, { status: 400 });
 
-    // 2. Retrieval com Paridade de Produção
+    // 2. Retrieval com Paridade de Produçío
     const { contextText } = await retrieveContextText({
       orgId: org_id,
       query,
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
     const routed = await ragAnswerWithGating({
       systemPrompt,
       userText: query,
-      chatHistory: [], // Eval isolado por padrão
+      chatHistory: [], // Eval isolado por padrío
       contextText,
       temperature: Number(body?.temperature ?? 0.1),
       max_tokens: Number(body?.max_tokens ?? 250),

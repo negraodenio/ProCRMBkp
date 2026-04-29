@@ -16,7 +16,7 @@ export default async function OrganizationPage() {
         .single();
 
     if (!profile?.organization_id) {
-        return <div>Organização não encontrada.</div>;
+        return <div>Organizaçío nío encontrada.</div>;
     }
 
     const { data: org } = await supabase
@@ -28,7 +28,7 @@ export default async function OrganizationPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-medium">Organização</h3>
+                <h3 className="text-lg font-medium">Organizaçío</h3>
                 <p className="text-sm text-muted-foreground">
                     Gerencie os dados da sua empresa.
                 </p>

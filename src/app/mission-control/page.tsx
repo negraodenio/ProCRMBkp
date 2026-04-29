@@ -65,7 +65,7 @@ export default function MissionControlPage() {
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div>
                                 <h1 className="text-3xl font-bold tracking-tight">Mission Control</h1>
-                                <p className="text-slate-500">Panorama de Inovação e Comercialização de Ativos.</p>
+                                <p className="text-slate-500">Panorama de Inovaçío e Comercializaçío de Ativos.</p>
                             </div>
                             <div className="flex items-center gap-2 no-print">
                                 <Button variant="outline" size="sm" className="gap-2 border-indigo-200 text-indigo-700 bg-indigo-50/50 hover:bg-indigo-100" onClick={handleExport}>
@@ -97,7 +97,7 @@ export default function MissionControlPage() {
                                                 toast.error('Falha no seed: ' + (data.error || 'Erro desconhecido'));
                                             }
                                         } catch (e) {
-                                            toast.error('Erro de conexão com o servidor.');
+                                            toast.error('Erro de conexío com o servidor.');
                                         }
                                         setSeeding(false);
                                     }}
@@ -227,7 +227,7 @@ export default function MissionControlPage() {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Funil de Transferência de Tecnologia</CardTitle>
-                                <p className="text-xs text-slate-500">Baseado nos dados reais da sua organização.</p>
+                                <p className="text-xs text-slate-500">Baseado nos dados reais da sua organizaçío.</p>
                             </CardHeader>
                             <CardContent>
                                 {loading ? (

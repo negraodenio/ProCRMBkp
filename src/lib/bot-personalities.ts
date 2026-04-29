@@ -27,7 +27,7 @@ export const PERSONALITY_PRESETS = {
     name: "Amigável",
     emoji: "😊",
     description: "Caloroso mas profissional",
-    tone_prompt: "TOM: Cordial, solícito e muito prestativo. EMOJIS: Pode usar com moderação 😊, 👍.",
+    tone_prompt: "TOM: Cordial, solícito e muito prestativo. EMOJIS: Pode usar com moderaçío 😊, 👍.",
     temperature: 0.3,
     max_temperature: 0.5,
     use_emojis: true
@@ -54,7 +54,7 @@ export const PERSONALITY_PRESETS = {
     name: "Casual",
     emoji: "😎",
     description: "Descontraído e informal",
-    tone_prompt: "TOM: Informal e leve. Fale como um parceiro ou amigo. Gírias leves são ok. EMOJIS: 😎, ✌️, 🙌.",
+    tone_prompt: "TOM: Informal e leve. Fale como um parceiro ou amigo. Gírias leves sío ok. EMOJIS: 😎, ✌️, 🙌.",
     temperature: 0.5,
     max_temperature: 0.7,
     use_emojis: true
@@ -63,7 +63,7 @@ export const PERSONALITY_PRESETS = {
     name: "Técnico",
     emoji: "🔧",
     description: "Detalhado e preciso",
-    tone_prompt: "TOM: Técnico, preciso e focado na resolução de problemas. EMOJIS: 🔧, ⚙️.",
+    tone_prompt: "TOM: Técnico, preciso e focado na resoluçío de problemas. EMOJIS: 🔧, ⚙️.",
     temperature: 0.1,
     max_temperature: 0.5,
     use_emojis: false
@@ -81,7 +81,7 @@ export const PERSONALITY_PRESETS = {
     name: "Vendas Consultivas",
     emoji: "💼",
     description: "Ajuda a escolher e fechar",
-    tone_prompt: "TOM: Consultivo, empático e focado em entender a dor do cliente para oferecer a solução. 1 pergunta por vez.",
+    tone_prompt: "TOM: Consultivo, empático e focado em entender a dor do cliente para oferecer a soluçío. 1 pergunta por vez.",
     temperature: 0.3,
     max_temperature: 0.6,
     use_emojis: true
@@ -111,15 +111,15 @@ export function clampTemperature(presetKey: PersonalityType, uiTemp?: number) {
 export const POLICY_GLOBAL_RAG_JSON = `
 REGRAS GLOBAIS (SENIOR):
 - Fonte de Conhecimento: Use o <context> para responder dúvidas técnicas ou sobre a empresa.
-- Naturalidade e Saudações: Responda a saudações (Oi, Tudo bem, etc) de forma calorosa e natural seguindo seu TOM. Não seja redundante.
+- Naturalidade e Saudações: Responda a saudações (Oi, Tudo bem, etc) de forma calorosa e natural seguindo seu TOM. Nío seja redundante.
 - Pequenas Conversas: Você pode responder a interações sociais curtas, mas tente sempre puxar o assunto para como você pode ajudar baseado na empresa.
-- Proibição de Alucinação: Se o <context> não tiver a informação e for algo específico da empresa, use "answer": null.
+- Proibiçío de Alucinaçío: Se o <context> nío tiver a informaçío e for algo específico da empresa, use "answer": null.
 - Idioma: Responda sempre em pt-BR.
 
 MODO JSON (OBRIGATÓRIO):
 - Responda EXCLUSIVAMENTE em JSON válido:
 {
-  "answer": "Sua resposta natural (ou null se for algo que você REALMENTE não sabe sobre a empresa)",
+  "answer": "Sua resposta natural (ou null se for algo que você REALMENTE nío sabe sobre a empresa)",
   "evidence_quotes": ["frase_literal_do_contexto_que_prova_sua_resposta"],
   "next_step": "Pergunta curta para manter o papo ou CTA",
   "handoff_to": "Nome da Pessoa | Nome do Setor | 'Human' | null"
@@ -127,7 +127,7 @@ MODO JSON (OBRIGATÓRIO):
 
 REGRAS DE TRANSBORDO (HANDOFF):
 - Se o cliente pedir explicitamente para falar com uma PESSOA (ex: Maria), SETOR (ex: Financeiro) ou simplesmente "atendimento humano", preencha "handoff_to".
-- Se você perceber que não consegue ajudar o cliente após 2 tentativas ou se o assunto for sensível (reclamações graves), sugira o transbordo preenchendo "handoff_to": "Human".
+- Se você perceber que nío consegue ajudar o cliente após 2 tentativas ou se o assunto for sensível (reclamações graves), sugira o transbordo preenchendo "handoff_to": "Human".
 - Nestes casos, responda educadamente no "answer" que está encaminhando o contato.
 
 REGRAS DE EVIDÊNCIA:
@@ -136,7 +136,7 @@ REGRAS DE EVIDÊNCIA:
 `.trim();
 
 /**
- * Build system prompt com técnica Sandwich para máxima adesão
+ * Build system prompt com técnica Sandwich para máxima adesío
  */
 export function buildSystemPrompt(
   presetKey: PersonalityType,

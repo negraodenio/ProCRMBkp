@@ -55,7 +55,7 @@ export async function generateAIContent(toolId: string, leadId?: string, rawText
         }
     }
 
-    if (!organizationId) return { success: false, error: "Organização não encontrada" };
+    if (!organizationId) return { success: false, error: "Organizaçío nío encontrada" };
 
     // 1.1 Check Plan Limits
     const { data: org } = await supabase
@@ -64,7 +64,7 @@ export async function generateAIContent(toolId: string, leadId?: string, rawText
         .eq("id", organizationId)
         .single();
 
-    if (!org) return { success: false, error: "Organização não encontrada" };
+    if (!org) return { success: false, error: "Organizaçío nío encontrada" };
 
     const plan = (org.subscription_plan || "free") as PlanLevel;
     const limitResult = checkPlanLimit(
@@ -101,12 +101,12 @@ export async function generateAIContent(toolId: string, leadId?: string, rawText
             break;
 
         case "predictive-analysis":
-            systemPrompt = "Você é um cientista de dados especializado em Revenue Operations (RevOps). Analise a propensão de fechamento.";
-            userPrompt = `Analise a propensão de conversão para este prospect. Retorne:
-      1. Score de Propensão (0-100%).
-      2. Vetores de Aceleração (O que ajuda).
-      3. Pontos de Fricção (Barreiras prováveis).
-      4. Recomendação Estratégica.
+            systemPrompt = "Você é um cientista de dados especializado em Revenue Operations (RevOps). Analise a propensío de fechamento.";
+            userPrompt = `Analise a propensío de conversío para este prospect. Retorne:
+      1. Score de Propensío (0-100%).
+      2. Vetores de Aceleraçío (O que ajuda).
+      3. Pontos de Fricçío (Barreiras prováveis).
+      4. Recomendaçío Estratégica.
       Responda APENAS em Português do Brasil em Markdown.
 
       Contexto:
@@ -116,8 +116,8 @@ export async function generateAIContent(toolId: string, leadId?: string, rawText
 
         case "categorize-lead":
             systemPrompt = "Você é um especialista em SDR/BDR de alta performance. Realize o Lead Scoring.";
-            userPrompt = `Avalie e classifique este lead com base nos critérios de FIT e INTENÇÃO.
-      Retorne: Classificação (A, B, C), ICP Match (0-100%) e Prioridade de Atendimento.
+            userPrompt = `Avalie e classifique este lead com base nos critérios de FIT e INTENÇíO.
+      Retorne: Classificaçío (A, B, C), ICP Match (0-100%) e Prioridade de Atendimento.
       Responda APENAS em Português do Brasil.
 
       Contexto:
@@ -126,9 +126,9 @@ export async function generateAIContent(toolId: string, leadId?: string, rawText
             break;
 
         case "generate-email":
-            systemPrompt = "Você é um copywriter sênior focado em Outbound Marketing e Persuasão.";
+            systemPrompt = "Você é um copywriter sênior focado em Outbound Marketing e Persuasío.";
             userPrompt = `Escreva um e-mail de follow-up ultra-personalizado.
-      Use gatilhos de curiosidade e autoridade. Foque no problema do cliente (dor) e não apenas na solução.
+      Use gatilhos de curiosidade e autoridade. Foque no problema do cliente (dor) e nío apenas na soluçío.
       Responda APENAS em Português do Brasil.
 
       Contexto:
@@ -149,7 +149,7 @@ export async function generateAIContent(toolId: string, leadId?: string, rawText
 
         case "next-action":
             systemPrompt = "Você é um coach estratégico de vendas.";
-            userPrompt = `Sugira a ÚNICA melhor próxima ação para este lead. Seja específico.
+            userPrompt = `Sugira a ÚNICA melhor próxima açío para este lead. Seja específico.
       Responda APENAS em Português do Brasil.
 
       Contexto do Cliente:
@@ -161,7 +161,7 @@ export async function generateAIContent(toolId: string, leadId?: string, rawText
             systemPrompt = "Você é um Master Negotiator. Use o método Sandler e técnicas de Reenquadramento (Reframing) para tratar objeções.";
             userPrompt = `O prospect está apresentando resistência. Identifique as objeções ocultas e forneça:
             1. Técnica de 'Reverse' (Perguntas para aprofundar a dor).
-            2. Argumentação de Contorno (Focus on Value).
+            2. Argumentaçío de Contorno (Focus on Value).
             3. Call to Action de Fechamento.
             Responda APENAS em Português do Brasil.
 
@@ -173,7 +173,7 @@ export async function generateAIContent(toolId: string, leadId?: string, rawText
         case "sales-script":
             systemPrompt = "Você é um Arquiteto de Conversas de Vendas. Use a metodologia SPIN Selling.";
             userPrompt = `Desenvolva um Framework de Conversa para este prospect específico.
-            Divida em: Perguntas de Situação, Problema, Implicação (dor) e Necessidade de Solução.
+            Divida em: Perguntas de Situaçío, Problema, Implicaçío (dor) e Necessidade de Soluçío.
             Inclua 'Power Statements' para gerar autoridade imediata.
             Responda APENAS em Português do Brasil.
 
@@ -184,7 +184,7 @@ export async function generateAIContent(toolId: string, leadId?: string, rawText
 
         case "meeting-prep":
             systemPrompt = "Você é um Consultor de Estratégia Comercial preparando um Dossiê Executivo.";
-            userPrompt = `Prepare um Dossiê Pré-Reunião de alto impacto:
+            userPrompt = `Prepare um Dossiê Pré-Reuniío de alto impacto:
             1. Pain Points Detectados.
             2. Stakeholders Prováveis e Interesses.
             3. Agenda 'Customer-Centric'.
@@ -197,9 +197,9 @@ export async function generateAIContent(toolId: string, leadId?: string, rawText
             break;
 
         case "science-teaser":
-            systemPrompt = "Você é um especialista em Transferência de Tecnologia e Marketing Científico. Sua missão é traduzir linguagem técnica complexa em valor de negócio e identificar o estágio de maturidade tecnológica.";
+            systemPrompt = "Você é um especialista em Transferência de Tecnologia e Marketing Científico. Sua missío é traduzir linguagem técnica complexa em valor de negócio e identificar o estágio de maturidade tecnológica.";
             userPrompt = `Transforme o seguinte texto científico/patente em um 'Teaser de Mercado' conciso.
-            Foque no Problema, na Solução Inovadora e no Diferencial Competitivo. 
+            Foque no Problema, na Soluçío Inovadora e no Diferencial Competitivo. 
             OBRIGATÓRIO: Estime o Nível de Maturidade Tecnológica (TRL de 1 a 9) com uma breve justificativa.
             Responda em Português do Brasil em Markdown.
 
@@ -210,11 +210,11 @@ export async function generateAIContent(toolId: string, leadId?: string, rawText
 
         case "patent-to-pitch":
             systemPrompt = "Você é um Consultor de Business Development para Startups Deep Tech e TTOs.";
-            userPrompt = `Com base nesta descrição de tecnologia/patente, elabore um Pitch Executivo estruturado:
+            userPrompt = `Com base nesta descriçío de tecnologia/patente, elabore um Pitch Executivo estruturado:
             1. Proposta de Valor (The "Why").
             2. Barreira de Entrada (IP/Diferencial).
             3. Maturidade (TRL sugerido).
-            4. Modelo de Monetização Sugerido (Licenciamento, Spin-off, etc).
+            4. Modelo de Monetizaçío Sugerido (Licenciamento, Spin-off, etc).
             5. Perfil do Parceiro Ideal.
             Responda em Português do Brasil em Markdown.
 

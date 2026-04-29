@@ -21,7 +21,7 @@ export function ConversionFunnel({ stages }: ConversionFunnelProps) {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Funil de Conversão</CardTitle>
+          <CardTitle>Funil de Conversío</CardTitle>
           <TrendingDown className="h-5 w-5 text-muted-foreground" />
         </div>
         <p className="text-sm text-muted-foreground">Visualize a eficiência do seu processo comercial etapa por etapa.</p>
@@ -64,10 +64,10 @@ export function ConversionFunnel({ stages }: ConversionFunnelProps) {
           })}
         </div>
 
-        {/* Taxa de Conversão Total */}
+        {/* Taxa de Conversío Total */}
         <div className="mt-6 pt-4 border-t">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Taxa de Conversão Total</span>
+            <span className="text-sm font-medium">Taxa de Conversío Total</span>
             <span className="text-2xl font-bold text-green-600">
               {stages.length > 0
                 ? ((stages[stages.length - 1].count / stages[0].count) * 100).toFixed(1)

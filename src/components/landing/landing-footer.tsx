@@ -28,7 +28,7 @@ export function LandingFooter() {
             <h4 className="font-bold text-slate-900 mb-6 uppercase text-[10px] tracking-widest">Produto</h4>
             <ul className="space-y-4 text-sm text-slate-500 font-medium">
               <li><a href="#tools" className="hover:text-primary transition-colors">5 IA Tools</a></li>
-              <li><a href="#comparison" className="hover:text-primary transition-colors">Comparação</a></li>
+              <li><a href="#comparison" className="hover:text-primary transition-colors">Comparaçío</a></li>
               <li><a href="#pricing" className="hover:text-primary transition-colors">Preços</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Integrações</a></li>
             </ul>
@@ -49,7 +49,7 @@ export function LandingFooter() {
             <h4 className="font-bold text-slate-900 mb-6 uppercase text-[10px] tracking-widest">Suporte</h4>
             <ul className="space-y-4 text-sm text-slate-500 font-medium">
               <li><a href="#" className="hover:text-primary transition-colors">Central de Ajuda</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Documentação</a></li>
+              <li><a href="#" className="hover:text-primary transition-colors">Documentaçío</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Webinars</a></li>
               <li><a href="mailto:contato@nexum.com.br" className="hover:text-primary transition-colors">Contato</a></li>
             </ul>
@@ -68,7 +68,7 @@ export function LandingFooter() {
 
         <div className="border-t border-slate-200 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-            © 2026 Nexum. Todos os direitos reservados. 🛡️
+            Â© 2026 Nexum. Todos os direitos reservados. ðŸ›¡ï¸
           </p>
           <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
              <span className="w-2 h-2 bg-emerald-500 rounded-full" />

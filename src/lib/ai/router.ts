@@ -10,7 +10,7 @@ export interface RoutedChatResult {
 }
 
 /**
- * Heurística para detectar perguntas abertas ou pedidos de recomendação genéricos.
+ * Heurística para detectar perguntas abertas ou pedidos de recomendaçío genéricos.
  */
 export function isOpenEndedQuery(text: string): boolean {
   const s = text.toLowerCase();
@@ -49,13 +49,13 @@ function fallbackOpenEnded(contextText: string): string | null {
   const arr = Array.from(titles);
   if (!arr.length) return null;
 
-  // Limita a 8 itens para não poluir o WhatsApp
+  // Limita a 8 itens para nío poluir o WhatsApp
   const top = arr.slice(0, 8).map(x => `• ${x}`).join("\n");
   return `No manual encontrei estas opções:\n\n${top}\n\nQual desses você gostaria de saber mais detalhes?`;
 }
 
 /**
- * Função de roteamento principal.
+ * Funçío de roteamento principal.
  */
 export async function chatWithRouting(params: {
   aiChat: (p: any) => Promise<string>;
@@ -82,7 +82,7 @@ export async function chatWithRouting(params: {
   }
 
   // 2. Primário: DeepSeek JSON Mode (Evidence-Gated)
-  // Para RAG de produção, preferimos o modelo que respeita o JSON schema para validar evidência.
+  // Para RAG de produçío, preferimos o modelo que respeita o JSON schema para validar evidência.
   try {
     return await jsonEvidenceChatDeepSeek({
         aiChat,
@@ -130,7 +130,7 @@ export async function jsonEvidenceChatDeepSeek(params: {
   const raw = await aiChat({
     messages: messagesWithJson,
     model: deepseekModel,
-    temperature: 0.1, // Quase zero para precisão JSON
+    temperature: 0.1, // Quase zero para precisío JSON
     max_tokens,
     response_format: { type: "json_object" }
   });
@@ -139,7 +139,7 @@ export async function jsonEvidenceChatDeepSeek(params: {
 
   if (!obj) {
     return {
-      text: "Não consegui processar sua solicitação com segurança técnica. Pode reformular?",
+      text: "Nío consegui processar sua solicitaçío com segurança técnica. Pode reformular?",
       model_used: "deepseek_fallback",
       reason: "invalid_json_format"
     };
@@ -149,7 +149,7 @@ export async function jsonEvidenceChatDeepSeek(params: {
   const quotes = Array.isArray(obj.evidence_quotes) ? obj.evidence_quotes.map(String) : [];
   const nextStep = typeof obj.next_step === "string" ? obj.next_step.trim() : "Como posso te ajudar?";
 
-  // Validação de Evidência (O Coração do Gating)
+  // Validaçío de Evidência (O Coraçío do Gating)
   const ev = evidenceQuotesAreSupported({
     contextText,
     evidenceQuotes: quotes,
@@ -164,9 +164,9 @@ export async function jsonEvidenceChatDeepSeek(params: {
     };
   }
 
-  // Se não houver evidência técnica, bloqueamos o conteúdo "alucinado" e enviamos apenas o próximo passo.
+  // Se nío houver evidência técnica, bloqueamos o conteúdo "alucinado" e enviamos apenas o próximo passo.
   return {
-    text: nextStep || "Sinto muito, mas não encontrei essa informação nos manuais da empresa. Posso te ajudar com outra coisa?",
+    text: nextStep || "Sinto muito, mas nío encontrei essa informaçío nos manuais da empresa. Posso te ajudar com outra coisa?",
     model_used: "deepseek_json",
     reason: answer ? "evidence_mismatch_blocked" : "no_context_support"
   };

@@ -53,7 +53,7 @@ export function canonicalizeTxt(rawText: string, filename: string = ""): Canonic
         const getArea = (t: string) => t.match(/(?:ÁREA|AREA|Area):\s*(.+)/i)?.[1]?.trim();
         const getSubject = (t: string) => t.match(/(?:ASSUNTO|Assunto):\s*(.+)/i)?.[1]?.trim();
         const getSubSubject = (t: string) => t.match(/(?:SUB-ASSUNTO|Sub-assunto):\s*(.+)/i)?.[1]?.trim();
-        const getIntention = (t: string) => t.match(/(?:INTENÇÃO|Intenção|Intencao):\s*(.+)/i)?.[1]?.trim();
+        const getIntention = (t: string) => t.match(/(?:INTENÇíO|Intençío|Intencao):\s*(.+)/i)?.[1]?.trim();
         const getQuestions = (t: string) => {
              const m = t.match(/(?:PERGUNTAS DE TRIAGEM|Perguntas):\s*(.+)/i)?.[1]?.trim();
              return m ? m.split(/[?;|]/).map(q => q.trim()).filter(q => q.length > 5) : [];
@@ -70,7 +70,7 @@ export function canonicalizeTxt(rawText: string, filename: string = ""): Canonic
         const id = getID(raw) || "RAND-" + Math.random().toString(36).substring(7);
         const niche = getNiche(raw) || defaultNiche;
         const area = getArea(raw) || "Geral";
-        const subject = getSubject(raw) || "Informação";
+        const subject = getSubject(raw) || "Informaçío";
         const sub_subject = getSubSubject(raw) || "";
         const intention = getIntention(raw) || "";
         const questions = getQuestions(raw);
@@ -85,7 +85,7 @@ export function canonicalizeTxt(rawText: string, filename: string = ""): Canonic
 
         // Quality check for this block
         if (niche === "GERAL") missingFieldsGlobal.add("NICHO");
-        if (subject === "Informação") missingFieldsGlobal.add("ASSUNTO");
+        if (subject === "Informaçío") missingFieldsGlobal.add("ASSUNTO");
         if (!answer || answer.length < 10) missingFieldsGlobal.add("RESPOSTA");
 
         blocks.push({
@@ -111,7 +111,7 @@ export function canonicalizeTxt(rawText: string, filename: string = ""): Canonic
         let txt = `[BLOCK_ID] ${b.id}\n`;
         txt += `[CONTEXTO] ${b.niche} > ${b.area} > ${b.subject}`;
         if (b.sub_subject) txt += ` > ${b.sub_subject}`;
-        if (b.intention) txt += `\n[INTENÇÃO] ${b.intention}`;
+        if (b.intention) txt += `\n[INTENÇíO] ${b.intention}`;
         if (b.questions.length) txt += `\n[PERGUNTAS TRIAGEM] ${b.questions.join(" | ")}`;
         if (b.short_answer) txt += `\n[RESPOSTA SUGERIDA] ${b.short_answer}`;
         if (b.instructions) txt += `\n[ORIENTAÇÕES COMPLETAS] ${b.instructions}`;

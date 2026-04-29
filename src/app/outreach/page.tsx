@@ -93,7 +93,7 @@ export default function OutreachPage() {
                     <div className="flex justify-between items-start">
                         <div className="space-y-2">
                             <h1 className="text-3xl font-bold tracking-tight">Email Outreach</h1>
-                            <p className="text-muted-foreground italic">Gestão de campanhas automatizadas e cadências de prospecção com IA.</p>
+                            <p className="text-muted-foreground italic">Gestío de campanhas automatizadas e cadências de prospecçío com IA.</p>
                         </div>
                         <Button className="bg-indigo-600 hover:bg-indigo-700 gap-2 h-12 px-6" onClick={() => setShowCreate(true)}>
                             <Plus className="h-4 w-4" />
@@ -177,7 +177,7 @@ export default function OutreachPage() {
                                                         </div>
                                                         <div className="w-full max-w-xs space-y-1">
                                                             <div className="flex justify-between text-[10px] text-muted-foreground">
-                                                                <span>Conversão</span>
+                                                                <span>Conversío</span>
                                                                 <span>{progress}%</span>
                                                             </div>
                                                             <Progress value={progress} className="h-1.5" />
@@ -210,7 +210,7 @@ export default function OutreachPage() {
                                             IA Outreach Optimizer Ativo
                                         </h3>
                                         <p className="text-indigo-700 text-sm opacity-80">
-                                            Seus e-mails estão sendo otimizados automaticamente para evitar filtros de spam e maximizar aberturas.
+                                            Seus e-mails estío sendo otimizados automaticamente para evitar filtros de spam e maximizar aberturas.
                                         </p>
                                     </div>
                                 </CardContent>
@@ -236,7 +236,7 @@ export default function OutreachPage() {
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Nome da Campanha</label>
                             <Input 
-                                placeholder="Ex: Prospecção Patente Grafeno V3" 
+                                placeholder="Ex: Prospecçío Patente Grafeno V3" 
                                 value={newName} 
                                 onChange={(e) => setNewName(e.target.value)}
                             />

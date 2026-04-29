@@ -45,7 +45,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     const data = await response.json();
     const embedding = data.data[0].embedding;
 
-    validateEmbedding(embedding); // ← Proteção extra
+    validateEmbedding(embedding); // ← Proteçío extra
 
     return embedding;
 }

@@ -19,8 +19,8 @@ interface WelcomeEmailProps {
   name: string;
 }
 
-export const WelcomeEmail = ({ name = "Novo UsuÃ¡rio" }: WelcomeEmailProps) => {
-  const previewText = `A Nexum deu as boas-vindas a vocÃª, ${name}!`;
+export const WelcomeEmail = ({ name = "Novo Usuário" }: WelcomeEmailProps) => {
+  const previewText = `A Nexum deu as boas-vindas a você, ${name}!`;
 
   return (
     <Html>
@@ -43,16 +43,16 @@ export const WelcomeEmail = ({ name = "Novo UsuÃ¡rio" }: WelcomeEmailProps) =>
             </Heading>
 
             <Text className="text-black text-[14px] leading-[24px]">
-              OlÃ¡ {name},
+              Olá {name},
             </Text>
 
             <Text className="text-black text-[14px] leading-[24px]">
-              Estamos muito felizes em ter vocÃª a bordo. A Nexum foi criada para ajudar vocÃª a vender muito mais usando InteligÃªncia Artificial de ponta.
+              Estamos muito felizes em ter você a bordo. A Nexum foi criada para ajudar você a vender muito mais usando Inteligência Artificial de ponta.
             </Text>
 
             <Section className="bg-slate-50 p-4 rounded-lg my-4 border border-slate-100">
               <Text className="text-slate-800 font-semibold mb-2 m-0">
-                Seus PrÃ³ximos Passos:
+                Seus Próximos Passos:
               </Text>
               <Text className="text-slate-600 text-sm mt-1 m-0">âœ“ Completar seu perfil de empresa</Text>
               <Text className="text-slate-600 text-sm mt-1 m-0">âœ“ Importar seus primeiros leads</Text>
@@ -69,7 +69,7 @@ export const WelcomeEmail = ({ name = "Novo UsuÃ¡rio" }: WelcomeEmailProps) =>
             </Section>
 
             <Text className="text-black text-[14px] leading-[24px]">
-              Se tiver qualquer dÃºvida, nosso suporte estÃ¡ disponÃ­vel 24/7.
+              Se tiver qualquer dúvida, nosso suporte está disponí­vel 24/7.
               <br />
               Basta responder a este email.
             </Text>

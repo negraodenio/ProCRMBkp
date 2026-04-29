@@ -11,7 +11,7 @@ export async function sendIntegratedWhatsAppMessage(phone: string, text: string)
     const { data: profile } = await supabase.from('profiles').select('organization_id').single();
 
     if (!profile?.organization_id) {
-        throw new Error("Sessão ou Organização não encontrada.");
+        throw new Error("Sessío ou Organizaçío nío encontrada.");
     }
 
     const instanceName = `bot-${profile.organization_id}`;

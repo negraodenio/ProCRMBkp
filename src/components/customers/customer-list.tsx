@@ -24,7 +24,7 @@ const customers = [
   {
     id: "1",
     name: "Empresa ABC Ltda",
-    contact: "João Silva",
+    contact: "Joío Silva",
     email: "joao@empresaabc.com.br",
     phone: "(11) 99999-9999",
     status: "Ativo",
@@ -41,7 +41,7 @@ const customers = [
   },
   {
     id: "3",
-    name: "Inovação Digital",
+    name: "Inovaçío Digital",
     contact: "Carlos Santos",
     email: "carlos@inovacaodigital.com.br",
     phone: "(31) 97777-7777",

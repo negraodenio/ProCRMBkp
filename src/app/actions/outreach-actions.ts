@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function getOutreachCampaigns() {
     const supabase = await createClient();
     const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return { success: false, error: "Não autorizado" };
+    if (!userData.user) return { success: false, error: "Nío autorizado" };
 
     const { data: profile } = await supabase
         .from("profiles")
@@ -13,7 +13,7 @@ export async function getOutreachCampaigns() {
         .eq("id", userData.user.id)
         .single();
 
-    if (!profile?.organization_id) return { success: false, error: "Org não encontrada" };
+    if (!profile?.organization_id) return { success: false, error: "Org nío encontrada" };
 
     const { data: campaigns, error } = await supabase
         .from("outreach_campaigns")
@@ -47,7 +47,7 @@ export async function createOutreachCampaign(params: {
 }) {
     const supabase = await createClient();
     const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return { success: false, error: "Não autorizado" };
+    if (!userData.user) return { success: false, error: "Nío autorizado" };
 
     const { data: profile } = await supabase
         .from("profiles")
@@ -55,7 +55,7 @@ export async function createOutreachCampaign(params: {
         .eq("id", userData.user.id)
         .single();
 
-    if (!profile?.organization_id) return { success: false, error: "Org não encontrada" };
+    if (!profile?.organization_id) return { success: false, error: "Org nío encontrada" };
 
     const { data: campaign, error } = await supabase
         .from("outreach_campaigns")

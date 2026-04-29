@@ -30,7 +30,7 @@ export function ClosePrediction({ probability, estimatedDays, factors }: ClosePr
     <Card className={cn("border-l-4", colors.border, colors.bg)}>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Previsão de Fechamento</CardTitle>
+          <CardTitle className="text-lg">Previsío de Fechamento</CardTitle>
           <Target className={cn("h-5 w-5", colors.text)} />
         </div>
       </CardHeader>
@@ -88,7 +88,7 @@ export function ClosePrediction({ probability, estimatedDays, factors }: ClosePr
               <div className="p-2 bg-white rounded border">
                 <div className="flex items-center gap-1 mb-1">
                   <Badge variant={factors.qualified ? "default" : "outline"} className="h-4 text-xs">
-                    {factors.qualified ? "Qualificado" : "Não Qualificado"}
+                    {factors.qualified ? "Qualificado" : "Nío Qualificado"}
                   </Badge>
                 </div>
               </div>
@@ -96,11 +96,11 @@ export function ClosePrediction({ probability, estimatedDays, factors }: ClosePr
           </div>
         )}
 
-        {/* Recomendação */}
+        {/* Recomendaçío */}
         <div className="pt-3 border-t">
-          <p className="text-xs font-semibold text-muted-foreground mb-1">Recomendação</p>
+          <p className="text-xs font-semibold text-muted-foreground mb-1">Recomendaçío</p>
           <p className="text-sm">
-            {probability >= 70 && "Priorize este lead! Alta chance de conversão."}
+            {probability >= 70 && "Priorize este lead! Alta chance de conversío."}
             {probability >= 40 && probability < 70 && "Continue o follow-up. Chance moderada."}
             {probability < 40 && "Requalifique ou reavalie a abordagem."}
           </p>

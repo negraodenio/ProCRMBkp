@@ -96,12 +96,12 @@ async function sendPaymentFailedEmail(email: string) {
 
           <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 30px; text-align: center;">
             <h2 style="color: #dc2626; margin: 0 0 10px;">⚠️ Pagamento Falhou</h2>
-            <p style="color: #7f1d1d; margin: 0;">Não conseguimos processar o teu pagamento.</p>
+            <p style="color: #7f1d1d; margin: 0;">Nío conseguimos processar o teu pagamento.</p>
           </div>
 
           <div style="padding: 30px 0;">
             <p>Olá,</p>
-            <p>O último pagamento da tua subscrição Nexum falhou. Para evitar a suspensão do teu plano, por favor atualiza o teu método de pagamento.</p>
+            <p>O último pagamento da tua subscriçío Nexum falhou. Para evitar a suspensío do teu plano, por favor atualiza o teu método de pagamento.</p>
 
             <div style="text-align: center; padding: 20px 0;">
               <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://Nexum.eu'}/dashboard/settings/billing"
@@ -129,7 +129,7 @@ async function sendCancellationEmail(email: string) {
     await resend.emails.send({
       from: "Nexum <noreply@Nexum.eu>",
       to: email,
-      subject: `😢 Subscrição cancelada — Nexum`,
+      subject: `😢 Subscriçío cancelada — Nexum`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; padding: 20px 0;">
@@ -137,13 +137,13 @@ async function sendCancellationEmail(email: string) {
           </div>
 
           <div style="background: #fefce8; border: 1px solid #fde68a; border-radius: 12px; padding: 30px; text-align: center;">
-            <h2 style="color: #a16207; margin: 0 0 10px;">Subscrição Cancelada</h2>
+            <h2 style="color: #a16207; margin: 0 0 10px;">Subscriçío Cancelada</h2>
             <p style="color: #854d0e; margin: 0;">Vamos sentir a tua falta!</p>
           </div>
 
           <div style="padding: 30px 0;">
             <p>Olá,</p>
-            <p>A tua subscrição Nexum foi cancelada. O teu acesso continuará ativo até ao fim do período atual.</p>
+            <p>A tua subscriçío Nexum foi cancelada. O teu acesso continuará ativo até ao fim do período atual.</p>
             <p>Se mudares de ideia, podes reativar a qualquer momento:</p>
 
             <div style="text-align: center; padding: 20px 0;">
@@ -359,7 +359,7 @@ export async function POST(req: Request) {
       }
 
       // ========================================
-      // INVOICE PAYMENT SUCCEEDED — Renovação OK
+      // INVOICE PAYMENT SUCCEEDED — Renovaçío OK
       // ========================================
       case "invoice.payment_succeeded": {
         const invoice = event.data.object as any;

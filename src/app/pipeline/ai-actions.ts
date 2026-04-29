@@ -105,7 +105,7 @@ export async function analyzeFunnelWithAI(data: {
 
     // Validations
     if (!data.proposals || data.proposals.length === 0) {
-        return { success: false, error: "Não há propostas suficientes no funil para analisar." }
+        return { success: false, error: "Nío há propostas suficientes no funil para analisar." }
     }
 
     // Prepare prompt data
@@ -120,7 +120,7 @@ export async function analyzeFunnelWithAI(data: {
     }).join('\n')
 
     const systemPrompt = `Você é um Diretor de Vendas Exigente e Estrategista.
-Sua missão é dar 3 insights curtos e de alto impacto para o vendedor olhar o funil comercial dele.
+Sua missío é dar 3 insights curtos e de alto impacto para o vendedor olhar o funil comercial dele.
 Analise os dados fornecidos e retorne EXATAMENTE um JSON na estrutura solicitada.`
 
     const userPrompt = `
@@ -133,8 +133,8 @@ DETALHES DAS PROPOSTAS:
 ${proposalsDetails}
 
 Retorne um objeto JSON com as seguintes chaves (em português brasileiro, textos curtos e diretos):
-1. "bottleneck": Aponta onde está o maior dinheiro parado ou a etapa mais engarrafada (ex: "Seu maior gargalo financeiro está na etapa de Negociação (R$ 45.000 parados).").
-2. "actionable_insight": Uma ação clara sobre as propostas esfriando/paradas (ex: "A proposta da empresa XYZ está parada há 15 dias, faça um follow-up urgente hoje.").
+1. "bottleneck": Aponta onde está o maior dinheiro parado ou a etapa mais engarrafada (ex: "Seu maior gargalo financeiro está na etapa de Negociaçío (R$ 45.000 parados).").
+2. "actionable_insight": Uma açío clara sobre as propostas esfriando/paradas (ex: "A proposta da empresa XYZ está parada há 15 dias, faça um follow-up urgente hoje.").
 3. "focus_deal": Aponta a principal oportunidade para focar a energia (ex: "Foque na proposta X, pois tem o maior ticket médio (R$ 15.000) e está perto do fechamento.").
 
 Responda SOMENTE o JSON válido.
@@ -145,7 +145,7 @@ Responda SOMENTE o JSON válido.
         const parsed = JSON.parse(aiResponse) as FunnelAnalysisResult;
 
         if (!parsed.bottleneck || !parsed.actionable_insight || !parsed.focus_deal) {
-            return { success: false, error: "A IA não retornou o formato esperado." }
+            return { success: false, error: "A IA nío retornou o formato esperado." }
         }
 
         return { success: true, data: parsed }

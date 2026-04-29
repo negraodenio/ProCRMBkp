@@ -49,7 +49,7 @@ const AI_TOOLS = [
     {
         id: "patent-to-pitch",
         title: "Pitch de Patente",
-        subtitle: "Comercialização de IP",
+        subtitle: "Comercializaçío de IP",
         description: "Estrutura uma proposta de valor comercial completa a partir dos dados técnicos de uma patente.",
         buttonText: "Gerar Pitch",
         icon: Briefcase,
@@ -64,7 +64,7 @@ const AI_TOOLS = [
         buttonText: "Descobrir Mercados",
         icon: TrendingUp,
         color: "from-emerald-500 to-teal-600",
-        badge: "Expansão",
+        badge: "Expansío",
     },
     {
         id: "generate-proposal",
@@ -79,8 +79,8 @@ const AI_TOOLS = [
     {
         id: "categorize-lead",
         title: "Scoring de Lead",
-        subtitle: "Qualificação automatizada",
-        description: "Atribui pontuação estratégica e recomenda a próxima ação com base no perfil do decisor mapeado.",
+        subtitle: "Qualificaçío automatizada",
+        description: "Atribui pontuaçío estratégica e recomenda a próxima açío com base no perfil do decisor mapeado.",
         buttonText: "Qualificar Lead",
         icon: Tag,
         color: "from-rose-500 to-pink-600",
@@ -191,11 +191,11 @@ function AIToolsContent() {
                         {inputMode === "research" ? (
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-slate-700">
-                                    Cole o texto da patente, artigo científico ou descrição da tecnologia:
+                                    Cole o texto da patente, artigo científico ou descriçío da tecnologia:
                                 </label>
                                 <textarea
                                     className="w-full h-36 p-4 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all resize-none"
-                                    placeholder="Ex: Esta invenção refere-se a um método inovador de síntese de polímeros biodegradáveis utilizando catálise enzimática..."
+                                    placeholder="Ex: Esta invençío refere-se a um método inovador de síntese de polímeros biodegradáveis utilizando catálise enzimática..."
                                     value={researchText}
                                     onChange={(e) => setResearchText(e.target.value)}
                                 />

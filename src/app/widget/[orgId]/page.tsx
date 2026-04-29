@@ -34,7 +34,7 @@ export default async function WidgetPage({ params }: WidgetPageProps) {
             <div className="flex h-screen items-center justify-center bg-slate-50">
                 <div className="text-center space-y-2">
                     <h1 className="text-xl font-bold text-slate-900">Link Inválido</h1>
-                    <p className="text-sm text-muted-foreground">Esta organização não foi encontrada.</p>
+                    <p className="text-sm text-muted-foreground">Esta organizaçío nío foi encontrada.</p>
                 </div>
             </div>
         );

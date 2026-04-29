@@ -64,7 +64,7 @@ export function Dashboard() {
           variant: "primary" as const,
         },
         {
-          title: "Taxa de Conversão",
+          title: "Taxa de Conversío",
           value: "0%",
           trend: 0,
           description: "Meta: 15%",
@@ -94,12 +94,12 @@ export function Dashboard() {
         {
           title: "Leads Hoje",
           value: "0",
-          description: "Captação diária",
+          description: "Captaçío diária",
           icon: Zap,
           variant: "default" as const,
         },
         {
-          title: "Taxa Qualificação",
+          title: "Taxa Qualificaçío",
           value: "0%",
           description: "de leads qualificados",
           icon: PieChart,

@@ -31,7 +31,7 @@ export async function createWorkflow(
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    throw new Error('Usuário não autenticado')
+    throw new Error('Usuário nío autenticado')
   }
 
   const { data, error } = await supabase
@@ -121,7 +121,7 @@ export async function markAlertAsRead(alertId: string) {
   }
 }
 
-// Função para criar alertas automaticamente
+// Funçío para criar alertas automaticamente
 export async function createSmartAlert(
   organizationId: string,
   type: string,
@@ -157,7 +157,7 @@ export async function createSmartAlert(
   return data
 }
 
-// Função para calcular probabilidade de fechamento
+// Funçío para calcular probabilidade de fechamento
 export async function calculateCloseProbability(lead: any, deal?: any): Promise<number> {
   let probability = 0
 
@@ -166,7 +166,7 @@ export async function calculateCloseProbability(lead: any, deal?: any): Promise<
     probability += (lead.score / 100) * 30
   }
 
-  // Engajamento (peso: 25%) - Usando updated_at como proxy se last_contact não existir
+  // Engajamento (peso: 25%) - Usando updated_at como proxy se last_contact nío existir
   const lastContact = lead.last_contact || lead.updated_at || lead.created_at
   if (lastContact) {
     const daysSinceContact = Math.floor(
@@ -183,7 +183,7 @@ export async function calculateCloseProbability(lead: any, deal?: any): Promise<
       'Contatado': 20,
       'Qualificado': 40,
       'Proposta': 70,
-      'Negociação': 85
+      'Negociaçío': 85
     }
     const stageScore = stageWeights[deal.stage] || 10
     probability += stageScore * 0.25

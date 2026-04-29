@@ -28,7 +28,7 @@ interface ConfirmDialogProps {
 export function ConfirmDialog({
   trigger,
   title = "Tem certeza?",
-  description = "Esta ação não pode ser desfeita.",
+  description = "Esta açío nío pode ser desfeita.",
   confirmLabel = "Confirmar",
   cancelLabel = "Cancelar",
   variant = "destructive",

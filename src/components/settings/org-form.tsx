@@ -25,7 +25,7 @@ export function OrgForm({ org }: OrgFormProps) {
         if (result.error) {
             toast.error(result.error);
         } else {
-            toast.success("Organização atualizada com sucesso!");
+            toast.success("Organizaçío atualizada com sucesso!");
         }
         setLoading(false);
     };
@@ -38,7 +38,7 @@ export function OrgForm({ org }: OrgFormProps) {
                     <Input id="name" name="name" defaultValue={org?.name || ""} placeholder="Nome da empresa" />
                 </div>
                 <div className="space-y-2">
-                    <Label>ID da Organização</Label>
+                    <Label>ID da Organizaçío</Label>
                     <div className="p-3 bg-slate-50 border rounded-md text-sm font-mono text-slate-500 select-all">
                         {org?.id}
                     </div>

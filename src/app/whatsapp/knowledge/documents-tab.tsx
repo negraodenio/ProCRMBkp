@@ -109,7 +109,7 @@ export function DocumentsTab({ documents, chunksCount }: DocumentsTabProps) {
           {documents.length > 0 && (
           <ConfirmDialog
             title="Limpar Base de Conhecimento"
-            description="ATENÇÃO: Isso excluirá TODOS os documentos e conhecimentos do robô. Esta ação não pode ser desfeita."
+            description="ATENÇíO: Isso excluirá TODOS os documentos e conhecimentos do robô. Esta açío nío pode ser desfeita."
             confirmLabel="Limpar Tudo"
             onConfirm={handlePurge}
             trigger={

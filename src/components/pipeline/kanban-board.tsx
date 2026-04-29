@@ -75,10 +75,10 @@ interface KanbanBoardProps {
 }
 
 const UFV_COMPLIANCE_STAGES: Record<number, string> = {
-    0: "Intake / Ingestão",
-    1: "Qualificação (TRL)",
+    0: "Intake / Ingestío",
+    1: "Qualificaçío (TRL)",
     2: "NDA / Confidencialidade",
-    3: "Negociação Técnica",
+    3: "Negociaçío Técnica",
     4: "Licenciamento / Contrato"
 };
 
@@ -195,7 +195,7 @@ export function KanbanBoard({ initialStages, initialProposals }: KanbanBoardProp
 
     const saveStageRename = async (stageId: string) => {
         if (!editingName.trim()) {
-            toast.error("Nome não pode ser vazio");
+            toast.error("Nome nío pode ser vazio");
             return;
         }
 
@@ -215,7 +215,7 @@ export function KanbanBoard({ initialStages, initialProposals }: KanbanBoardProp
         const stageProposals = proposals.filter(p => p.stage_id === stageId);
 
         if (stageProposals.length > 0) {
-            toast.error(`Não é possível excluir. Existem ${stageProposals.length} propostas nesta etapa.`);
+            toast.error(`Nío é possível excluir. Existem ${stageProposals.length} propostas nesta etapa.`);
             return;
         }
 
@@ -232,7 +232,7 @@ export function KanbanBoard({ initialStages, initialProposals }: KanbanBoardProp
 
     const handleCreateStage = async () => {
         if (!newStageName.trim()) {
-            toast.error("Nome não pode ser vazio");
+            toast.error("Nome nío pode ser vazio");
             return;
         }
 
@@ -240,7 +240,7 @@ export function KanbanBoard({ initialStages, initialProposals }: KanbanBoardProp
         const pipelineId = stages[0]?.pipeline_id;
         if (!pipelineId) {
             // Error case
-            toast.error("Pipeline não encontrado");
+            toast.error("Pipeline nío encontrado");
             return;
         }
 
@@ -468,7 +468,7 @@ export function KanbanBoard({ initialStages, initialProposals }: KanbanBoardProp
                             <Label htmlFor="stage-name">Nome da Etapa</Label>
                             <Input
                                 id="stage-name"
-                                placeholder="Ex: Apresentação"
+                                placeholder="Ex: Apresentaçío"
                                 value={newStageName}
                                 onChange={(e) => setNewStageName(e.target.value)}
                             />
@@ -499,7 +499,7 @@ export function KanbanBoard({ initialStages, initialProposals }: KanbanBoardProp
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-            {/* Modal de Edição da Proposta */}
+            {/* Modal de Ediçío da Proposta */}
             <Dialog open={!!editingProposal} onOpenChange={(open) => !open && setEditingProposal(null)}>
                 <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>

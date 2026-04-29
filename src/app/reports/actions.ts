@@ -26,7 +26,7 @@ export async function getAdvancedReportsData(
 
   // 1. Context & Auth
   const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error("Não autorizado");
+  if (authError || !user) throw new Error("Nío autorizado");
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -34,7 +34,7 @@ export async function getAdvancedReportsData(
     .eq("id", user.id)
     .single();
 
-  if (!profile?.organization_id) throw new Error("Organização não encontrada");
+  if (!profile?.organization_id) throw new Error("Organizaçío nío encontrada");
   const orgId = profile.organization_id;
 
   // Default date range: Last 30 days if not provided
@@ -268,7 +268,7 @@ export async function getReportsData() {
 
   // 1. Get User/Org Context
   const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error("Não autorizado");
+  if (authError || !user) throw new Error("Nío autorizado");
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -276,7 +276,7 @@ export async function getReportsData() {
     .eq("id", user.id)
     .single();
 
-  if (!profile?.organization_id) throw new Error("Organização não encontrada");
+  if (!profile?.organization_id) throw new Error("Organizaçío nío encontrada");
 
   const orgId = profile.organization_id;
 
@@ -366,7 +366,7 @@ function getSourceColor(source: string): string {
     "WhatsApp": "#22c55e",
     "Site": "#3b82f6",
     "Instagram": "#f97316",
-    "Indicação": "#eab308",
+    "Indicaçío": "#eab308",
     "Facebook": "#1877f2",
     "Google": "#ea4335",
     "Outros": "#94a3b8"

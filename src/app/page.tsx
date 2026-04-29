@@ -20,7 +20,7 @@ export default async function LandingPage() {
     const country = headersList.get("x-vercel-ip-country") || "PT";
     const isBR = country === "BR";
 
-    const currency = isBR ? "R$" : "€";
+    const currency = isBR ? "R$" : "â‚¬";
     const prices = {
         starter: isBR ? "129" : "29",
         pro: isBR ? "349" : "79",
@@ -59,18 +59,18 @@ export default async function LandingPage() {
 
                         <div className="relative z-10 space-y-10 max-w-5xl mx-auto">
                             <div className="inline-flex items-center gap-3 px-6 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-indigo-300 uppercase tracking-[0.3em]">
-                                Liderança Tecnológica em Inovação
+                                Liderança Tecnológica em Inovaçío
                             </div>
 
                             <h2 className="text-5xl md:text-8xl font-black leading-[0.9] tracking-tighter">
                                 Eleve o Impacto da Sua <br />
                                 <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent italic">
-                                    Instituição.
+                                    Instituiçío.
                                 </span>
                             </h2>
 
                             <p className="text-xl text-slate-400 font-medium max-w-3xl mx-auto leading-relaxed">
-                                Junte-se à elite das universidades que utilizam inteligência artificial para transformar pesquisa em progresso industrial e soberania nacional.
+                                Junte-se í  elite das universidades que utilizam inteligência artificial para transformar pesquisa em progresso industrial e soberania nacional.
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-8 justify-center pt-8">

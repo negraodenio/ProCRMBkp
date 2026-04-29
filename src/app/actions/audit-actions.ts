@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function getAuditLogs() {
     const supabase = await createClient();
     const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return { success: false, error: "Não autorizado" };
+    if (!userData.user) return { success: false, error: "Nío autorizado" };
 
     const { data: profile } = await supabase
         .from("profiles")
@@ -13,7 +13,7 @@ export async function getAuditLogs() {
         .eq("id", userData.user.id)
         .single();
 
-    if (!profile?.organization_id) return { success: false, error: "Org não encontrada" };
+    if (!profile?.organization_id) return { success: false, error: "Org nío encontrada" };
 
     const { data: logs, error } = await supabase
         .from("audit_logs")

@@ -39,7 +39,7 @@ export async function addNote(contactId: string, content: string, organizationId
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    throw new Error('Usuário não autenticado')
+    throw new Error('Usuário nío autenticado')
   }
 
   const { data, error } = await supabase

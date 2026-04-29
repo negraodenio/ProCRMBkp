@@ -49,7 +49,7 @@ export function UpgradeModal({
       }
     } catch (error) {
       console.error("Upgrade error:", error);
-      toast.error("Erro de conexão. Verifique sua internet.");
+      toast.error("Erro de conexío. Verifique sua internet.");
     } finally {
       setLoading(null);
     }

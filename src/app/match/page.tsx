@@ -77,7 +77,7 @@ export default function MatchPage() {
                 toast.error("Erro ao buscar matches: " + res.error);
             }
         } catch (err) {
-            toast.error("Erro na comunicação com o servidor.");
+            toast.error("Erro na comunicaçío com o servidor.");
         } finally {
             setLoading(false);
         }
@@ -109,7 +109,7 @@ export default function MatchPage() {
                 contactEmail: contact.email,
                 contactName: contact.name,
                 companyName: selectedMatch.name,
-                researchTitle: "Nova Tecnologia de Inovação", // Could be dynamic
+                researchTitle: "Nova Tecnologia de Inovaçío", // Could be dynamic
                 teaserContent: researchText.substring(0, 300) + "..."
             });
 
@@ -295,7 +295,7 @@ export default function MatchPage() {
                             Iniciar Engajamento: {selectedMatch?.name}
                         </DialogTitle>
                         <DialogDescription>
-                            Encontramos os seguintes tomadores de decisão para esta empresa.
+                            Encontramos os seguintes tomadores de decisío para esta empresa.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -342,7 +342,7 @@ export default function MatchPage() {
                         <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100 space-y-2">
                             <div className="flex items-center gap-2 text-[10px] text-indigo-700 font-black uppercase tracking-wider">
                                 <Sparkles className="h-3 w-3" />
-                                Sugestão de Abordagem (IA Optimized)
+                                Sugestío de Abordagem (IA Optimized)
                             </div>
                             <p className="text-xs text-indigo-900 leading-relaxed bg-white/50 p-3 rounded-lg border border-indigo-200/50">
                                 "Olá {contacts[0]?.name || 'Decisor'}, observei que a <strong>{selectedMatch?.name}</strong> está expandindo em {selectedMatch?.industry}. Desenvolvemos uma tecnologia de <strong>TRL 4</strong> que reduz custos operacionais em 15% via {researchText.substring(0, 30)}... Gostaria de um breve PDF com os dados técnicos?"

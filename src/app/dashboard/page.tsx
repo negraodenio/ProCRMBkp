@@ -58,7 +58,7 @@ export default async function DashboardPage() {
               Dashboard Analytics
             </h1>
             <p className="text-muted-foreground mt-1">
-              Visão geral do seu funil de vendas e performance
+              Visío geral do seu funil de vendas e performance
             </p>
           </div>
 
@@ -77,7 +77,7 @@ export default async function DashboardPage() {
               color="border-l-blue-500"
             />
             <MetricCard
-              title="Taxa de Conversão"
+              title="Taxa de Conversío"
               value={`${dashboardData.metrics.conversionRate}%`}
               change={5}
               icon={<Target className="h-5 w-5 text-green-600" />}

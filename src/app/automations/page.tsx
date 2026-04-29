@@ -46,10 +46,10 @@ interface Automation {
 
 const PIPELINE_STAGES = [
     { value: "new", label: "Novo / Primeiro Contato" },
-    { value: "contacted", label: "Contatado / Prospecção" },
+    { value: "contacted", label: "Contatado / Prospecçío" },
     { value: "qualified", label: "Qualificado" },
     { value: "proposal", label: "Proposta Enviada" },
-    { value: "negotiation", label: "Em Negociação" },
+    { value: "negotiation", label: "Em Negociaçío" },
     { value: "won", label: "Venda Fechada" },
     { value: "lost", label: "Lead Perdido" },
 ];
@@ -105,7 +105,7 @@ export default function AutomationsPage() {
         }
 
         if (!profile?.organization_id) {
-            toast.error("Organização não encontrada");
+            toast.error("Organizaçío nío encontrada");
             return;
         }
 
@@ -131,7 +131,7 @@ export default function AutomationsPage() {
 
         if (error) {
             console.error("Error creating automation:", error);
-            toast.error("Erro ao criar automação");
+            toast.error("Erro ao criar automaçío");
             return;
         }
 
@@ -186,7 +186,7 @@ export default function AutomationsPage() {
                             <div>
                                 <h1 className="text-3xl font-bold">Mensagens Automáticas</h1>
                                 <p className="text-muted-foreground">
-                                    Configure mensagens WhatsApp que são enviadas automaticamente quando o status de um lead muda
+                                    Configure mensagens WhatsApp que sío enviadas automaticamente quando o status de um lead muda
                                 </p>
                             </div>
                             <Dialog open={open} onOpenChange={setOpen}>
@@ -296,7 +296,7 @@ export default function AutomationsPage() {
                                     <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
                                     <h3 className="text-lg font-semibold mb-2">Nenhuma mensagem automática configurada</h3>
                                     <p className="text-muted-foreground text-center max-w-md">
-                                        Configure mensagens que são enviadas automaticamente quando o status de um lead muda no pipeline.
+                                        Configure mensagens que sío enviadas automaticamente quando o status de um lead muda no pipeline.
                                     </p>
                                 </CardContent>
                             </Card>
@@ -362,7 +362,7 @@ export default function AutomationsPage() {
                                                     Editar
                                                 </Button>
                                                 <ConfirmDialog
-                                                    title="Excluir Automação"
+                                                    title="Excluir Automaçío"
                                                     description="Tem certeza que deseja excluir esta mensagem automática?"
                                                     confirmLabel="Excluir"
                                                     onConfirm={() => deleteAutomation(automation.id)}

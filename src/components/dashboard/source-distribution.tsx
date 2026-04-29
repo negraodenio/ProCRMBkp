@@ -15,7 +15,7 @@ const LABELS: Record<string, string> = {
   whatsapp: 'WhatsApp',
   instagram: 'Instagram',
   website: 'Site',
-  referral: 'Indicação',
+  referral: 'Indicaçío',
   other: 'Outro'
 }
 

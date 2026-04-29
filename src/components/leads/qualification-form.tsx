@@ -31,7 +31,7 @@ export function QualificationForm({ leadId, organizationId, leadName, initialDat
 
   const [score, setScore] = useState(0);
 
-  // Lógica de cálculo de Score (Simulação baseada na imagem)
+  // Lógica de cálculo de Score (Simulaçío baseada na imagem)
   useEffect(() => {
     const s =
       (parseInt(responses.urgency) || 0) +
@@ -49,10 +49,10 @@ export function QualificationForm({ leadId, organizationId, leadName, initialDat
     setLoading(true);
     try {
       await saveLeadQualification(leadId, organizationId, responses, score);
-      toast.success('Qualificação salva com sucesso!');
+      toast.success('Qualificaçío salva com sucesso!');
     } catch (error) {
       console.error(error);
-      toast.error('Erro ao salvar qualificação');
+      toast.error('Erro ao salvar qualificaçío');
     } finally {
       setLoading(false);
     }
@@ -67,7 +67,7 @@ export function QualificationForm({ leadId, organizationId, leadName, initialDat
             <FileText className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-xl font-bold">Formulário de Qualificação</h2>
+            <h2 className="text-xl font-bold">Formulário de Qualificaçío</h2>
             <p className="text-xs text-muted-foreground italic">
               Qualificando: {leadName || "Lead sem nome"}
             </p>
@@ -90,7 +90,7 @@ export function QualificationForm({ leadId, organizationId, leadName, initialDat
 
           {/* Urgência */}
           <div className="space-y-3">
-            <Label className="text-sm font-semibold">Há quanto tempo busca solução?</Label>
+            <Label className="text-sm font-semibold">Há quanto tempo busca soluçío?</Label>
             <Select
               value={responses.urgency}
               onValueChange={(val) => setResponses({ ...responses, urgency: val })}
@@ -120,7 +120,7 @@ export function QualificationForm({ leadId, organizationId, leadName, initialDat
               </div>
               <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-muted/50 transition-colors cursor-pointer">
                 <RadioGroupItem value="10" id="decisor-nao" />
-                <Label htmlFor="decisor-nao" className="cursor-pointer">Não, preciso consultar / Coparticipação</Label>
+                <Label htmlFor="decisor-nao" className="cursor-pointer">Nío, preciso consultar / Coparticipaçío</Label>
               </div>
             </RadioGroup>
           </div>
@@ -157,7 +157,7 @@ export function QualificationForm({ leadId, organizationId, leadName, initialDat
               </div>
               <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-muted/50 transition-colors cursor-pointer">
                 <RadioGroupItem value="10" id="exp-nao" />
-                <Label htmlFor="exp-nao" className="cursor-pointer">Não / Raramente</Label>
+                <Label htmlFor="exp-nao" className="cursor-pointer">Nío / Raramente</Label>
               </div>
             </RadioGroup>
           </div>
@@ -169,7 +169,7 @@ export function QualificationForm({ leadId, organizationId, leadName, initialDat
           disabled={loading}
         >
           {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-          Calcular e Salvar Score de Qualificação
+          Calcular e Salvar Score de Qualificaçío
         </Button>
       </Card>
 
@@ -178,7 +178,7 @@ export function QualificationForm({ leadId, organizationId, leadName, initialDat
         <Card className="p-8 flex flex-col items-center justify-center space-y-12 glass-card h-fit sticky top-24">
           <div className="flex items-center gap-2 text-primary">
             <SparklesIcon className="h-5 w-5" />
-            <h3 className="font-bold text-lg">Score de Qualificação</h3>
+            <h3 className="font-bold text-lg">Score de Qualificaçío</h3>
           </div>
 
           <ScoreCircle score={score} />
@@ -189,7 +189,7 @@ export function QualificationForm({ leadId, organizationId, leadName, initialDat
             </p>
 
             <div className="space-y-2 pt-4 border-t border-white/10">
-              <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Classificação:</h4>
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Classificaçío:</h4>
               <div className="grid gap-2">
                 <div className="flex items-center gap-2 text-[10px]">
                   <div className="w-2 h-2 rounded-full bg-orange-500" />

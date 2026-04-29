@@ -94,7 +94,7 @@ export function SettingsPanel() {
         <TabsContent value="notifications" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Preferências de Notificação</CardTitle>
+              <CardTitle>Preferências de Notificaçío</CardTitle>
               <CardDescription>
                 Escolha como deseja receber notificações
               </CardDescription>

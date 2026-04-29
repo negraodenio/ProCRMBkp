@@ -399,7 +399,7 @@ export default function ChatPage() {
                                                 <div className="flex flex-col items-end gap-2">
                                                     <ConfirmDialog
                                                     title="Excluir Conversa"
-                                                    description="Tem certeza que deseja excluir esta conversa? Todas as mensagens serão perdidas."
+                                                    description="Tem certeza que deseja excluir esta conversa? Todas as mensagens serío perdidas."
                                                     confirmLabel="Excluir"
                                                     onConfirm={() => handleDelete(chat.id)}
                                                     trigger={
@@ -484,7 +484,7 @@ export default function ChatPage() {
                                         {/* Reset Button */}
                                         <ConfirmDialog
                                             title="Resetar Memória da IA"
-                                            description="Isso limpará todo o histórico desta conversa e a IA perderá o contexto deste contato. Esta ação não pode ser desfeita."
+                                            description="Isso limpará todo o histórico desta conversa e a IA perderá o contexto deste contato. Esta açío nío pode ser desfeita."
                                             confirmLabel="Resetar"
                                             onConfirm={() => handleClearHistory(selectedChat!.id)}
                                             trigger={
@@ -648,7 +648,7 @@ export default function ChatPage() {
                                 <div className="max-w-md space-y-4">
                                     <h2 className="text-2xl font-bold text-foreground">Conversas WhatsApp</h2>
                                     <p className="text-muted-foreground leading-relaxed italic border-l-4 border-primary/30 pl-4 py-2 bg-primary/10 rounded-r-xl text-sm">
-                                        "A comunicação eficiente é o segredo de um CRM de sucesso."
+                                        "A comunicaçío eficiente é o segredo de um CRM de sucesso."
                                     </p>
                                     <p className="text-sm text-muted-foreground pt-6">
                                         Selecione uma conversa ao lado para começar ou aguarde novas mensagens dos seus clientes.

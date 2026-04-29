@@ -17,7 +17,7 @@ export async function syncLattesProfile(researcherName: string) {
             .eq("id", userData.user.id)
             .single();
 
-        if (!profile?.organization_id) return { success: false, error: "Org não encontrada" };
+        if (!profile?.organization_id) return { success: false, error: "Org nío encontrada" };
 
         // 1. Search for researcher in our DB first
         const { data: existingResearcher } = await supabase
@@ -68,7 +68,7 @@ export async function syncLattesProfile(researcherName: string) {
             model: "fast",
             messages: [{
                 role: "system",
-                content: "Você é um assistente que simula a extração de dados do Currículo Lattes. Responda SOMENTE em JSON válido."
+                content: "Você é um assistente que simula a extraçío de dados do Currículo Lattes. Responda SOMENTE em JSON válido."
             }, {
                 role: "user",
                 content: `Gere um perfil acadêmico plausível para um pesquisador brasileiro chamado "${researcherName}". 
@@ -84,7 +84,7 @@ export async function syncLattesProfile(researcherName: string) {
         } catch {
             aiProfile = {
                 department: "Departamento Interdisciplinar",
-                expertise: ["Pesquisa Aplicada", "Inovação Tecnológica"],
+                expertise: ["Pesquisa Aplicada", "Inovaçío Tecnológica"],
                 publications_count: 25,
                 patents_count: 1,
                 h_index: 8
@@ -134,6 +134,6 @@ export async function syncLattesProfile(researcherName: string) {
         };
     } catch (error: any) {
         console.error("Lattes Sync Error:", error);
-        return { success: false, error: "Falha na sincronização: " + error.message };
+        return { success: false, error: "Falha na sincronizaçío: " + error.message };
     }
 }

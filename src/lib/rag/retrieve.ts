@@ -2,7 +2,7 @@ import { createOrgScopedServiceClient } from "@/lib/supabase/service-scoped";
 import { generateEmbedding } from "@/lib/ai/client";
 
 /**
- * Recupera o contexto do manual escopado por organização e query.
+ * Recupera o contexto do manual escopado por organizaçío e query.
  */
 export async function retrieveContextText(params: {
   orgId: string;

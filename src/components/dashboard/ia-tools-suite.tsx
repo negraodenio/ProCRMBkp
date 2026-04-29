@@ -16,7 +16,7 @@ const TOOLS = [
     {
         id: "patent-to-pitch",
         name: "Pitch de Patente",
-        subtitle: "Comercialização de IP",
+        subtitle: "Comercializaçío de IP",
         icon: Briefcase,
         color: "text-orange-600",
         bg: "bg-orange-50",
@@ -40,7 +40,7 @@ const TOOLS = [
     {
         id: "categorize-lead",
         name: "Scoring de Lead",
-        subtitle: "Qualificação automática",
+        subtitle: "Qualificaçío automática",
         icon: Tag,
         color: "text-rose-600",
         bg: "bg-rose-50",

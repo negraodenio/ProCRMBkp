@@ -88,7 +88,7 @@ export default function ClientsPage() {
         e.preventDefault();
 
         if (!profile?.organization_id) {
-            toast.error("Organização não encontrada");
+            toast.error("Organizaçío nío encontrada");
             return;
         }
 

@@ -56,7 +56,7 @@ export function ConversationTimeline({
 
   return (
     <div className="space-y-6">
-      {/* Header com botão de adicionar nota */}
+      {/* Header com botío de adicionar nota */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Histórico de Conversas</h3>
         <Dialog open={open} onOpenChange={setOpen}>

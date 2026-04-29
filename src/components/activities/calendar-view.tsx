@@ -10,17 +10,17 @@ import { ptBR } from "date-fns/locale";
 const activities = [
   {
     id: "1",
-    title: "Reunião de vendas",
+    title: "Reuniío de vendas",
     date: new Date(2023, 5, 15),
     time: "14:00",
-    type: "Reunião",
+    type: "Reuniío",
   },
   {
     id: "2",
-    title: "Ligação de follow-up",
+    title: "Ligaçío de follow-up",
     date: new Date(2023, 5, 14),
     time: "10:30",
-    type: "Ligação",
+    type: "Ligaçío",
   },
   {
     id: "3",

@@ -15,7 +15,7 @@ interface SummaryResult {
   confidence_score: number
 }
 
-// Configuração de providers com fallback
+// Configuraçío de providers com fallback
 const AI_PROVIDERS = [
   {
     name: 'SiliconFlow (DeepSeek)',
@@ -120,7 +120,7 @@ Retorne um JSON com:
   "summary": "Resumo em 2-3 linhas do contexto geral",
   "key_points": ["Ponto 1", "Ponto 2", "Ponto 3"],
   "sentiment": "positive" | "neutral" | "negative",
-  "next_action": "Próxima ação sugerida para o vendedor",
+  "next_action": "Próxima açío sugerida para o vendedor",
   "confidence_score": 0.85
 }
 
@@ -128,7 +128,7 @@ IMPORTANTE:
 - summary: máximo 200 caracteres
 - key_points: 3-5 pontos principais
 - sentiment: análise do tom geral da conversa
-- next_action: ação específica e prática
+- next_action: açío específica e prática
 - confidence_score: 0-1 baseado na qualidade dos dados`
 
   try {
@@ -136,7 +136,7 @@ IMPORTANTE:
     const result = JSON.parse(responseText)
 
     return {
-      summary: result.summary || 'Resumo não disponível',
+      summary: result.summary || 'Resumo nío disponível',
       key_points: result.key_points || [],
       sentiment: result.sentiment || 'neutral',
       next_action: result.next_action || 'Aguardar resposta do cliente',
@@ -156,7 +156,7 @@ export async function analyzeMessageIntent(message: string, history: Message[]):
 }> {
   const historyText = history.slice(-5).map(m => m.content).join('\n')
 
-  const systemPrompt = 'Você é um especialista em qualificação de leads e análise de intenção de compra.'
+  const systemPrompt = 'Você é um especialista em qualificaçío de leads e análise de intençío de compra.'
 
   const userPrompt = `Analise a mensagem mais recente de um lead e retorne em JSON:
 
@@ -169,16 +169,16 @@ Retorne:
 {
   "intent": "buying" | "questioning" | "objection" | "casual",
   "score": 0-100 (probabilidade de compra),
-  "suggested_action": "Ação específica para o vendedor",
+  "suggested_action": "Açío específica para o vendedor",
   "urgency": "high" | "medium" | "low"
 }
 
 CRITÉRIOS:
 - buying: menciona preço, prazo, contrato, "quero comprar"
 - questioning: pergunta sobre produto/serviço
-- objection: preocupação, dúvida, "mas..."
+- objection: preocupaçío, dúvida, "mas..."
 - casual: conversa informal
-- score: alto se mostrar intenção de compra
+- score: alto se mostrar intençío de compra
 - urgency: high se precisar resposta imediata`
 
   try {
@@ -192,7 +192,7 @@ CRITÉRIOS:
       urgency: result.urgency || 'low'
     }
   } catch (error) {
-    console.error('Erro ao analisar intenção:', error)
+    console.error('Erro ao analisar intençío:', error)
     throw new Error('Falha ao analisar mensagem')
   }
 }

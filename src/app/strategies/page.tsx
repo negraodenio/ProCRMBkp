@@ -45,7 +45,7 @@ interface Strategy {
 
 const STRATEGY_TYPES = [
     { value: "pos_venda", label: "Pós-Venda", icon: "🎯", color: "text-green-600" },
-    { value: "reativacao", label: "Reativação", icon: "🔄", color: "text-blue-600" },
+    { value: "reativacao", label: "Reativaçío", icon: "🔄", color: "text-blue-600" },
 ];
 
 const TRIGGERS = [
@@ -104,7 +104,7 @@ export default function StrategiesPage() {
             .single();
 
         if (!profile?.organization_id) {
-            toast.error("Organização não encontrada");
+            toast.error("Organizaçío nío encontrada");
             return;
         }
 
@@ -192,7 +192,7 @@ export default function StrategiesPage() {
                             <div>
                                 <h1 className="text-3xl font-bold">Estratégias</h1>
                                 <p className="text-muted-foreground">
-                                    Automações de pós-venda e reativação
+                                    Automações de pós-venda e reativaçío
                                 </p>
                             </div>
                             <Dialog open={open} onOpenChange={setOpen}>
@@ -316,16 +316,16 @@ export default function StrategiesPage() {
                                             Estratégias de Marketing
                                         </CardTitle>
                                         <CardDescription>
-                                            Gerencie suas automações de pós-venda e reativação
+                                            Gerencie suas automações de pós-venda e reativaçío
                                         </CardDescription>
                                     </div>
                                     <div className="flex items-center gap-4">
                                         <div className="text-center">
-                                            <p className="text-sm text-muted-foreground">Execução Automática</p>
+                                            <p className="text-sm text-muted-foreground">Execuçío Automática</p>
                                             <div className="flex items-center gap-2">
                                                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                                                 <span className="text-sm font-medium text-green-600">
-                                                    Verificação de gatilhos ativa...
+                                                    Verificaçío de gatilhos ativa...
                                                 </span>
                                             </div>
                                         </div>
@@ -354,7 +354,7 @@ export default function StrategiesPage() {
                             </Card>
                             <Card>
                                 <CardContent className="pt-6 text-center">
-                                    <p className="text-sm text-muted-foreground">Reativação</p>
+                                    <p className="text-sm text-muted-foreground">Reativaçío</p>
                                     <p className="text-3xl font-bold text-orange-600">{stats.reativacao}</p>
                                     <div className="flex items-center justify-center gap-1 text-muted-foreground">
                                         <RefreshCw className="h-4 w-4" />
@@ -372,7 +372,7 @@ export default function StrategiesPage() {
                                     <Target className="h-12 w-12 text-muted-foreground mb-4" />
                                     <h3 className="text-lg font-semibold mb-2">Nenhuma estratégia configurada</h3>
                                     <p className="text-muted-foreground text-center max-w-md">
-                                        Crie estratégias de pós-venda e reativação para automatizar o relacionamento com seus clientes.
+                                        Crie estratégias de pós-venda e reativaçío para automatizar o relacionamento com seus clientes.
                                     </p>
                                 </CardContent>
                             </Card>
@@ -433,7 +433,7 @@ export default function StrategiesPage() {
                                                     </Button>
                                                     <ConfirmDialog
                                                         title="Excluir Estratégia"
-                                                        description="Tem certeza que deseja excluir esta estratégia? Esta ação não pode ser desfeita."
+                                                        description="Tem certeza que deseja excluir esta estratégia? Esta açío nío pode ser desfeita."
                                                         confirmLabel="Excluir"
                                                         onConfirm={() => deleteStrategy(strategy.id)}
                                                         trigger={

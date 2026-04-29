@@ -20,7 +20,7 @@ export function RealTimeInsights({ hotLeads, coldLeads, closingDeals, revenueAtR
           <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
           Insights em Tempo Real
         </CardTitle>
-        <p className="text-sm text-muted-foreground">Alertas e oportunidades que requerem sua atenção imediata.</p>
+        <p className="text-sm text-muted-foreground">Alertas e oportunidades que requerem sua atençío imediata.</p>
       </CardHeader>
       <CardContent className="space-y-3">
         {/* Leads Quentes */}
@@ -66,7 +66,7 @@ export function RealTimeInsights({ hotLeads, coldLeads, closingDeals, revenueAtR
                   <AlertCircle className="h-4 w-4 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Em Negociação</p>
+                  <p className="text-sm font-medium">Em Negociaçío</p>
                   <p className="text-xs text-muted-foreground">Prestes a fechar</p>
                 </div>
               </div>
@@ -84,7 +84,7 @@ export function RealTimeInsights({ hotLeads, coldLeads, closingDeals, revenueAtR
                   <DollarSign className="h-4 w-4 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Receita em Negociação</p>
+                  <p className="text-sm font-medium">Receita em Negociaçío</p>
                   <p className="text-xs text-muted-foreground">Valor total</p>
                 </div>
               </div>

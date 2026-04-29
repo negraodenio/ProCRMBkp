@@ -9,7 +9,7 @@ export async function searchGrants(researchTopic: string) {
     try {
         const supabase = await createClient();
         const { data: userData } = await supabase.auth.getUser();
-        if (!userData.user) return { success: false, error: "Não autorizado" };
+        if (!userData.user) return { success: false, error: "Nío autorizado" };
 
         const { data: profile } = await supabase
             .from("profiles")
@@ -17,7 +17,7 @@ export async function searchGrants(researchTopic: string) {
             .eq("id", userData.user.id)
             .single();
 
-        if (!profile?.organization_id) return { success: false, error: "Org não encontrada" };
+        if (!profile?.organization_id) return { success: false, error: "Org nío encontrada" };
 
         // 1. Fetch grants from DB
         const { data: dbGrants, error } = await supabase
@@ -36,7 +36,7 @@ export async function searchGrants(researchTopic: string) {
 Edital: ${grant.name} (${grant.agency}) - ${grant.description}
 Pesquisa do Usuário: ${researchTopic}
 
-Em exatamente 2 frases, explique por que este edital é (ou não é) adequado para esta pesquisa. 
+Em exatamente 2 frases, explique por que este edital é (ou nío é) adequado para esta pesquisa. 
 Mencione aspectos específicos do edital que conectam com a pesquisa. Responda em Português do Brasil.`;
 
                 try {

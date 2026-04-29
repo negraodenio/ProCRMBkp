@@ -22,13 +22,13 @@ export async function POST(request: NextRequest) {
     const phone = message.key?.remoteJid?.replace('@s.whatsapp.net', '')
     const messageText = message.message?.conversation ||
                        message.message?.extendedTextMessage?.text ||
-                       '[Mídia não suportada]'
+                       '[Mídia nío suportada]'
 
     const isFromMe = message.key?.fromMe || false
     const direction = isFromMe ? 'outbound' : 'inbound'
 
     if (!phone) {
-      console.log('[Webhook] Telefone não encontrado')
+      console.log('[Webhook] Telefone nío encontrado')
       return NextResponse.json({ error: 'No phone number' }, { status: 400 })
     }
 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (!lead) {
-      console.log(`[Webhook] Lead não encontrado para telefone: ${phone}`)
+      console.log(`[Webhook] Lead nío encontrado para telefone: ${phone}`)
       return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
     }
 
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`[Webhook] Mensagem registrada no histórico para lead ${lead.name}`)
 
-    // 2. Se for mensagem do cliente, analisar intenção com IA
+    // 2. Se for mensagem do cliente, analisar intençío com IA
     if (direction === 'inbound') {
       try {
         // Buscar histórico recente
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 
         const analysis = await analyzeMessageIntent(messageText, history || [])
 
-        console.log(`[Webhook] Análise de intenção:`, analysis)
+        console.log(`[Webhook] Análise de intençío:`, analysis)
 
         // 3. Se detectou lead quente, criar alerta
         if (analysis.urgency === 'high' || analysis.score > 70) {
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
             lead.organization_id,
             'hot_lead',
             `Lead Quente: ${lead.name}`,
-            `Detectada alta intenção de compra (${analysis.score}%). ${analysis.suggested_action}`,
+            `Detectada alta intençío de compra (${analysis.score}%). ${analysis.suggested_action}`,
             'critical',
             lead.id,
             undefined,

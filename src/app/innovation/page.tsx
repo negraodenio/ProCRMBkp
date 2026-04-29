@@ -38,12 +38,12 @@ export default function InnovationLandingPage() {
                         <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
                             <Link href="/register">
                                 <Button size="lg" className="bg-orange-600 hover:bg-orange-700 text-white text-xl h-20 px-12 rounded-2xl shadow-2xl shadow-orange-600/20 transition-all hover:scale-105">
-                                    Agendar Demonstração
+                                    Agendar Demonstraçío
                                     <ArrowRight className="ml-2 h-6 w-6" />
                                 </Button>
                             </Link>
                             <Button size="lg" variant="outline" className="border-slate-800 bg-slate-900/50 backdrop-blur-xl text-white text-xl h-20 px-12 rounded-2xl">
-                                Ver Autopilot em Ação
+                                Ver Autopilot em Açío
                             </Button>
                         </div>
 
@@ -66,13 +66,13 @@ export default function InnovationLandingPage() {
                         <FeatureCard 
                             icon={Zap} 
                             title="GERAR" 
-                            description="Tradução automática de patentes e papers em Teasers de Mercado altamente persuasivos."
+                            description="Traduçío automática de patentes e papers em Teasers de Mercado altamente persuasivos."
                             color="orange"
                         />
                         <FeatureCard 
                             icon={Target} 
                             title="MATCH" 
-                            description="Motor vetorial que cruza sua tecnologia com o DNA de inovação das maiores empresas do mundo."
+                            description="Motor vetorial que cruza sua tecnologia com o DNA de inovaçío das maiores empresas do mundo."
                             color="amber"
                         />
                         <FeatureCard 
@@ -93,11 +93,11 @@ export default function InnovationLandingPage() {
                             </div>
                             <h2 className="text-4xl md:text-5xl font-black leading-tight">
                                 Autopilot: <br />
-                                <span className="text-orange-500">Do Paper à Reunião</span> <br />
+                                <span className="text-orange-500">Do Paper à Reuniío</span> <br />
                                 em tempo recorde.
                             </h2>
                             <p className="text-slate-400 text-lg">
-                                Esqueça semanas de prospecção manual. Nosso Autopilot mapeia o ecossistema, 
+                                Esqueça semanas de prospecçío manual. Nosso Autopilot mapeia o ecossistema, 
                                 identifica o fit estratégico e prepara a campanha de contato em um único workflow inteligente.
                             </p>
                             <ul className="space-y-4">
@@ -107,11 +107,11 @@ export default function InnovationLandingPage() {
                                 </li>
                                 <li className="flex items-center gap-3 text-slate-200">
                                     <div className="h-2 w-2 bg-orange-500 rounded-full" />
-                                    Geração de racional estratégico para cada match
+                                    Geraçío de racional estratégico para cada match
                                 </li>
                                 <li className="flex items-center gap-3 text-slate-200">
                                     <div className="h-2 w-2 bg-orange-500 rounded-full" />
-                                    Dashboard de Mission Control para gestão de ativos
+                                    Dashboard de Mission Control para gestío de ativos
                                 </li>
                             </ul>
                         </div>
@@ -140,7 +140,7 @@ export default function InnovationLandingPage() {
                 <section className="py-32 text-center container mx-auto px-4">
                     <h2 className="text-4xl md:text-7xl font-black mb-12">
                         Pronto para liderar a <br />
-                        <span className="italic underline decoration-orange-600 underline-offset-8">Próxima Onda</span> de inovação?
+                        <span className="italic underline decoration-orange-600 underline-offset-8">Próxima Onda</span> de inovaçío?
                     </h2>
                     <Link href="/register">
                         <Button size="lg" className="bg-white text-slate-950 hover:bg-slate-200 text-2xl h-24 px-16 rounded-[2rem] font-black transition-all hover:scale-105 active:scale-95">

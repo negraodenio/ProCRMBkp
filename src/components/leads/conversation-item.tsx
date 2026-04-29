@@ -37,13 +37,13 @@ const typeConfig = {
   },
   call: {
     icon: Phone,
-    label: 'Ligação',
+    label: 'Ligaçío',
     color: 'text-orange-600',
     bg: 'bg-orange-100'
   },
   meeting: {
     icon: User,
-    label: 'Reunião',
+    label: 'Reuniío',
     color: 'text-pink-600',
     bg: 'bg-pink-100'
   },

@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function searchPeople(query: string) {
     const supabase = await createClient();
     const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return { success: false, error: "Não autorizado" };
+    if (!userData.user) return { success: false, error: "Nío autorizado" };
 
     const { data: profile } = await supabase
         .from("profiles")
@@ -13,7 +13,7 @@ export async function searchPeople(query: string) {
         .eq("id", userData.user.id)
         .single();
 
-    if (!profile?.organization_id) return { success: false, error: "Organização não encontrada" };
+    if (!profile?.organization_id) return { success: false, error: "Organizaçío nío encontrada" };
 
     const { data: contacts, error } = await supabase
         .from("contacts")
@@ -31,7 +31,7 @@ export async function searchPeople(query: string) {
 export async function convertToLead(contactId: string) {
     const supabase = await createClient();
     const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return { success: false, error: "Não autorizado" };
+    if (!userData.user) return { success: false, error: "Nío autorizado" };
 
     const { error } = await supabase
         .from("contacts")

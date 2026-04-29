@@ -8,7 +8,7 @@ export async function updateProfile(formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-        return { error: "Não autorizado" };
+        return { error: "Nío autorizado" };
     }
 
     const full_name = formData.get("full_name") as string;
@@ -41,11 +41,11 @@ export async function updateOrganization(formData: FormData) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) return { error: "Não autorizado" };
+    if (!user) return { error: "Nío autorizado" };
 
     // Get user's org id
     const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
-    if (!profile?.organization_id) return { error: "Organização não encontrada" };
+    if (!profile?.organization_id) return { error: "Organizaçío nío encontrada" };
 
     const name = formData.get("name") as string;
     // Add other fields if available in DB (address, etc)
@@ -62,7 +62,7 @@ export async function updateOrganization(formData: FormData) {
 
     if (error) {
         console.error("Error updating org:", error);
-        return { error: "Erro ao atualizar organização" };
+        return { error: "Erro ao atualizar organizaçío" };
     }
 
     revalidatePath("/settings/organization");

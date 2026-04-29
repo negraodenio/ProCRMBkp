@@ -3,9 +3,9 @@ export default function PrivacyPage() {
         <div className="container mx-auto py-10 px-4 max-w-4xl">
             <h1 className="text-3xl font-bold mb-6">Política de Privacidade</h1>
             <div className="prose dark:prose-invert">
-                <p>Última atualização: {new Date().toLocaleDateString()}</p>
+                <p>Última atualizaçío: {new Date().toLocaleDateString()}</p>
 
-                <h2>1. Introdução</h2>
+                <h2>1. Introduçío</h2>
                 <p>A sua privacidade é importante para nós. Esta política explica como coletamos, usamos e protegemos seus dados.</p>
 
                 <h2>2. Dados Coletados</h2>
@@ -13,7 +13,7 @@ export default function PrivacyPage() {
                 <ul>
                     <li>Dados de conta (Nome, Email, Telefone)</li>
                     <li>Dados de uso do CRM (Leads, Contatos)</li>
-                    <li>Mensagens processadas via integração WhatsApp (para funcionalidade do chat)</li>
+                    <li>Mensagens processadas via integraçío WhatsApp (para funcionalidade do chat)</li>
                 </ul>
 
                 <h2>3. Uso dos Dados</h2>
@@ -25,10 +25,10 @@ export default function PrivacyPage() {
                 </ul>
 
                 <h2>4. Compartilhamento</h2>
-                <p>Não vendemos seus dados pessoais. Compartilhamos apenas com processadores essenciais (ex: Stripe, Provedores de IA LLM) sob estritos acordos de confidencialidade.</p>
+                <p>Nío vendemos seus dados pessoais. Compartilhamos apenas com processadores essenciais (ex: Stripe, Provedores de IA LLM) sob estritos acordos de confidencialidade.</p>
 
                 <h2>5. Seus Direitos</h2>
-                <p>Você pode solicitar a exclusão ou exportação dos seus dados a qualquer momento entrando em contato com o suporte.</p>
+                <p>Você pode solicitar a exclusío ou exportaçío dos seus dados a qualquer momento entrando em contato com o suporte.</p>
             </div>
         </div>
     );

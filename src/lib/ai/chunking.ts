@@ -10,7 +10,7 @@ export function splitTextWithOverlap(text: string, options: ChunkOptions = { chu
     // We want to keep the separators to know where breaks happened
     const semanticSplit = text
         .replace(/\r\n/g, "\n") // Normalize newlines
-        .split(/(\n\s*\n|(?=^#{1,3}\s)|(?=^[A-ZÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+:\s))/gm)
+        .split(/(\n\s*\n|(?=^#{1,3}\s)|(?=^[A-ZÁÀÂíÉÈÍÏÓÔÕÖÚÇÑ ]+:\s))/gm)
         .filter(t => t.trim().length > 0);
 
     const chunks: string[] = [];

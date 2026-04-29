@@ -75,7 +75,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
   const engagementWeight = (engagementScore / 100) * 25
 
   const stageWeights: Record<string, number> = {
-    'Novo': 10, 'Contatado': 20, 'Qualificado': 40, 'Proposta': 70, 'Negociação': 85
+    'Novo': 10, 'Contatado': 20, 'Qualificado': 40, 'Proposta': 70, 'Negociaçío': 85
   }
   const stageName = (deal?.stages as any)?.name || 'Novo'
   const stageScore = stageWeights[stageName] || 10
@@ -154,7 +154,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
               {lead.score !== null && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Score de Qualificação</CardTitle>
+                    <CardTitle className="text-lg">Score de Qualificaçío</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center gap-4">
@@ -172,7 +172,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
                 </Card>
               )}
 
-              {/* Previsão de Fechamento */}
+              {/* Previsío de Fechamento */}
               <ClosePrediction
                 probability={probability}
                 estimatedDays={estimatedDays}

@@ -10,7 +10,7 @@ const IA_ACTION_EXAMPLES = [
   {
     title: "Market Strategy (GTM)",
     icon: Target,
-    content: "Estratégia gerada para Patente Bio-Polímero: Foco em Indústria de Embalagens (ROI 280%). Pricing sugerido: Licenciamento com 3% Royalties.",
+    content: "Estratégia gerada para Patente Bio-Polí­mero: Foco em Indústria de Embalagens (ROI 280%). Pricing sugerido: Licenciamento com 3% Royalties.",
     color: "text-emerald-600",
     bg: "bg-emerald-50",
     border: "border-emerald-100"
@@ -18,7 +18,7 @@ const IA_ACTION_EXAMPLES = [
   {
     title: "IA Priority Scoring",
     icon: Sparkles,
-    content: "Tecnologia 'Sensor IoT' atingiu Score 92/100. Alta aderência com o roadmap da Siemens detected via análise semântica.",
+    content: "Tecnologia 'Sensor IoT' atingiu Score 92/100. Alta aderência com o roadmap da Siemens detected via análise semí¢ntica.",
     color: "text-indigo-600",
     bg: "bg-indigo-50",
     border: "border-indigo-100"
@@ -71,7 +71,7 @@ export function HeroSection() {
 
             <p className="text-xl text-slate-400 leading-relaxed max-w-2xl font-medium">
               O motor de inteligência artificial desenhado para **Universidades e NITs** que buscam liderança global. 
-              Transforme ativos de pesquisa em inovação industrial com precisão absoluta e conformidade NIST/LGPD.
+              Transforme ativos de pesquisa em inovaçío industrial com precisío absoluta e conformidade NIST/LGPD.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6">
@@ -98,7 +98,7 @@ export function HeroSection() {
                     </div>
                 </div>
                 <p className="text-sm text-slate-500 font-medium italic">
-                    Conectando os principais centros de excelência do país.
+                    Conectando os principais centros de excelência do paí­s.
                 </p>
             </div>
           </div>

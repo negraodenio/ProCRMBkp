@@ -13,14 +13,14 @@ export async function sendMessageAction(conversationId: string, text: string) {
         const { data: authData, error: authError } = await supabase.auth.getUser();
         if (authError || !authData?.user) {
             console.error("[Action] Auth Error:", authError);
-            return { error: "Não autorizado" };
+            return { error: "Nío autorizado" };
         }
         const user = authData.user;
 
         const { data: profile, error: profErr } = await supabase.from("profiles").select("organization_id, full_name").eq("id", user.id).maybeSingle();
         if (profErr || !profile) {
             console.error("[Action] Profile Error:", profErr);
-            return { error: "Perfil ou organização não encontrados" };
+            return { error: "Perfil ou organizaçío nío encontrados" };
         }
 
         // 2. Get Conversation Details (Phone)
@@ -32,7 +32,7 @@ export async function sendMessageAction(conversationId: string, text: string) {
 
         if (convErr || !conversation) {
             console.error("[Action] Conv Error:", convErr);
-            return { error: "Conversa não encontrada" };
+            return { error: "Conversa nío encontrada" };
         }
 
         // 3. Derive Instance Name - Standardized
@@ -87,13 +87,13 @@ export async function deleteConversationAction(conversationId: string) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) return { error: "Não autorizado" };
+    if (!user) return { error: "Nío autorizado" };
 
     try {
         // Verify ownership via organization
         const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
 
-        if (!profile?.organization_id) return { error: "Organização não encontrada" };
+        if (!profile?.organization_id) return { error: "Organizaçío nío encontrada" };
 
         const { data: conversation } = await supabase
             .from("conversations")
@@ -102,7 +102,7 @@ export async function deleteConversationAction(conversationId: string) {
             .eq("organization_id", profile.organization_id)
             .single();
 
-        if (!conversation) return { error: "Conversa não encontrada ou sem permissão" };
+        if (!conversation) return { error: "Conversa nío encontrada ou sem permissío" };
 
         // Delete messages first (if not cascading)
         await supabase.from("messages").delete().eq("conversation_id", conversationId);
@@ -142,10 +142,10 @@ export async function clearChatMessagesAction(conversationId: string) {
 
         // 1. Auth Check
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return { error: "Não autorizado" };
+        if (!user) return { error: "Nío autorizado" };
 
         const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
-        if (!profile?.organization_id) return { error: "Organização não encontrada" };
+        if (!profile?.organization_id) return { error: "Organizaçío nío encontrada" };
 
         // 2. Admin Client to bypass RLS and ensure complete deletion
         const adminClient = createServiceRoleClient();
@@ -158,7 +158,7 @@ export async function clearChatMessagesAction(conversationId: string) {
             .eq("organization_id", profile.organization_id)
             .single();
 
-        if (!conversation) return { error: "Conversa não encontrada ou sem permissão" };
+        if (!conversation) return { error: "Conversa nío encontrada ou sem permissío" };
 
         // 4. Delete messages
         const { error, count } = await adminClient
@@ -187,10 +187,10 @@ export async function clearChatMessagesAction(conversationId: string) {
 export async function getTransferData() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { error: "Não autorizado" };
+    if (!user) return { error: "Nío autorizado" };
 
     const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
-    if (!profile) return { error: "Perfil não encontrado" };
+    if (!profile) return { error: "Perfil nío encontrado" };
 
     const [departmentsRes, usersRes] = await Promise.all([
         supabase.from("departments").select("*").eq("organization_id", profile.organization_id),
@@ -211,11 +211,11 @@ export async function transferConversation(
 ) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { error: "Não autorizado" };
+    if (!user) return { error: "Nío autorizado" };
 
     try {
         const { data: profile } = await supabase.from("profiles").select("organization_id, full_name").eq("id", user.id).single();
-        if (!profile) return { error: "Perfil não encontrado" };
+        if (!profile) return { error: "Perfil nío encontrado" };
 
         // 1. Update Conversation
         const updateData: any = {

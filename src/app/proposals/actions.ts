@@ -87,7 +87,7 @@ export async function getProposal(proposalId: string) {
 
   if (error) {
     console.error('Error fetching proposal:', error)
-    throw new Error('Proposta não encontrada')
+    throw new Error('Proposta nío encontrada')
   }
 
   return data
@@ -140,7 +140,7 @@ export async function trackProposalView(proposalId: string) {
     view_count: (proposal.view_count || 0) + 1
   }
 
-  // Se é a primeira visualização
+  // Se é a primeira visualizaçío
   if (!proposal.viewed_at) {
     updates.viewed_at = new Date().toISOString()
     updates.status = 'viewed'
@@ -171,12 +171,12 @@ export async function getProposalTemplates(organizationId: string) {
 }
 
 export async function generateProposalPDF(proposalId: string) {
-  // Esta função seria implementada com uma biblioteca como jsPDF ou Puppeteer
+  // Esta funçío seria implementada com uma biblioteca como jsPDF ou Puppeteer
   // Por enquanto, retorna um placeholder
 
   const proposal = await getProposal(proposalId)
 
-  // TODO: Implementar geração real de PDF
+  // TODO: Implementar geraçío real de PDF
   // Opções:
   // 1. jsPDF no cliente
   // 2. Puppeteer no servidor (gera PDF de HTML)

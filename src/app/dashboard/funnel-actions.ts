@@ -83,7 +83,7 @@ export async function getRealTimeInsights(organizationId: string) {
     .eq('type', 'lead')
     .lt('last_contact', threeDaysAgo.toISOString())
 
-  // Deals próximos de fechar (etapa Negociação/Proposta) usando inner join seguro
+  // Deals próximos de fechar (etapa Negociaçío/Proposta) usando inner join seguro
   const { data: closingDealsData } = await supabase
     .from('deals')
     .select('value, stages!inner(name)')

@@ -202,7 +202,7 @@ export function PipelineView({
                                         </div>
                                     ) : (
                                         <>
-                                            <div className="font-medium text-sm flex-1">{p.name} {p.is_default && <span className="text-[10px] bg-muted px-1 rounded ml-2">Padrão</span>}</div>
+                                            <div className="font-medium text-sm flex-1">{p.name} {p.is_default && <span className="text-[10px] bg-muted px-1 rounded ml-2">Padrío</span>}</div>
                                             <div className="flex items-center gap-1">
                                                 <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => {
                                                     setEditingPipelineId(p.id);
@@ -212,7 +212,7 @@ export function PipelineView({
                                                 </Button>
                                                 <ConfirmDialog
                                                     title="Excluir Funil"
-                                                    description="Tem certeza que deseja excluir este funil? Todas as etapas serão removidas."
+                                                    description="Tem certeza que deseja excluir este funil? Todas as etapas serío removidas."
                                                     confirmLabel="Excluir"
                                                     onConfirm={() => handleDeletePipeline(p.id)}
                                                     trigger={
@@ -293,7 +293,7 @@ export function PipelineView({
                             {/* Insight 3 */}
                             <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-xl">
                                 <h4 className="text-blue-800 font-bold text-sm uppercase tracking-wide mb-2 flex items-center gap-2">
-                                    <span className="text-blue-500">⚡</span> Ação Imediata
+                                    <span className="text-blue-500">⚡</span> Açío Imediata
                                 </h4>
                                 <p className="text-slate-700 font-medium">{analysisResult.actionable_insight}</p>
                             </div>

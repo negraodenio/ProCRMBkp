@@ -59,7 +59,7 @@ export default function ReportsPage() {
       } catch (error) {
         console.error("Erro ao carregar relatórios:", error);
         toast.error("Erro ao carregar dados", {
-            description: "Não foi possível gerar o relatório. Tente novamente."
+            description: "Nío foi possível gerar o relatório. Tente novamente."
         });
       } finally {
         setLoading(false);
@@ -105,7 +105,7 @@ export default function ReportsPage() {
                </div>
                <h3 className="text-lg font-semibold">Falha ao carregar relatórios</h3>
                <p className="text-muted-foreground max-w-sm">
-                 Não foi possível obter os dados de vendas. Tente atualizar a página ou verifique sua conexão.
+                 Nío foi possível obter os dados de vendas. Tente atualizar a página ou verifique sua conexío.
                </p>
                <Button onClick={() => window.location.reload()} variant="outline">
                  Tentar Novamente
@@ -130,7 +130,7 @@ export default function ReportsPage() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Relatórios de Vendas (Live)</h1>
-              <p className="text-muted-foreground">Visão estratégica de performance e receita.</p>
+              <p className="text-muted-foreground">Visío estratégica de performance e receita.</p>
             </div>
             <div className="flex items-center gap-2">
                 <DatePickerWithRange date={date} setDate={setDate} />
@@ -162,7 +162,7 @@ export default function ReportsPage() {
               <CardContent>
                 <div className="text-2xl font-bold text-primary/80">{formatCurrency(stats.activePipeline)}</div>
                 <p className="text-xs text-muted-foreground">
-                  Em negociação aberta
+                  Em negociaçío aberta
                 </p>
               </CardContent>
             </Card>
@@ -182,7 +182,7 @@ export default function ReportsPage() {
 
             <Card className="shadow-sm border-border">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Conversão</CardTitle>
+                <CardTitle className="text-sm font-medium">Conversío</CardTitle>
                 <Users className="h-4 w-4 text-primary/60" />
               </CardHeader>
               <CardContent>
@@ -200,7 +200,7 @@ export default function ReportsPage() {
             <Card className="md:col-span-4 shadow-sm">
                 <CardHeader>
                     <CardTitle>Tendência de Receita</CardTitle>
-                    <CardDescription>Evolução diária de vendas ganhas no período</CardDescription>
+                    <CardDescription>Evoluçío diária de vendas ganhas no período</CardDescription>
                 </CardHeader>
                 <CardContent className="pl-2">
                     <div className="h-[350px]">
@@ -256,7 +256,7 @@ export default function ReportsPage() {
             <Card className="md:col-span-3 shadow-sm">
                 <CardHeader>
                     <CardTitle>Funil de Vendas (Atual)</CardTitle>
-                    <CardDescription>Distribuição de negociações ativas</CardDescription>
+                    <CardDescription>Distribuiçío de negociações ativas</CardDescription>
                 </CardHeader>
                 <CardContent>
                    <div className="h-[350px]">

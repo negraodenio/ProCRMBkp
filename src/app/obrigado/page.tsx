@@ -54,7 +54,7 @@ export default function ObrigadoPage() {
           </h2>
           <div className="grid md:grid-cols-3 gap-6 text-left">
             <div>
-              <p className="font-semibold text-slate-700 mb-1">📚 Documentação</p>
+              <p className="font-semibold text-slate-700 mb-1">📚 Documentaçío</p>
               <p className="text-sm text-slate-600">
                 Explore nossos guias e tutoriais
               </p>
@@ -62,7 +62,7 @@ export default function ObrigadoPage() {
             <div>
               <p className="font-semibold text-slate-700 mb-1">🎥 Ver Demo</p>
               <p className="text-sm text-slate-600">
-                Assista o CRM em ação
+                Assista o CRM em açío
               </p>
             </div>
             <div>

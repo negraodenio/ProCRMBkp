@@ -105,7 +105,7 @@ export default function GrantDiscoveryPage() {
                                             <ArrowRight className="h-4 w-4" />
                                         </a>
                                     ) : (
-                                        <span className="text-xs text-slate-400">Detalhes não disponíveis</span>
+                                        <span className="text-xs text-slate-400">Detalhes nío disponíveis</span>
                                     )}
                                 </CardContent>
                             </Card>

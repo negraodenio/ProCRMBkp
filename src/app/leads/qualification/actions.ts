@@ -11,7 +11,7 @@ export async function saveLeadQualification(
 ) {
   const supabase = createClient();
 
-  // Determinar classificação
+  // Determinar classificaçío
   let classification = 'Frio';
   if (score >= 70) classification = 'Quente';
   else if (score >= 40) classification = 'Morno';

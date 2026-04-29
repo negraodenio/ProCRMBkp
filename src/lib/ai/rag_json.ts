@@ -24,14 +24,14 @@ export function buildJsonGuardPrompt(): ChatMsg {
       "Você deve responder OBRIGATORIAMENTE em JSON válido.",
       "Formato de saída:",
       `{
-  "answer": "Sua resposta (ou null se não houver evidência)",
-  "evidence_quotes": ["citação literal 1 do contexto", "citação literal 2..."],
+  "answer": "Sua resposta (ou null se nío houver evidência)",
+  "evidence_quotes": ["citaçío literal 1 do contexto", "citaçío literal 2..."],
   "next_step": "Pergunta curta ou CTA"
 }`,
       "REGRAS CRÍTICAS:",
-      "1. Se 'answer' for preenchido, você DEVE incluir citações LITERAIS e IDÊNTICAS do <context> em 'evidence_quotes'. Não parafraseie.",
-      "2. Se existir uma frase relevante no contexto, copie-a exatamente para 'evidence_quotes'; não reescreva.",
-      "3. Se o <context> não suportar a resposta, use 'answer': null.",
+      "1. Se 'answer' for preenchido, você DEVE incluir citações LITERAIS e IDÊNTICAS do <context> em 'evidence_quotes'. Nío parafraseie.",
+      "2. Se existir uma frase relevante no contexto, copie-a exatamente para 'evidence_quotes'; nío reescreva.",
+      "3. Se o <context> nío suportar a resposta, use 'answer': null.",
       "4. Se 'answer' for null, use 'next_step' para pedir mais detalhes ou oferecer ajuda humana.",
       "5. Proibido qualquer texto fora do bloco JSON."
     ].join("\n")

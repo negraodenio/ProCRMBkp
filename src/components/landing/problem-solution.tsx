@@ -4,21 +4,21 @@ import { XCircle, CheckCircle2, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PAIN_POINTS = [
-  { text: "Mapear parceiros: semanas", icon: "⌛" },
-  { text: "Identificar TRL: manual", icon: "📑" },
-  { text: "Tradução Técnica: complexo", icon: "🗣️" },
-  { text: "Lattes Sync: inexistente", icon: "🔍" },
-  { text: "Pitch de Patente: 3 dias", icon: "📄" },
-  { text: "Market Teasers: 4 horas", icon: "📊" },
+  { text: "Mapear parceiros: semanas", icon: "âŒ›" },
+  { text: "Identificar TRL: manual", icon: "ðŸ“‘" },
+  { text: "Traduçío Técnica: complexo", icon: "ðŸ—£ï¸" },
+  { text: "Lattes Sync: inexistente", icon: "ðŸ”" },
+  { text: "Pitch de Patente: 3 dias", icon: "ðŸ“„" },
+  { text: "Market Teasers: 4 horas", icon: "ðŸ“Š" },
 ];
 
 const SOLUTIONS = [
-  { text: "Match Semântico: 2 seg", icon: "⚡" },
-  { text: "TRL Predictor: automático", icon: "✅" },
-  { text: "Technical-to-Market: 5 seg", icon: "🎯" },
-  { text: "Lattes Sync: Tempo Real", icon: "🔗" },
-  { text: "Patent-to-Pitch: 1 clique", icon: "🔥" },
-  { text: "Market Teasers: Instantâneo", icon: "💎" },
+  { text: "Match Semí¢ntico: 2 seg", icon: "âš¡" },
+  { text: "TRL Predictor: automático", icon: "âœ…" },
+  { text: "Technical-to-Market: 5 seg", icon: "ðŸŽ¯" },
+  { text: "Lattes Sync: Tempo Real", icon: "ðŸ”—" },
+  { text: "Patent-to-Pitch: 1 clique", icon: "ðŸ”¥" },
+  { text: "Market Teasers: Instantí¢neo", icon: "ðŸ’Ž" },
 ];
 
 export function ProblemSolution() {
@@ -26,7 +26,7 @@ export function ProblemSolution() {
     <section className="container mx-auto px-4 py-32">
       <div className="text-center max-w-4xl mx-auto mb-20 space-y-6">
         <h2 className="text-4xl md:text-6xl font-black text-slate-900 leading-[1.1] tracking-tighter">
-          O "Vale da Morte" da Inovação <br />
+          O "Vale da Morte" da Inovaçío <br />
           <span className="text-indigo-600 italic">Termina Aqui.</span>
         </h2>
         <p className="text-xl text-slate-500 font-medium max-w-2xl mx-auto">
@@ -66,7 +66,7 @@ export function ProblemSolution() {
         {/* With Nexum */}
         <div className="bg-slate-950 rounded-[2.5rem] p-10 md:p-14 shadow-[0_40px_80px_-20px_rgba(79,70,229,0.3)] relative overflow-hidden group border border-white/10">
           <div className="absolute top-0 right-0 p-8">
-            <div className="px-3 py-1 bg-indigo-600 text-[10px] font-black text-white rounded-full tracking-widest uppercase">Padrão Funarbe</div>
+            <div className="px-3 py-1 bg-indigo-600 text-[10px] font-black text-white rounded-full tracking-widest uppercase">Padrío Funarbe</div>
           </div>
           
           <div className="flex items-center gap-4 mb-10">
@@ -100,7 +100,7 @@ export function ProblemSolution() {
 
       <div className="mt-16 text-center">
          <p className="text-slate-400 text-sm font-bold flex items-center justify-center gap-3">
-            A Nexum orquestra o fluxo de inovação, do laboratório ao mercado.
+            A Nexum orquestra o fluxo de inovaçío, do laboratório ao mercado.
             <ArrowRight className="h-4 w-4 text-indigo-500" />
          </p>
       </div>

@@ -85,7 +85,7 @@ export default function LoginPage() {
                             <form action={handleSignup} className="space-y-5">
                                 <div className="space-y-2">
                                     <Label htmlFor="fullName" className="font-semibold text-slate-700">Nome Completo</Label>
-                                    <Input id="fullName" name="fullName" placeholder="João Silva" required className="h-12 bg-slate-50 border-slate-200 focus-visible:ring-primary/20 focus-visible:border-primary transition-all" />
+                                    <Input id="fullName" name="fullName" placeholder="Joío Silva" required className="h-12 bg-slate-50 border-slate-200 focus-visible:ring-primary/20 focus-visible:border-primary transition-all" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="companyName" className="font-semibold text-slate-700">Nome da Empresa</Label>
@@ -131,7 +131,7 @@ export default function LoginPage() {
                             </span>
                         </h2>
                         <p className="text-xl text-slate-300 font-medium max-w-lg leading-relaxed">
-                            O Nexum integra seu Kanban de vendas com automação de propostas financeiras em múltiplas moedas. Tudo no piloto automático.
+                            O Nexum integra seu Kanban de vendas com automaçío de propostas financeiras em múltiplas moedas. Tudo no piloto automático.
                         </p>
                     </div>
 
@@ -144,7 +144,7 @@ export default function LoginPage() {
                                 <div>
                                     <h3 className="text-white font-bold mb-1">5 IA Tools especializadas</h3>
                                     <p className="text-slate-400 text-sm leading-relaxed">
-                                        Da qualificação automática de leads ao Conselheiro de Vendas virtual guiando seu funil em tempo real.
+                                        Da qualificaçío automática de leads ao Conselheiro de Vendas virtual guiando seu funil em tempo real.
                                     </p>
                                 </div>
                             </div>
@@ -152,7 +152,7 @@ export default function LoginPage() {
                         <div className="flex items-center gap-6 text-sm font-semibold text-slate-400">
                             <div className="flex items-center gap-2">
                                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                                Sem cartão de crédito
+                                Sem cartío de crédito
                             </div>
                             <div className="flex items-center gap-2">
                                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />

@@ -42,7 +42,7 @@ const TOOLS: ToolCard[] = [
     badge: "MAIS USADO",
     preview: "Resumo Gerado: 'Esta tecnologia reduz o tempo de análise em 40%...'",
     color: "text-violet-600",
-    fullExample: "Output Science Teaser:\n\nTECNOLOGIA: Polímero Bio-degradável\nVALOR: Redução de 30% no custo de produção de embalagens.\nMERCADO: Indústria de cosméticos premium e higiene pessoal.\nSOLUÇÃO: Substitui plásticos petroquímicos com 100% de decomposição em 90 dias."
+    fullExample: "Output Science Teaser:\n\nTECNOLOGIA: Polí­mero Bio-degradável\nVALOR: Reduçío de 30% no custo de produçío de embalagens.\nMERCADO: Indústria de cosméticos premium e higiene pessoal.\nSOLUí‡íƒO: Substitui plásticos petroquí­micos com 100% de decomposiçío em 90 dias."
   },
   {
     id: "pitch",
@@ -52,14 +52,14 @@ const TOOLS: ToolCard[] = [
     badge: "IP & LICENCIAMENTO",
     preview: "Pitch: 'Investimento com payback estimado em 14 meses...'",
     color: "text-orange-600",
-    fullExample: "Output Pitch de Patente:\n\nOPORTUNIDADE: Licenciamento com exclusividade.\nVANTAGEM COMPETITIVA: Única tecnologia nacional com patente INPI aprovada para X.\nROI ESTIMADO: 15% sobre faturamento líquido no primeiro ano.\nPRÓXIMOS PASSOS: Agendar demonstração técnica da prova de conceito."
+    fullExample: "Output Pitch de Patente:\n\nOPORTUNIDADE: Licenciamento com exclusividade.\nVANTAGEM COMPETITIVA: íšnica tecnologia nacional com patente INPI aprovada para X.\nROI ESTIMADO: 15% sobre faturamento lí­quido no primeiro ano.\nPRí“XIMOS PASSOS: Agendar demonstraçío técnica da prova de conceito."
   },
   {
     id: "markets",
     title: "Novos Mercados",
     description: "Identifica novos setores e aplicações potenciais para uma tecnologia usando análise vetorial global.",
     icon: TrendingUp,
-    badge: "EXPANSÃO",
+    badge: "EXPANSíƒO",
     preview: "Setores Encontrados: Agronegócio, Defesa, Aeroespacial.",
     color: "text-emerald-600",
     fullExample: "Output Novos Mercados:\n\nSETOR 1: Aeroespacial (Revestimentos leves)\nSETOR 2: Dispositivos Médicos (Bio-implantes)\nSETOR 3: Energia (Sensores de monitoramento remoto)\nCOMPETIDORES: BASF, Dupont, 3M."
@@ -69,10 +69,10 @@ const TOOLS: ToolCard[] = [
     title: "Business Case",
     description: "Gera relatórios de viabilidade técnica e financeira para convencer diretores de P&D.",
     icon: FileText,
-    badge: "ESTRATÉGICO",
+    badge: "ESTRATí‰GICO",
     preview: "Análise: Fit tecnológico de 94% com a planta industrial atual.",
     color: "text-blue-600",
-    fullExample: "Output Business Case:\n\nCAPEX ESTIMADO: Baixo (reuso de maquinário existente).\nRISCO: Mínimo (tecnologia já validada em TRL 6).\nPARCERIA: Possibilidade de co-desenvolvimento via Embrapii.\nCONCLUSÃO: Recomenda-se a aquisição para defesa de mercado."
+    fullExample: "Output Business Case:\n\nCAPEX ESTIMADO: Baixo (reuso de maquinário existente).\nRISCO: Mí­nimo (tecnologia já validada em TRL 6).\nPARCERIA: Possibilidade de co-desenvolvimento via Embrapii.\nCONCLUSíƒO: Recomenda-se a aquisiçío para defesa de mercado."
   },
   {
     id: "scoring",
@@ -82,7 +82,7 @@ const TOOLS: ToolCard[] = [
     badge: "CRM INTEL",
     preview: "Score: 92/100 (Lead Quente para Transferência).",
     color: "text-rose-600",
-    fullExample: "Output Lead Scoring:\n\nEMPRESA: Natura &Co\nMATCH SCORE: 92\nPOR QUE: Histórico de investimentos em bio-polímeros e sustentabilidade.\nCONTATO PRIORITÁRIO: Diretor de P&D (Dr. Ricardo Almeida).\nAÇÃO SUGERIDA: Enviar Science Teaser via Nexum Outreach."
+    fullExample: "Output Lead Scoring:\n\nEMPRESA: Natura &Co\nMATCH SCORE: 92\nPOR QUE: Histórico de investimentos em bio-polí­meros e sustentabilidade.\nCONTATO PRIORITíRIO: Diretor de P&D (Dr. Ricardo Almeida).\nAí‡íƒO SUGERIDA: Enviar Science Teaser via Nexum Outreach."
   }
 ];
 
@@ -102,7 +102,7 @@ export function AIToolsShowcase() {
           <span className="text-indigo-600 italic">Para Transferência de Tecnologia</span>
         </h2>
         <p className="text-xl text-slate-500 max-w-3xl mx-auto font-medium">
-          O Nexum automatiza a análise estratégica, permitindo que os gestores de inovação foquem no fechamento de parcerias e licenciamentos.
+          O Nexum automatiza a análise estratégica, permitindo que os gestores de inovaçío foquem no fechamento de parcerias e licenciamentos.
         </p>
       </div>
 
@@ -157,7 +157,7 @@ export function AIToolsShowcase() {
                 </div>
                 </div>
                 <DialogDescription className="text-slate-400 text-lg font-medium leading-relaxed">
-                Demonstração de inteligência artificial aplicada à transferência de tecnologia.
+                Demonstraçío de inteligência artificial aplicada í  transferência de tecnologia.
                 </DialogDescription>
             </DialogHeader>
 

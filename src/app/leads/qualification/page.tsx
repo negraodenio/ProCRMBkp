@@ -31,7 +31,7 @@ export default async function LeadQualificationPage({
     return redirect("/leads");
   }
 
-  // Buscar qualificação existente (se houver)
+  // Buscar qualificaçío existente (se houver)
   const { data: existingQual } = await supabase
     .from("lead_qualifications")
     .select("*")
@@ -49,7 +49,7 @@ export default async function LeadQualificationPage({
           {/* Top Bar */}
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <h1 className="text-3xl font-bold text-gradient">Qualificação de Leads - Fase 2</h1>
+              <h1 className="text-3xl font-bold text-gradient">Qualificaçío de Leads - Fase 2</h1>
               <p className="text-sm text-muted-foreground flex items-center gap-2">
                 Qualificando: <strong>{lead.name}</strong>
               </p>

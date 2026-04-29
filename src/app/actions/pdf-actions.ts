@@ -4,7 +4,7 @@
 export async function extractTextFromPDF(formData: FormData) {
     const pdf = require("pdf-parse");
     const file = formData.get("file") as File;
-    if (!file) return { success: false, error: "Arquivo não enviado" };
+    if (!file) return { success: false, error: "Arquivo nío enviado" };
 
     try {
         const bytes = await file.arrayBuffer();

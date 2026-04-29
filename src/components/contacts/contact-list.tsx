@@ -133,7 +133,7 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile?.organization_id) {
-      toast.error("Organização não encontrada");
+      toast.error("Organizaçío nío encontrada");
       return;
     }
 
@@ -447,7 +447,7 @@ export function ContactList({ contacts: initialContacts }: ContactListProps) {
                         </DropdownMenuItem>
                         <ConfirmDialog
                           title="Excluir Contato"
-                          description="Tem certeza que deseja excluir este contato? Esta ação não pode ser desfeita."
+                          description="Tem certeza que deseja excluir este contato? Esta açío nío pode ser desfeita."
                           confirmLabel="Excluir"
                           onConfirm={() => handleDelete(contact.id)}
                           trigger={

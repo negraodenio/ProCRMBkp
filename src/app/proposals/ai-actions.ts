@@ -4,7 +4,7 @@ import { summarizeConversation } from '@/lib/ai/summarize' // Importing just to 
 
 import OpenAI from 'openai'
 
-// Duplicando a configuração de providers com fallback do lib/ai/summarize.ts para não quebrar a lib existente
+// Duplicando a configuraçío de providers com fallback do lib/ai/summarize.ts para nío quebrar a lib existente
 const AI_PROVIDERS = [
   {
     name: 'SiliconFlow (DeepSeek)',
@@ -111,19 +111,19 @@ export async function generateProposalPitch(data: {
     const itemsListText = data.items.map(i => `- ${i.name} (${i.currency} ${i.unit_price})`).join('\n')
 
     const systemPrompt = `Você é um Executivo de Vendas e Copywriter de elite.
-Sua missão é escrever campos de 'Descrição/Escopo' persuasivos, claros e diretos para propostas comerciais.
+Sua missío é escrever campos de 'Descriçío/Escopo' persuasivos, claros e diretos para propostas comerciais.
 Use tom profissional, porém humano e engajador.
 
 REGRAS ESTritas:
-1. Não escreva um e-mail. Não use "Prezado [Nome]", nem "Atenciosamente".
-2. O texto vai diretamente no corpo/descrição de um PDF/Link de proposta de orçamento.
-3. Não use formatação markdown complexa, apenas parágrafos bem divididos.
-4. Foque no *valor e no problema que está sendo resolvido* pelos itens da proposta, não apenas em listar características.
-5. Maximize a percepção de valor do pacote total.
+1. Nío escreva um e-mail. Nío use "Prezado [Nome]", nem "Atenciosamente".
+2. O texto vai diretamente no corpo/descriçío de um PDF/Link de proposta de orçamento.
+3. Nío use formataçío markdown complexa, apenas parágrafos bem divididos.
+4. Foque no *valor e no problema que está sendo resolvido* pelos itens da proposta, nío apenas em listar características.
+5. Maximize a percepçío de valor do pacote total.
 6. Mantenha sucinto, idealmente de 2 a 3 parágrafos focados.`
 
     const userPrompt = `
-Escreva uma descrição atraente e persuasiva para a proposta abaixo destinada ao cliente/empresa: ${data.clientName}.
+Escreva uma descriçío atraente e persuasiva para a proposta abaixo destinada ao cliente/empresa: ${data.clientName}.
 
 ITENS INCLUÍDOS NO PACOTE:
 ${itemsListText}

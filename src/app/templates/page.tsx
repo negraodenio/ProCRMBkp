@@ -51,7 +51,7 @@ const SECTORS = [
     "Marketing Digital",
     "Consultoria",
     "Vendas",
-    "Educação",
+    "Educaçío",
     "Saúde",
     "Financeiro",
     "Jurídico",
@@ -107,7 +107,7 @@ export default function TemplatesPage() {
             .single();
 
         if (!profile?.organization_id) {
-            toast.error("Organização não encontrada");
+            toast.error("Organizaçío nío encontrada");
             return;
         }
 
@@ -253,10 +253,10 @@ export default function TemplatesPage() {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label htmlFor="description">Descrição</Label>
+                                            <Label htmlFor="description">Descriçío</Label>
                                             <Textarea
                                                 id="description"
-                                                placeholder="Breve descrição do template..."
+                                                placeholder="Breve descriçío do template..."
                                                 value={formData.description}
                                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                                 rows={2}
@@ -403,7 +403,7 @@ export default function TemplatesPage() {
                                         </CardHeader>
                                         <CardContent>
                                             <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                                                {template.content?.description || "Sem descrição"}
+                                                {template.content?.description || "Sem descriçío"}
                                             </p>
                                             <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
                                                 <span>
@@ -439,7 +439,7 @@ export default function TemplatesPage() {
                                                 </Button>
                                                 <ConfirmDialog
                                                     title="Excluir Template"
-                                                    description="Tem certeza que deseja excluir este template? Esta ação não pode ser desfeita."
+                                                    description="Tem certeza que deseja excluir este template? Esta açío nío pode ser desfeita."
                                                     confirmLabel="Excluir"
                                                     onConfirm={() => deleteTemplate(template.id)}
                                                     trigger={

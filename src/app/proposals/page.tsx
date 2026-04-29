@@ -801,7 +801,7 @@ export default function ProposalsPage() {
 
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between">
-                                                <Label htmlFor="content">Descrição & Escopo</Label>
+                                                <Label htmlFor="content">Descriçío & Escopo</Label>
                                                 <Button
                                                     type="button"
                                                     variant="ghost"
@@ -1003,9 +1003,9 @@ export default function ProposalsPage() {
                                 </div>
                             </div>
                             <div>
-                                <p className="text-sm font-semibold mb-1">Descrição</p>
+                                <p className="text-sm font-semibold mb-1">Descriçío</p>
                                 <div className="p-3 bg-muted rounded-md text-sm whitespace-pre-wrap min-h-[100px]">
-                                    {viewingProposal?.content?.description || "Sem descrição."}
+                                    {viewingProposal?.content?.description || "Sem descriçío."}
                                 </div>
                             </div>
                         </div>
@@ -1061,7 +1061,7 @@ export default function ProposalsPage() {
                                             !transferData.pipelineId
                                                 ? "Escolha um funil primeiro"
                                                 : allStages.filter(s => s.pipeline_id === transferData.pipelineId).length === 0
-                                                    ? "Este funil não tem etapas"
+                                                    ? "Este funil nío tem etapas"
                                                     : "Escolha uma etapa"
                                         } />
                                     </SelectTrigger>

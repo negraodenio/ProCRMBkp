@@ -8,18 +8,18 @@ export async function inviteUserAction(email: string, fullName: string, role: st
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
     if (!supabaseServiceKey) {
-        return { success: false, error: "A chave SUPABASE_SERVICE_ROLE_KEY não está configurada no servidor. É necessária permissão de administrador para enviar convites." };
+        return { success: false, error: "A chave SUPABASE_SERVICE_ROLE_KEY nío está configurada no servidor. É necessária permissío de administrador para enviar convites." };
     }
 
     // Use the standard server client to get the current user (admin)
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Usuário não autenticado" };
+    if (!user) return { success: false, error: "Usuário nío autenticado" };
 
     const { data: profile } = await supabase.from('profiles').select('organization_id').eq('id', user.id).single();
 
     if (!profile?.organization_id) {
-        return { success: false, error: "Organização do administrador não encontrada" };
+        return { success: false, error: "Organizaçío do administrador nío encontrada" };
     }
 
     // --- PLAN LIMIT CHECK ---

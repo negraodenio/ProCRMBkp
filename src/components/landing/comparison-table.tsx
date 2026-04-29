@@ -27,7 +27,7 @@ export function ComparisonTable() {
           <span className="text-indigo-600 italic">Técnica e Soberana</span>
         </h2>
         <p className="text-xl text-slate-500 max-w-2xl mx-auto font-medium">
-          Por que a Nexum é a única plataforma apta a gerir o capital intelectual estratégico da sua instituição.
+          Por que a Nexum é a única plataforma apta a gerir o capital intelectual estratégico da sua instituiçío.
         </p>
       </div>
 

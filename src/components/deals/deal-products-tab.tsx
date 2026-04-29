@@ -55,7 +55,7 @@ export function DealProductsTab({ dealId }: DealProductsTabProps) {
                <Package className="h-5 w-5 text-cyan-600" />
                Produtos e Serviços
             </h2>
-            <p className="text-xs text-slate-500">Gerencie os itens vinculados a esta negociação</p>
+            <p className="text-xs text-slate-500">Gerencie os itens vinculados a esta negociaçío</p>
           </div>
           <div className="flex gap-2">
             <button
@@ -81,7 +81,7 @@ export function DealProductsTab({ dealId }: DealProductsTabProps) {
             </div>
             <div className="bg-cyan-50 border-cyan-100 p-4 rounded-xl border shadow-sm flex items-center justify-between md:col-span-2">
                 <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-cyan-600 uppercase tracking-wider">Valor Total da Negociação</span>
+                    <span className="text-[10px] font-bold text-cyan-600 uppercase tracking-wider">Valor Total da Negociaçío</span>
                     <span className="text-2xl font-black text-cyan-700">
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)}
                     </span>
@@ -131,7 +131,7 @@ export function DealProductsTab({ dealId }: DealProductsTabProps) {
                     <td colSpan={6} className="px-6 py-20 text-center">
                       <div className="flex flex-col items-center gap-2 opacity-40">
                         <Package className="h-12 w-12 text-slate-300" />
-                        <p className="text-slate-500 font-medium">Nenhum produto vinculado a esta negociação</p>
+                        <p className="text-slate-500 font-medium">Nenhum produto vinculado a esta negociaçío</p>
                         <button
                             onClick={() => setShowAddForm(true)}
                             className="text-xs text-blue-600 hover:underline font-bold mt-2"
@@ -190,7 +190,7 @@ export function DealProductsTab({ dealId }: DealProductsTabProps) {
                 </div>
                 <div className="p-8 space-y-6">
                     <div className="py-4 text-center text-sm text-slate-400 italic">
-                        Seleção de produtos globais será integrada na próxima iteração.
+                        Seleçío de produtos globais será integrada na próxima iteraçío.
                     </div>
                     <button
                         onClick={() => setShowAddForm(false)}

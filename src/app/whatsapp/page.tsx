@@ -62,7 +62,7 @@ export default function WhatsAppPage() {
         const timeout = setTimeout(() => {
             if (loading) {
                 setLoading(false);
-                toast.error("A conexão está demorando mais que o esperado. Tente novamente.");
+                toast.error("A conexío está demorando mais que o esperado. Tente novamente.");
             }
         }, 15000);
 
@@ -82,7 +82,7 @@ export default function WhatsAppPage() {
             }
         } catch (e) {
             clearTimeout(timeout);
-            toast.error("Erro inesperado na conexão.");
+            toast.error("Erro inesperado na conexío.");
         } finally {
             setLoading(false);
         }
@@ -106,7 +106,7 @@ export default function WhatsAppPage() {
                 toast.success(checked ? "Robô ativado!" : "Robô pausado.");
             }
         } catch (e) {
-            toast.error("Erro na comunicação.");
+            toast.error("Erro na comunicaçío.");
         } finally {
             setBotLoading(false);
         }
@@ -123,7 +123,7 @@ export default function WhatsAppPage() {
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight text-foreground">WhatsApp</h1>
-                            <p className="text-muted-foreground mt-1">Gerencie sua conexão e treine sua IA.</p>
+                            <p className="text-muted-foreground mt-1">Gerencie sua conexío e treine sua IA.</p>
                         </div>
 
                         {/* Status Badge */}
@@ -144,7 +144,7 @@ export default function WhatsAppPage() {
                                 <CardHeader className="pb-4">
                                     <CardTitle className="flex items-center gap-2 text-xl">
                                         <QrCode className="h-5 w-5 text-indigo-600" />
-                                        Conexão
+                                        Conexío
                                     </CardTitle>
                                     <CardDescription>
                                         Escaneie o QR Code para conectar seu número.
@@ -157,9 +157,9 @@ export default function WhatsAppPage() {
                                             <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                                                 <QrCode className="h-8 w-8 text-primary" />
                                             </div>
-                                            <h3 className="text-lg font-semibold text-foreground">Nenhuma conexão ativa</h3>
+                                            <h3 className="text-lg font-semibold text-foreground">Nenhuma conexío ativa</h3>
                                             <p className="text-muted-foreground">
-                                                Clique no botão abaixo para gerar um novo QR Code e conectar seu WhatsApp.
+                                                Clique no botío abaixo para gerar um novo QR Code e conectar seu WhatsApp.
                                             </p>
                                                 <Button
                                                     onClick={() => canUseWhatsApp ? handleConnect() : setIsUpgradeModalOpen(true)}
@@ -291,7 +291,7 @@ export default function WhatsAppPage() {
 
                                     {/* Auto-Screening Simulation - NEW COMPLIANCE ITEM */}
                                     <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-dashed border-slate-200">
-                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">Simulação de Triagem (IA)</p>
+                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">Simulaçío de Triagem (IA)</p>
                                         <div className="space-y-2">
                                             <div className="p-2 bg-white rounded-md text-[11px] border shadow-sm">
                                                 <strong>Lead:</strong> Gostaria de saber mais sobre a patente de polímeros.

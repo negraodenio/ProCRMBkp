@@ -84,7 +84,7 @@ export function ChatWidget({
             setMessages(prev => [...prev, { role: "assistant", content: data.response }]);
         } catch (error) {
             console.error("Chat Error:", error);
-            setMessages(prev => [...prev, { role: "assistant", content: "Desculpe, tive um problema tÃ©cnico. Tente novamente." }]);
+            setMessages(prev => [...prev, { role: "assistant", content: "Desculpe, tive um problema técnico. Tente novamente." }]);
         } finally {
             setLoading(false);
         }

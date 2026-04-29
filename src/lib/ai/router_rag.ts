@@ -148,7 +148,7 @@ export async function ragAnswerWithGating(params: {
   if (shouldRetry) {
     try {
       const retryObj = await jsonEvidenceChat(primaryModelAlias, 0,
-        "TENTATIVA EXTRA: Escolha 1 trecho curto e literal do contexto e envie como 'evidence_quotes' sem NENHUMA alteração. Se houver evidência fiel, responda com 'answer' preenchido."
+        "TENTATIVA EXTRA: Escolha 1 trecho curto e literal do contexto e envie como 'evidence_quotes' sem NENHUMA alteraçío. Se houver evidência fiel, responda com 'answer' preenchido."
       );
 
       if (retryObj?.answer) {
@@ -174,7 +174,7 @@ export async function ragAnswerWithGating(params: {
     }
   }
 
-  // Se o primary recusou e não fizemos retry (ou retry falhou), mas temos um next_step do primary, use-o
+  // Se o primary recusou e nío fizemos retry (ou retry falhou), mas temos um next_step do primary, use-o
   if (primaryObj && !primaryObj.answer && primaryObj.next_step && !shouldRetry) {
     return {
       text: primaryObj.next_step,
@@ -221,7 +221,7 @@ export async function ragAnswerWithGating(params: {
   }
 
   return {
-    text: "Sinto muito, não encontrei essa informação nos manuais. Pode perguntar de outra forma ou quer falar com um humano?",
+    text: "Sinto muito, nío encontrei essa informaçío nos manuais. Pode perguntar de outra forma ou quer falar com um humano?",
     model_used: "blocked",
     reason: "no_supported_answer"
   };

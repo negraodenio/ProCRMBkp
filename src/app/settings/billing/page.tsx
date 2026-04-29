@@ -10,7 +10,7 @@ export default async function BillingPage() {
 
     const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
 
-    if (!profile?.organization_id) return <div>Organização não encontrada</div>;
+    if (!profile?.organization_id) return <div>Organizaçío nío encontrada</div>;
 
     const { data: org } = await supabase
         .from("organizations")
@@ -42,7 +42,7 @@ export default async function BillingPage() {
             <div>
                 <h3 className="text-lg font-medium">Planos e Faturamento</h3>
                 <p className="text-sm text-muted-foreground">
-                    Gerencie a assinatura e cobrança da sua organização.
+                    Gerencie a assinatura e cobrança da sua organizaçío.
                 </p>
             </div>
             <Separator />

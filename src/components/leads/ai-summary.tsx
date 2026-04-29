@@ -100,7 +100,7 @@ export function AISummary({ summary, onRegenerate }: AISummaryProps) {
           </div>
         )}
 
-        {/* Sentimento e Próxima Ação */}
+        {/* Sentimento e Próxima Açío */}
         <div className="flex items-center gap-3 pt-3 border-t">
           <div className="flex items-center gap-2">
             <div className={cn("p-1.5 rounded-full", config.bg)}>
@@ -110,7 +110,7 @@ export function AISummary({ summary, onRegenerate }: AISummaryProps) {
           </div>
           <div className="flex-1" />
           <div className="text-right">
-            <p className="text-xs text-muted-foreground">Próxima ação</p>
+            <p className="text-xs text-muted-foreground">Próxima açío</p>
             <p className="text-sm font-medium text-purple-700">{summary.next_action}</p>
           </div>
         </div>

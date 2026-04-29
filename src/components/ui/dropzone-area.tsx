@@ -125,7 +125,7 @@ export function DropzoneArea({
           )}
         </div>
 
-        {/* Animação de fundo ao arrastar */}
+        {/* Animaçío de fundo ao arrastar */}
         {isDragActive && (
           <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg animate-pulse -z-10" />
         )}

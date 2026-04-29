@@ -192,7 +192,7 @@ export async function createPipeline(data: { name: string, organization_id: stri
     const defaultStages = [
         { pipeline_id: pipeline.id, name: 'Lead', color: 'bg-blue-500', order: 0 },
         { pipeline_id: pipeline.id, name: 'Em Contato', color: 'bg-yellow-500', order: 1 },
-        { pipeline_id: pipeline.id, name: 'Negociação', color: 'bg-orange-500', order: 2 },
+        { pipeline_id: pipeline.id, name: 'Negociaçío', color: 'bg-orange-500', order: 2 },
         { pipeline_id: pipeline.id, name: 'Fechado', color: 'bg-green-500', order: 3 }
     ];
 

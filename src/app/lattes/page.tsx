@@ -31,7 +31,7 @@ export default function LattesSyncPage() {
                 toast.error(res.error);
             }
         } catch (err) {
-            toast.error("Erro na conexão.");
+            toast.error("Erro na conexío.");
         } finally {
             setLoading(false);
         }
@@ -44,8 +44,8 @@ export default function LattesSyncPage() {
                 <Header />
                 <main className="p-8 max-w-4xl mx-auto w-full space-y-8">
                     <div className="space-y-2">
-                        <h1 className="text-3xl font-bold tracking-tight">Sincronização Lattes</h1>
-                        <p className="text-muted-foreground italic">Mapeamento automatizado de ativos de inovação diretamente da base CNPq.</p>
+                        <h1 className="text-3xl font-bold tracking-tight">Sincronizaçío Lattes</h1>
+                        <p className="text-muted-foreground italic">Mapeamento automatizado de ativos de inovaçío diretamente da base CNPq.</p>
                     </div>
 
                     <Card className="border-primary/20 shadow-lg shadow-primary/5">
@@ -110,7 +110,7 @@ export default function LattesSyncPage() {
                                             <p className="font-medium">{result.department}</p>
                                         </div>
                                         <div>
-                                            <p className="text-xs text-slate-500 uppercase font-bold">Última Atualização</p>
+                                            <p className="text-xs text-slate-500 uppercase font-bold">Última Atualizaçío</p>
                                             <p className="font-medium">{result.lastUpdate}</p>
                                         </div>
                                     </div>

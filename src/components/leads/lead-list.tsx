@@ -62,7 +62,7 @@ const STATUS_LABELS: Record<string, string> = {
   contacted: "Contatado",
   qualified: "Qualificado",
   proposal: "Proposta",
-  negotiation: "Negociação",
+  negotiation: "Negociaçío",
   won: "Ganho",
   lost: "Perdido",
 };
@@ -72,7 +72,7 @@ const SOURCE_LABELS: Record<string, string> = {
   whatsapp: "WhatsApp",
   website: "Site",
   instagram: "Instagram",
-  referral: "Indicação",
+  referral: "Indicaçío",
   other: "Outro",
 };
 
@@ -228,7 +228,7 @@ export function LeadList() {
       .single();
 
     if (!profile?.organization_id) {
-      toast.error("Organização não encontrada");
+      toast.error("Organizaçío nío encontrada");
       return;
     }
 
@@ -586,7 +586,7 @@ export function LeadList() {
         </Card>
         <Card className="border-l-4 border-l-orange-500">
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Em Negociação</p>
+            <p className="text-sm text-muted-foreground">Em Negociaçío</p>
             <p className="text-3xl font-bold text-orange-600">{stats.negotiation}</p>
           </CardContent>
         </Card>
@@ -718,7 +718,7 @@ export function LeadList() {
 
                   <ConfirmDialog
                     title="Excluir Lead"
-                    description="Tem certeza que deseja excluir este lead? Esta ação não pode ser desfeita."
+                    description="Tem certeza que deseja excluir este lead? Esta açío nío pode ser desfeita."
                     confirmLabel="Excluir"
                     onConfirm={() => deleteLead(lead.id)}
                     trigger={

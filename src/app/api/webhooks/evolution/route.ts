@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
             pushName = phone;
         }
 
-        // Extract Text Content (Conversação ou Legenda de Mídia)
+        // Extract Text Content (Conversaçío ou Legenda de Mídia)
         let text = "";
         if (messageData.message?.conversation) {
             text = messageData.message.conversation;

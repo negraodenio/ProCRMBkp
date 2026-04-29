@@ -6,7 +6,7 @@ import { sendOutreachEmail } from "@/lib/mail";
 export async function findCompanyContacts(companyId: string) {
     const supabase = await createClient();
     const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return { success: false, error: "Não autorizado" };
+    if (!userData.user) return { success: false, error: "Nío autorizado" };
 
     // 1. Get company name
     const { data: company } = await supabase
@@ -15,7 +15,7 @@ export async function findCompanyContacts(companyId: string) {
         .eq("id", companyId)
         .single();
 
-    if (!company) return { success: false, error: "Empresa não encontrada" };
+    if (!company) return { success: false, error: "Empresa nío encontrada" };
 
     // 2. Find real contacts in DB matching this company
     const { data: profile } = await supabase
@@ -24,7 +24,7 @@ export async function findCompanyContacts(companyId: string) {
         .eq("id", userData.user.id)
         .single();
 
-    if (!profile?.organization_id) return { success: false, error: "Org não encontrada" };
+    if (!profile?.organization_id) return { success: false, error: "Org nío encontrada" };
 
     const { data: contacts, error } = await supabase
         .from("contacts")

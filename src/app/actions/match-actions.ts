@@ -8,7 +8,7 @@ export async function findCorporateMatches(researchText: string) {
 
     const supabase = await createClient();
     const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return { success: false, error: "Não autorizado" };
+    if (!userData.user) return { success: false, error: "Nío autorizado" };
 
     const { data: profile } = await supabase
         .from("profiles")
@@ -16,7 +16,7 @@ export async function findCorporateMatches(researchText: string) {
         .eq("id", userData.user.id)
         .single();
     
-    if (!profile?.organization_id) return { success: false, error: "Organização não encontrada" };
+    if (!profile?.organization_id) return { success: false, error: "Organizaçío nío encontrada" };
 
     try {
         // 1. Generate Embedding for the Research
@@ -69,7 +69,7 @@ export async function findCorporateMatches(researchText: string) {
 export async function convertMatchToLead(companyId: string, researchTitle: string) {
     const supabase = await createClient();
     const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return { success: false, error: "Não autorizado" };
+    if (!userData.user) return { success: false, error: "Nío autorizado" };
 
     // 1. Get company data
     const { data: company } = await supabase
@@ -78,7 +78,7 @@ export async function convertMatchToLead(companyId: string, researchTitle: strin
         .eq("id", companyId)
         .single();
     
-    if (!company) return { success: false, error: "Empresa não encontrada" };
+    if (!company) return { success: false, error: "Empresa nío encontrada" };
 
     // 2. Insert into Contacts as Lead
     const { data: lead, error: leadError } = await supabase.from("contacts").insert({

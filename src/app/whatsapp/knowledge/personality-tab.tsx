@@ -110,7 +110,7 @@ export function PersonalityTab({ botSettings: initialSettings, organizationId }:
 
   // Preview message baseado na personalidade e configurações
   const getPreviewMessage = () => {
-    // Se tiver mensagem de boas vindas customizada e for a primeira interação (simulado)
+    // Se tiver mensagem de boas vindas customizada e for a primeira interaçío (simulado)
     if (settings.welcome_message) return settings.welcome_message;
 
     switch (settings.personality_preset) {
@@ -318,7 +318,7 @@ export function PersonalityTab({ botSettings: initialSettings, organizationId }:
                     <div className="bg-primary/5 p-4 rounded-lg border border-primary/10">
                         <p className="text-xs text-primary font-medium">✨ Dica:</p>
                         <p className="text-xs text-primary/80 mt-1">
-                            Você pode usar este link para colocar um botão de chat no seu site, Instagram ou enviar diretamente para seus clientes.
+                            Você pode usar este link para colocar um botío de chat no seu site, Instagram ou enviar diretamente para seus clientes.
                         </p>
                     </div>
                 </div>

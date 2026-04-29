@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Rocket, Target, Zap, Users, BarChart3, ChevronRight, FileText, Sparkles, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ export default function DemoShowcasePage() {
                 
                 {/* Intro */}
                 <div className="space-y-6 text-center">
-                    <h1 className="text-5xl md:text-7xl font-black tracking-tighter">Roteiro de Demonstração</h1>
+                    <h1 className="text-5xl md:text-7xl font-black tracking-tighter">Roteiro de Demonstraçío</h1>
                     <p className="text-slate-500 text-xl max-w-2xl mx-auto leading-relaxed">
                         Siga estes 4 passos para demonstrar como o sistema resolve o gap entre a universidade e o mercado.
                     </p>
@@ -35,12 +35,12 @@ export default function DemoShowcasePage() {
                     {/* Step 1 */}
                     <DemoStep 
                         number="01"
-                        title="Ingestão de Ativos (Intake)"
+                        title="Ingestío de Ativos (Intake)"
                         description="Demonstre como o sistema processa patentes ou artigos científicos complexos em segundos."
                         features={[
-                            "Extração Automática de Texto (PDF)",
-                            "Classificação TRL Instantânea",
-                            "Identificação de Proposta de Valor por IA"
+                            "Extraçío Automática de Texto (PDF)",
+                            "Classificaçío TRL Instantânea",
+                            "Identificaçío de Proposta de Valor por IA"
                         ]}
                         buttonText="Abrir Intake de Pesquisa"
                         href="/autopilot"
@@ -51,10 +51,10 @@ export default function DemoShowcasePage() {
                     <DemoStep 
                         number="02"
                         title="Inteligência de Matching"
-                        description="Mostre a busca semântica em ação, encontrando parceiros corporativos com fit tecnológico."
+                        description="Mostre a busca semântica em açío, encontrando parceiros corporativos com fit tecnológico."
                         features={[
                             "Matching Vetorial (Semântico)",
-                            "Geração de Racional Estratégico",
+                            "Geraçío de Racional Estratégico",
                             "Score de Aderência Industriais"
                         ]}
                         buttonText="Executar Matchmaking"
@@ -65,8 +65,8 @@ export default function DemoShowcasePage() {
                     {/* Step 3 */}
                     <DemoStep 
                         number="03"
-                        title="Prospecção e Engajamento"
-                        description="Mostre como encontrar os decisores certos e iniciar a comunicação oficial."
+                        title="Prospecçío e Engajamento"
+                        description="Mostre como encontrar os decisores certos e iniciar a comunicaçío oficial."
                         features={[
                             "Mapeamento de CTOs e Heads",
                             "Envio de Outreach Personalizado",
@@ -80,12 +80,12 @@ export default function DemoShowcasePage() {
                     {/* Step 4 */}
                     <DemoStep 
                         number="04"
-                        title="Gestão de Impacto (Mission Control)"
-                        description="Encerre mostrando a visão analítica para os gestores da instituição."
+                        title="Gestío de Impacto (Mission Control)"
+                        description="Encerre mostrando a visío analítica para os gestores da instituiçío."
                         features={[
                             "Analytics de Interesse por Setor",
                             "Pipeline de Transferência",
-                            "Exportação de Relatórios de Auditoria"
+                            "Exportaçío de Relatórios de Auditoria"
                         ]}
                         buttonText="Acessar Mission Control"
                         href="/mission-control"
@@ -98,15 +98,15 @@ export default function DemoShowcasePage() {
                 <div className="bg-slate-900 rounded-[3rem] p-12 md:p-20 text-white text-center space-y-8 relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-amber-500" />
                     <Sparkles className="h-12 w-12 text-orange-500 mx-auto" />
-                    <h2 className="text-4xl font-bold">Por que nossa solução vence?</h2>
+                    <h2 className="text-4xl font-bold">Por que nossa soluçío vence?</h2>
                     <div className="grid md:grid-cols-3 gap-8 text-left max-w-4xl mx-auto">
                         <div className="space-y-2">
                             <p className="font-bold flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-400" /> Compliance Total</p>
-                            <p className="text-sm text-slate-400">Registramos cada ação da IA para total transparência em licitações.</p>
+                            <p className="text-sm text-slate-400">Registramos cada açío da IA para total transparência em licitações.</p>
                         </div>
                         <div className="space-y-2">
                             <p className="font-bold flex items-center gap-2"><Rocket className="h-4 w-4 text-emerald-400" /> Velocidade</p>
-                            <p className="text-sm text-slate-400">O Autopilot reduz de meses para minutos o tempo de prospecção.</p>
+                            <p className="text-sm text-slate-400">O Autopilot reduz de meses para minutos o tempo de prospecçío.</p>
                         </div>
                         <div className="space-y-2">
                             <p className="font-bold flex items-center gap-2"><Sparkles className="h-4 w-4 text-emerald-400" /> IA Especializada</p>

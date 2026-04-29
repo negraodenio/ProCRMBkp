@@ -39,7 +39,7 @@ export function DealTabs({ deal }: DealTabsProps) {
 
       <TabsContent value="email" className="mt-6">
         <div className="py-20 text-center">
-            <p className="text-sm text-slate-400">Nenhum e-mail vinculado a esta negociação.</p>
+            <p className="text-sm text-slate-400">Nenhum e-mail vinculado a esta negociaçío.</p>
         </div>
       </TabsContent>
 
@@ -78,9 +78,9 @@ function TabTrigger({ value, icon, label }: { value: string; icon: React.ReactNo
 
 function HistoryTimeline({ dealId }: { dealId: string }) {
     const items = [
-        { text: "Rickey Tatayama alterou a etapa para Follow UP a partir do funil Funil Padrão", date: "13/02/2026 12:43" },
-        { text: "Rickey Tatayama alterou o valor único da negociação de R$ 4558,00 para R$ 4718,00", date: "13/02/2026 12:42" },
-        { text: "Negociação criada via CRM", date: "13/02/2026 12:42" },
+        { text: "Rickey Tatayama alterou a etapa para Follow UP a partir do funil Funil Padrío", date: "13/02/2026 12:43" },
+        { text: "Rickey Tatayama alterou o valor único da negociaçío de R$ 4558,00 para R$ 4718,00", date: "13/02/2026 12:42" },
+        { text: "Negociaçío criada via CRM", date: "13/02/2026 12:42" },
     ];
 
     return (
@@ -90,7 +90,7 @@ function HistoryTimeline({ dealId }: { dealId: string }) {
             </h3>
             <Card className="bg-slate-50 border-dashed">
                 <CardContent className="py-8 text-center text-xs text-slate-400">
-                    Não existem tarefas pendentes para essa Negociação
+                    Nío existem tarefas pendentes para essa Negociaçío
                 </CardContent>
             </Card>
 

@@ -19,15 +19,15 @@ import Link from "next/link";
 const customer = {
   id: "1",
   name: "Empresa ABC Ltda",
-  contact: "João Silva",
+  contact: "Joío Silva",
   email: "joao@empresaabc.com.br",
   phone: "(11) 99999-9999",
-  address: "Av. Paulista, 1000 - São Paulo, SP",
+  address: "Av. Paulista, 1000 - Sío Paulo, SP",
   status: "Ativo",
   value: "R$ 50.000",
   since: "2023-01-15",
   lastContact: "2023-06-10",
-  notes: "Cliente importante com potencial para expansão. Último contato foi positivo e demonstrou interesse em novos serviços.",
+  notes: "Cliente importante com potencial para expansío. Último contato foi positivo e demonstrou interesse em novos serviços.",
 };
 
 export function CustomerDetails() {
@@ -155,7 +155,7 @@ export function CustomerDetails() {
                     <Phone className="h-3 w-3 text-primary-foreground" />
                   </div>
                   <div>
-                    <div className="font-medium">Ligação de follow-up</div>
+                    <div className="font-medium">Ligaçío de follow-up</div>
                     <div className="text-sm text-muted-foreground">10/06/2023 às 14:30</div>
                   </div>
                 </div>
@@ -173,7 +173,7 @@ export function CustomerDetails() {
                     <Calendar className="h-3 w-3" />
                   </div>
                   <div>
-                    <div className="font-medium">Reunião de vendas</div>
+                    <div className="font-medium">Reuniío de vendas</div>
                     <div className="text-sm text-muted-foreground">01/06/2023 às 16:00</div>
                   </div>
                 </div>
@@ -191,7 +191,7 @@ export function CustomerDetails() {
             <CardContent className="space-y-2">
               <Button variant="outline" className="w-full justify-start">
                 <Phone className="mr-2 h-4 w-4" />
-                Fazer Ligação
+                Fazer Ligaçío
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 <Mail className="mr-2 h-4 w-4" />

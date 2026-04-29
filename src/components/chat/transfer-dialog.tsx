@@ -176,7 +176,7 @@ export function TransferDialog({ isOpen, onClose, conversationId, onSuccess }: T
                    📝 Observações Internas
                 </Label>
                 <Textarea
-                  placeholder="Mensagem interna para o próximo atendente (o cliente não verá isso)"
+                  placeholder="Mensagem interna para o próximo atendente (o cliente nío verá isso)"
                   className="min-h-[100px] bg-muted/10 border-border resize-none italic text-sm"
                   value={internalNote}
                   onChange={(e) => setInternalNote(e.target.value)}

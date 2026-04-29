@@ -43,7 +43,7 @@ export default function PeopleSearchPage() {
                 toast.error(res.error || "Erro na busca");
             }
         } catch {
-            toast.error("Erro na comunicação.");
+            toast.error("Erro na comunicaçío.");
         } finally {
             setLoading(false);
         }

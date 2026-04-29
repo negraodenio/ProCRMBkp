@@ -9,7 +9,7 @@ export default function SecurityPage() {
             <div>
                 <h3 className="text-lg font-medium">Segurança</h3>
                 <p className="text-sm text-muted-foreground">
-                    Gerencie suas configurações de segurança e proteção de conta.
+                    Gerencie suas configurações de segurança e proteçío de conta.
                 </p>
             </div>
             <Separator />
@@ -34,7 +34,7 @@ export default function SecurityPage() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Smartphone className="h-4 w-4" />
-                            Autenticação de Dois Fatores (2FA)
+                            Autenticaçío de Dois Fatores (2FA)
                         </CardTitle>
                         <CardDescription>
                             Adicione uma camada extra de segurança à sua conta.

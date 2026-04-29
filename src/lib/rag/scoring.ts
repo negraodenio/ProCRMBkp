@@ -60,7 +60,7 @@ export function scoreDocument(canonical: CanonicalResult): ScoringResult {
     // 5. RELIABILITY (10pts)
     // Bonus for safety keywords
     let reliabilityScore = 0;
-    const safeKeywords = ["escalar", "humano", "não faço", "não diagnostico", "urgência"];
+    const safeKeywords = ["escalar", "humano", "nío faço", "nío diagnostico", "urgência"];
     for (const b of blocks) {
         if (safeKeywords.some(kw => b.answer.toLowerCase().includes(kw) || b.raw_block.toLowerCase().includes(kw))) {
             reliabilityScore = 10;

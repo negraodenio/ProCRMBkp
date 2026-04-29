@@ -33,25 +33,25 @@ export default function AuditPage() {
 
     const getActionLabel = (action: string) => {
         const labels: Record<string, string> = {
-            "PLATFORM_INIT": "Inicialização da Plataforma",
+            "PLATFORM_INIT": "Inicializaçío da Plataforma",
             "SEED_DATA": "Seed de Dados",
             "CREATE_PIPELINE": "Pipeline Criado",
             "CREATE_PROPOSAL": "Proposta Criada",
             "MATCH_RUN": "Matchmaking Executado",
             "OUTREACH_SEND": "Outreach Enviado",
             "CONTACT_DISCOVERY": "Descoberta de Contatos",
-            "LATTES_SYNC": "Sincronização Lattes",
+            "LATTES_SYNC": "Sincronizaçío Lattes",
             "LATTES_SYNC_NEW": "Novo Perfil Lattes",
             "GRANT_SEARCH": "Busca de Editais",
             "CREATE_CAMPAIGN": "Campanha Criada",
-            "CONVERT_TO_LEAD": "Conversão para Lead",
+            "CONVERT_TO_LEAD": "Conversío para Lead",
         };
         return labels[action] || action;
     };
 
     const handleExportPDF = () => {
         window.print();
-        toast.success("Relatório de auditoria enviado para impressão.");
+        toast.success("Relatório de auditoria enviado para impressío.");
     };
 
     return (
@@ -120,7 +120,7 @@ export default function AuditPage() {
                         <Card>
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                                    <Clock className="h-4 w-4" /> Retenção LGPD
+                                    <Clock className="h-4 w-4" /> Retençío LGPD
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -146,7 +146,7 @@ export default function AuditPage() {
                                         <thead className="bg-slate-50 border-y">
                                             <tr>
                                                 <th className="px-6 py-3 text-left font-medium text-slate-500">Timestamp</th>
-                                                <th className="px-6 py-3 text-left font-medium text-slate-500">Ação / Usuário</th>
+                                                <th className="px-6 py-3 text-left font-medium text-slate-500">Açío / Usuário</th>
                                                 <th className="px-6 py-3 text-left font-medium text-slate-500">Detalhes</th>
                                                 <th className="px-6 py-3 text-left font-medium text-slate-500">Assinatura HMAC-SHA256</th>
                                             </tr>
@@ -194,7 +194,7 @@ export default function AuditPage() {
                                 <FileText className="h-6 w-6" />
                                 Exportar Relatório de Auditoria
                             </h3>
-                            <p className="opacity-80 text-sm">Gere um PDF assinado com todos os registros para prestação de contas à FUNARBE.</p>
+                            <p className="opacity-80 text-sm">Gere um PDF assinado com todos os registros para prestaçío de contas à FUNARBE.</p>
                         </div>
                         <button 
                             className="bg-white text-indigo-600 font-bold px-6 py-3 rounded-lg hover:bg-indigo-50 transition-colors"

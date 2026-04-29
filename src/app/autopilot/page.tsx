@@ -268,7 +268,7 @@ export default function AutopilotPage() {
                                                 <p className="text-slate-400 text-xs uppercase font-bold tracking-widest mb-1">Market Strategy Report</p>
                                                 <h3 className="text-xl font-bold">Plano Go-To-Market</h3>
                                                 <p className="text-sm text-slate-400">
-                                                    Análise estratégica de penetração baseada em 128 competidores globais e mapeamento de nichos FAPEMIG/FINEP.
+                                                    Análise estratégica de penetraçío baseada em 128 competidores globais e mapeamento de nichos FAPEMIG/FINEP.
                                                 </p>
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
@@ -282,7 +282,7 @@ export default function AutopilotPage() {
                                                 </div>
                                             </div>
                                         </div>
-                                        <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-12 gap-2 mt-4" onClick={() => { window.print(); toast.success('Relatório enviado para impressão.'); }}>
+                                        <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-12 gap-2 mt-4" onClick={() => { window.print(); toast.success('Relatório enviado para impressío.'); }}>
                                             <Download className="h-4 w-4" />
                                             Baixar Relatório Estratégico Completo (PDF)
                                         </Button>

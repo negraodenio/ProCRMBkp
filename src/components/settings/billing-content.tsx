@@ -90,7 +90,7 @@ export function BillingContent({ subscription, usage, user }: BillingContentProp
 
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardDescription>IA Tools / mÃªs</CardDescription>
+                        <CardDescription>IA Tools / mês</CardDescription>
                         <CardTitle className="text-2xl">
                             {usage.ia_tools} / {currentPlan.limits.ia_tools_per_month === -1 ? "âˆž" : currentPlan.limits.ia_tools_per_month}
                         </CardTitle>
@@ -105,7 +105,7 @@ export function BillingContent({ subscription, usage, user }: BillingContentProp
 
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardDescription>UsuÃ¡rios</CardDescription>
+                        <CardDescription>Usuários</CardDescription>
                         <CardTitle className="text-2xl">
                             {usage.users} / {currentPlan.limits.users === -1 ? "âˆž" : currentPlan.limits.users}
                         </CardTitle>
@@ -125,10 +125,10 @@ export function BillingContent({ subscription, usage, user }: BillingContentProp
                     {currentPlanSlug === 'starter' && <Badge className="absolute -top-2 -right-2">Atual</Badge>}
                     <CardHeader>
                         <CardTitle>Starter</CardTitle>
-                        <CardDescription>O essencial para comeÃ§ar.</CardDescription>
+                        <CardDescription>O essencial para começar.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="text-3xl font-bold">â‚¬29<span className="text-sm font-normal text-muted-foreground">/mÃªs</span></div>
+                        <div className="text-3xl font-bold">â‚¬29<span className="text-sm font-normal text-muted-foreground">/mês</span></div>
                         <ul className="space-y-2 text-sm">
                             <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> 1.000 Leads</li>
                             <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> 50 IA Tools</li>
@@ -156,10 +156,10 @@ export function BillingContent({ subscription, usage, user }: BillingContentProp
                             Pro
                             <Sparkles className="h-4 w-4 text-primary" />
                         </CardTitle>
-                        <CardDescription>Escala e inteligÃªncia.</CardDescription>
+                        <CardDescription>Escala e inteligência.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="text-3xl font-bold">â‚¬79<span className="text-sm font-normal text-muted-foreground">/mÃªs</span></div>
+                        <div className="text-3xl font-bold">â‚¬79<span className="text-sm font-normal text-muted-foreground">/mês</span></div>
                         <ul className="space-y-2 text-sm">
                             <li className="flex items-center gap-2 font-bold"><Check className="h-4 w-4 text-primary" /> IA ILIMITADO âš¡</li>
                             <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> 10.000 Leads</li>

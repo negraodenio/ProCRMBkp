@@ -162,7 +162,7 @@ export const EvolutionService = {
                     if (responseData?.message && Array.isArray(responseData.message)) {
                         const firstMsg = responseData.message[0];
                         if (firstMsg?.exists === false) {
-                            throw new Error(`O número ${jid.split('@')[0]} não está cadastrado no WhatsApp.`);
+                            throw new Error(`O número ${jid.split('@')[0]} nío está cadastrado no WhatsApp.`);
                         }
                     }
 
@@ -181,7 +181,7 @@ export const EvolutionService = {
                 }
             } catch (pErr: any) {
                 // Rethrow OUR custom errors
-                if (pErr.message && (pErr.message.includes("não está cadastrado") || pErr.message.includes("desconectado") || !errorText.includes(pErr.message))) {
+                if (pErr.message && (pErr.message.includes("nío está cadastrado") || pErr.message.includes("desconectado") || !errorText.includes(pErr.message))) {
                     throw pErr;
                 }
             }

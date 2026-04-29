@@ -24,8 +24,8 @@ export const viewport: Viewport = {
 
 
 export const metadata: Metadata = {
-  title: "Nexum - Plataforma de TransferÃªncia TecnolÃ³gica",
-  description: "Plataforma de IA para TransferÃªncia de Tecnologia e Matchmaking Corporativo â€” NIT UFV",
+  title: "Nexum - Plataforma de Transferência Tecnológica",
+  description: "Plataforma de IA para Transferência de Tecnologia e Matchmaking Corporativo â€” NIT UFV",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

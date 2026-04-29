@@ -24,9 +24,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 const activities = [
   {
     id: "1",
-    title: "Reunião de vendas",
-    type: "Reunião",
-    contact: "João Silva",
+    title: "Reuniío de vendas",
+    type: "Reuniío",
+    contact: "Joío Silva",
     company: "Empresa ABC Ltda",
     date: "2023-06-15",
     time: "14:00",
@@ -34,8 +34,8 @@ const activities = [
   },
   {
     id: "2",
-    title: "Ligação de follow-up",
-    type: "Ligação",
+    title: "Ligaçío de follow-up",
+    type: "Ligaçío",
     contact: "Maria Oliveira",
     company: "Tech Solutions SA",
     date: "2023-06-14",
@@ -47,7 +47,7 @@ const activities = [
     title: "Envio de proposta",
     type: "Email",
     contact: "Carlos Santos",
-    company: "Inovação Digital",
+    company: "Inovaçío Digital",
     date: "2023-06-13",
     time: "09:15",
     status: "Concluído",
@@ -75,9 +75,9 @@ export function ActivityList() {
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case "Reunião":
+      case "Reuniío":
         return <Calendar className="h-4 w-4" />;
-      case "Ligação":
+      case "Ligaçío":
         return <Phone className="h-4 w-4" />;
       case "Email":
         return <Mail className="h-4 w-4" />;

@@ -12,7 +12,7 @@ const items = [
     icon: User,
   },
   {
-    title: "Organização",
+    title: "Organizaçío",
     href: "/settings/organization",
     icon: Building2,
   },
