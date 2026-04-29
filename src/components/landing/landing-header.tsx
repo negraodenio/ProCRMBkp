@@ -18,7 +18,7 @@ export function LandingHeader() {
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
           <a href="#features" className="text-slate-600 hover:text-primary transition-colors">Pipeline & Propostas</a>
-          <a href="#tools" className="text-slate-600 hover:text-primary transition-colors">13 IA Tools</a>
+          <a href="#tools" className="text-slate-600 hover:text-primary transition-colors">IA Tools</a>
           <a href="#pricing" className="text-slate-600 hover:text-primary transition-colors">Planos</a>
           <div className="flex items-center gap-4 ml-4">
             <Link href="/login">
@@ -26,7 +26,7 @@ export function LandingHeader() {
             </Link>
             <Link href="/register">
               <Button className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 font-bold">
-                Criar Conta GrÃ¡tis
+                Criar Conta Grátis
               </Button>
             </Link>
           </div>

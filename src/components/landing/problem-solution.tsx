@@ -30,12 +30,12 @@ export function ProblemSolution() {
           <span className="text-indigo-600 italic">Termina Aqui.</span>
         </h2>
         <p className="text-xl text-slate-500 font-medium max-w-2xl mx-auto">
-          A IA4ALL elimina os gargalos que impedem a ciência de virar riqueza industrial.
+          A Nexum elimina os gargalos que impedem a ciência de virar riqueza industrial.
         </p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto items-stretch">
-        {/* Without IA4ALL */}
+        {/* Without Nexum */}
         <div className="bg-white border border-slate-200 rounded-[2.5rem] p-10 md:p-14 shadow-sm relative overflow-hidden group">
           <div className="flex items-center gap-4 mb-10">
             <div className="p-3 bg-slate-100 rounded-2xl text-slate-400">
@@ -63,7 +63,7 @@ export function ProblemSolution() {
           </div>
         </div>
 
-        {/* With IA4ALL */}
+        {/* With Nexum */}
         <div className="bg-slate-950 rounded-[2.5rem] p-10 md:p-14 shadow-[0_40px_80px_-20px_rgba(79,70,229,0.3)] relative overflow-hidden group border border-white/10">
           <div className="absolute top-0 right-0 p-8">
             <div className="px-3 py-1 bg-indigo-600 text-[10px] font-black text-white rounded-full tracking-widest uppercase">Padrão Funarbe</div>
@@ -100,7 +100,7 @@ export function ProblemSolution() {
 
       <div className="mt-16 text-center">
          <p className="text-slate-400 text-sm font-bold flex items-center justify-center gap-3">
-            A IA4ALL orquestra o fluxo de inovação, do laboratório ao mercado.
+            A Nexum orquestra o fluxo de inovação, do laboratório ao mercado.
             <ArrowRight className="h-4 w-4 text-indigo-500" />
          </p>
       </div>

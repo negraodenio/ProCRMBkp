@@ -5,14 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const COMPARISON_DATA = [
-  { feature: "IA Priority Scoring", ia4all: "check", firstignite: "alert", alertText: "Básico" },
-  { feature: "Lattes Sync (Expertise BR)", ia4all: "check", firstignite: "x" },
-  { feature: "WhatsApp Outreach Nativo", ia4all: "check", firstignite: "x" },
-  { feature: "Auditoria HMAC-SHA256", ia4all: "check", firstignite: "x" },
-  { feature: "TRL Identification", ia4all: "check", firstignite: "alert", alertText: "Manual" },
-  { feature: "Market Strategy (GTM) IA", ia4all: "check", firstignite: "alert" },
-  { feature: "LGPD Compliance (Brasil)", ia4all: "check", firstignite: "alert", alertText: "GDPR" },
-  { feature: "Aderência Processo 56467", ia4all: "check", firstignite: "x" },
+  { feature: "IA Priority Scoring", Nexum: "check", firstignite: "alert", alertText: "Básico" },
+  { feature: "Lattes Sync (Expertise BR)", Nexum: "check", firstignite: "x" },
+  { feature: "WhatsApp Outreach Nativo", Nexum: "check", firstignite: "x" },
+  { feature: "Auditoria HMAC-SHA256", Nexum: "check", firstignite: "x" },
+  { feature: "TRL Identification", Nexum: "check", firstignite: "alert", alertText: "Manual" },
+  { feature: "Market Strategy (GTM) IA", Nexum: "check", firstignite: "alert" },
+  { feature: "LGPD Compliance (Brasil)", Nexum: "check", firstignite: "alert", alertText: "GDPR" },
+  { feature: "Aderência Processo 56467", Nexum: "check", firstignite: "x" },
 ];
 
 export function ComparisonTable() {
@@ -27,7 +27,7 @@ export function ComparisonTable() {
           <span className="text-indigo-600 italic">Técnica e Soberana</span>
         </h2>
         <p className="text-xl text-slate-500 max-w-2xl mx-auto font-medium">
-          Por que a IA4ALL é a única plataforma apta a gerir o capital intelectual estratégico da sua instituição.
+          Por que a Nexum é a única plataforma apta a gerir o capital intelectual estratégico da sua instituição.
         </p>
       </div>
 
@@ -39,7 +39,7 @@ export function ComparisonTable() {
                 <th className="py-10 px-8 text-left text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Recurso Estratégico</th>
                 <th className="py-10 px-8 text-center bg-indigo-600 relative overflow-hidden">
                    <div className="relative z-10">
-                    <span className="text-2xl font-black italic tracking-tighter">IA4ALL</span>
+                    <span className="text-2xl font-black italic tracking-tighter">Nexum</span>
                     <div className="text-[9px] font-bold text-indigo-200 mt-1 uppercase tracking-widest">Sovereign Edition</div>
                    </div>
                    <div className="absolute top-0 right-0 p-2 opacity-20">
