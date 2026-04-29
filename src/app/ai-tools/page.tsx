@@ -155,8 +155,6 @@ const AI_TOOLS: AITool[] = [
         borderColor: "border-t-cyan-500",
         group: "closing",
     },
-        group: "innovation",
-    },
     {
         id: "patent-to-pitch",
         title: "Pitch de Patente",

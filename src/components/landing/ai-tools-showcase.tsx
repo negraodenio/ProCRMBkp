@@ -137,9 +137,6 @@ const TOOLS: ToolCard[] = [
     fullExample: "Governança de Dados:\n\nTodos os dados de pesquisadores e contatos são processados sob o framework Privacy by Design, com isolamento multi-tenant e criptografia AES-256."
   }
 ];
-o atacará diretamente o contorno de objeções de preço e fechamento tático.\n\nO investimento do projeto se paga convertendo apenas 1 dia das vendas perdidas. Vamos avançar e blindar a equipe comercial?"
-  }
-];
 
 export function AIToolsShowcase() {
   const [selectedTool, setSelectedTool] = useState<ToolCard | null>(null);
