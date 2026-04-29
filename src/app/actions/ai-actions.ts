@@ -5,29 +5,63 @@ import { createClient } from "@/lib/supabase/server";
 import { checkPlanLimit } from "@/lib/stripe/limits";
 import { PlanLevel } from "@/lib/stripe/plans";
 
-export async function generateAIContent(toolId: string, leadId: string) {
-    if (!leadId) {
-        return { success: false, error: "Lead ID is required" };
+export async function generateAIContent(toolId: string, leadId?: string, rawText?: string) {
+    if (!leadId && !rawText) {
+        return { success: false, error: "Lead ID or Raw Text is required" };
     }
 
-    // 1. Fetch Lead Data
+    let context = "";
+    let organizationId = "";
+    let userId = "";
+
     const supabase = await createClient();
-    const { data: lead, error } = await supabase
-        .from("contacts")
-        .select("*")
-        .eq("id", leadId)
-        .single();
+    const { data: userData } = await supabase.auth.getUser();
+    userId = userData.user?.id || "";
 
-    if (error || !lead) {
-        console.error("Error fetching lead:", error);
-        return { success: false, error: "Lead not found" };
+    if (leadId) {
+        // 1. Fetch Lead Data
+        const { data: lead, error } = await supabase
+            .from("contacts")
+            .select("*")
+            .eq("id", leadId)
+            .single();
+
+        if (error || !lead) {
+            console.error("Error fetching lead:", error);
+            return { success: false, error: "Lead not found" };
+        }
+
+        organizationId = lead.organization_id;
+
+        context = `
+        Lead Name: ${lead.name}
+        Company: ${lead.company || "N/A"}
+        Email: ${lead.email || "N/A"}
+        Phone: ${lead.phone || "N/A"}
+        Status: ${lead.status || "N/A"}
+        Source: ${lead.source || "N/A"}
+      `;
+    } else if (rawText) {
+        context = `Texto Científico/Patente:\n${rawText}`;
+        
+        // Need to get orgId from profile
+        if (userId) {
+            const { data: profile } = await supabase
+                .from("profiles")
+                .select("organization_id")
+                .eq("id", userId)
+                .single();
+            organizationId = profile?.organization_id || "";
+        }
     }
+
+    if (!organizationId) return { success: false, error: "Organização não encontrada" };
 
     // 1.1 Check Plan Limits
     const { data: org } = await supabase
         .from("organizations")
         .select("id, subscription_plan, ia_tools_used_month")
-        .eq("id", lead.organization_id)
+        .eq("id", organizationId)
         .single();
 
     if (!org) return { success: false, error: "Organização não encontrada" };
@@ -48,22 +82,7 @@ export async function generateAIContent(toolId: string, leadId: string) {
     }
 
     // 2. Fetch History (Optional - Messages)
-    const { data: messages } = await supabase
-        .from("messages")
-        .select("content, direction, created_at")
-        .eq("contact_id", leadId) // Assuming contact_id exists in messages table based on schema? No, messages link to conversations.
-        // Wait, schema says messages -> conversation -> contact_id (actually conversation has contact_phone)
-        // Let's keep it simple for now and just use lead data.
-        .limit(5);
-
-    const context = `
-    Lead Name: ${lead.name}
-    Company: ${lead.company || "N/A"}
-    Email: ${lead.email || "N/A"}
-    Phone: ${lead.phone || "N/A"}
-    Status: ${lead.status || "N/A"}
-    Source: ${lead.source || "N/A"}
-  `;
+    // ... logic for messages history if needed
 
     let systemPrompt = "";
     let userPrompt = "";
@@ -177,6 +196,47 @@ export async function generateAIContent(toolId: string, leadId: string) {
             model = "general";
             break;
 
+        case "science-teaser":
+            systemPrompt = "Você é um especialista em Transferência de Tecnologia e Marketing Científico. Sua missão é traduzir linguagem técnica complexa em valor de negócio e identificar o estágio de maturidade tecnológica.";
+            userPrompt = `Transforme o seguinte texto científico/patente em um 'Teaser de Mercado' conciso.
+            Foque no Problema, na Solução Inovadora e no Diferencial Competitivo. 
+            OBRIGATÓRIO: Estime o Nível de Maturidade Tecnológica (TRL de 1 a 9) com uma breve justificativa.
+            Responda em Português do Brasil em Markdown.
+
+            Texto Original:
+            ${context}`;
+            model = "general";
+            break;
+
+        case "patent-to-pitch":
+            systemPrompt = "Você é um Consultor de Business Development para Startups Deep Tech e TTOs.";
+            userPrompt = `Com base nesta descrição de tecnologia/patente, elabore um Pitch Executivo estruturado:
+            1. Proposta de Valor (The "Why").
+            2. Barreira de Entrada (IP/Diferencial).
+            3. Maturidade (TRL sugerido).
+            4. Modelo de Monetização Sugerido (Licenciamento, Spin-off, etc).
+            5. Perfil do Parceiro Ideal.
+            Responda em Português do Brasil em Markdown.
+
+            Contexto:
+            ${context}`;
+            model = "general";
+            break;
+
+        case "market-applications":
+            systemPrompt = "Você é um Analista de Mercado focado em Commercialization Foresight.";
+            userPrompt = `Identifique 3 verticais de mercado distintas onde esta tecnologia pode ser aplicada.
+            Para cada vertical, forneça:
+            - Justificativa técnica baseada no TRL atual.
+            - Tamanho estimado da oportunidade (Baixo/Médio/Alto).
+            - Exemplo de empresa que seria um parceiro estratégico.
+            Responda em Português do Brasil em Markdown.
+
+            Contexto:
+            ${context}`;
+            model = "general";
+            break;
+
         default:
             return { success: false, error: "Tool not recognized" };
     }
@@ -203,19 +263,19 @@ export async function generateAIContent(toolId: string, leadId: string) {
 
                 if (profile) {
                     await supabase.from("ai_operations").insert({
-                        organization_id: profile.organization_id,
+                        organization_id: organizationId,
                         user_id: userData.user.id,
                         tool_used: toolId,
-                        target_entity_id: leadId,
-                        input_params: { leadId },
+                        target_entity_id: leadId || null,
+                        input_params: { leadId, rawText: rawText ? "present" : "absent" },
                         output_result: { result: result.substring(0, 500) },
                         model_used: model,
-                        tokens_used: 0, // SiliconFlow doesn't return usage easily in this simple call
+                        tokens_used: 0,
                     });
 
                     // Increment usage count in organizations table
                     await supabase.rpc('increment_ia_usage', {
-                        org_id: profile.organization_id
+                        org_id: organizationId
                     });
                 }
             }

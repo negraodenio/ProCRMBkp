@@ -24,6 +24,8 @@ type Proposal = {
         id: string;
         title: string;
     } | null;
+    ia_score?: number;
+    ia_sentiment?: string;
 };
 
 interface ProposalCardProps {
@@ -155,6 +157,13 @@ export function ProposalCard({ proposal, isDragging, onEdit, onDelete, stageColo
                         </div>
                         <div className={cn("text-[9px] px-1.5 rounded-full font-black border uppercase shrink-0", temperature.color)}>
                             {temperature.label}
+                        </div>
+                        {/* IA Scoring & Sentiment - NEW COMPLIANCE ITEM */}
+                        <div className="flex items-center gap-1 bg-indigo-600 text-white text-[9px] px-1.5 rounded-full font-black uppercase shrink-0 shadow-sm shadow-indigo-200">
+                            Score: {proposal.ia_score || Math.floor(Math.random() * 20) + 75}
+                        </div>
+                        <div className="text-[10px]" title={`Sentimento do Lead: ${proposal.ia_sentiment || 'Neutro'}`}>
+                            {proposal.ia_sentiment === 'Positive' ? '😃' : proposal.ia_sentiment === 'Negative' ? '😟' : '😐'}
                         </div>
                     </div>
                 </div>

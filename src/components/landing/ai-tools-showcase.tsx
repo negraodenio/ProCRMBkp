@@ -48,148 +48,96 @@ const TOOLS: ToolCard[] = [
   // QUALIFICATION
   {
     id: "scoring",
-    title: "Scoring & Qualificação",
-    description: "Pontua e prioriza leads automaticamente sem trabalho manual.",
+    title: "IA Priority Scoring",
+    description: "Pontua automaticamente cada ativo do portfólio baseado no interesse corporativo e fit estratégico.",
     icon: Tag,
-    badge: "Nenhum CRM tem isto grátis",
-    preview: "Lead Qualificado: 92/100. Prioridade: Alta.",
+    badge: "BENCHMARK SUPERIOR",
+    preview: "Tecnologia Qualificada: 92/100. Prioridade: Máxima.",
     group: "qualification",
     color: "text-purple-600",
-    fullExample: "Análise de Scoring:\n\nNome: João Silva\nInteresse: CRM Pro\nComportamento: Visitou preços 4x, baixou whitepaper.\nScore Final: 92\nRecomendação: Atribuição imediata ao Key Account."
+    fullExample: "Análise de Scoring:\n\nPatente: Bio-Polímero V2\nSetor: Química Fina\nInteresse Detectado: 4 empresas do setor químico visualizaram o teaser.\nScore Final: 92\nRecomendação: Iniciar prospecção ativa imediata para licenciamento."
   },
   {
-    id: "business-case",
-    title: "Business Case Estratégico",
-    description: "Gera um caso de negócio personalizado para cada lead em 3 segundos.",
-    icon: FileText,
-    badge: "EXCLUSIVO ⭐",
-    preview: "ROI estimado: 340% em 12 meses para Empresa ABC.",
-    group: "qualification",
-    color: "text-blue-600",
-    fullExample: "Business Case Gerado:\n\nA Empresa ABC gasta atualmente €4.200/mês em processos manuais de vendas.\nCom o CRMia, estimamos uma redução de 35%, equivalente a €1.470/mês.\n\nROI estimado: 340% em 12 meses.\nPayback: 2.3 meses.\n\nProposta de valor recomendada: Posicionar como solução de produtividade e redução de headcount operacional."
-  },
-  {
-    id: "propensity",
-    title: "Propensão de Fechamento",
-    description: "Prevê com 87% de precisão quando o seu lead vai fechar o negócio.",
+    id: "trl-id",
+    title: "Identificação de TRL",
+    description: "Analisa o texto da pesquisa e identifica o nível de maturidade tecnológica (TRL 1-9) automaticamente.",
     icon: TrendingUp,
-    badge: "Salesforce cobra $300/user",
-    preview: "Probabilidade: 87%. Previsão: 2 a 5 dias.",
+    badge: "EXCLUSIVO ⭐",
+    preview: "TRL Identificado: Nível 4 (Protótipo em Laboratório).",
     group: "qualification",
     color: "text-emerald-600",
-    fullExample: "Análise Preditiva:\n\nLead: Carlos Innovate\nFase: Negociação\nSinais: Abriu proposta hoje, respondeu WhatsApp em < 5min.\nProbabilidade: 87%\nStatus: Hot. Movimentação detectada para assinatura digital."
+    fullExample: "Análise de Maturidade:\n\nCom base na descrição dos testes experimentais e validação em ambiente controlado, a IA classificou esta tecnologia como TRL 4.\nStatus: Pronto para validação em ambiente relevante."
   },
   {
-    id: "lead-temperature",
-    title: "Lead Temperature",
-    description: "Termômetro visual automático que indica esfriamento ou aquecimento de oportunidades no funil.",
-    icon: Flame,
+    id: "gtm-report",
+    title: "Market Strategy (GTM)",
+    description: "Gera relatórios Go-To-Market completos com análise de mercado e sugestão de precificação.",
+    icon: FileText,
     badge: "NOVIDADE 🔥",
-    preview: "Status: Quente. Última interação há 2H.",
+    preview: "GTM Gerado: ROI estimado de 280% para o licenciado.",
     group: "qualification",
-    color: "text-orange-500",
-    fullExample: "Análise de Recência (Lead Temperature):\n\nA IA monitora a proximidade da última interação (WhatsApp, E-mail, Proposta Enviada). Se o contato ocorreu nas últimas 48h, a oportunidade recebe o selo estratégico 🔥 QUENTE direto no Kanban.\nSempre saiba onde focar a energia do seu dia para não perder o timing da venda."
+    color: "text-blue-600",
+    fullExample: "Plano Go-To-Market:\n\nSetor Alvo: Cosméticos Sustentáveis\nTAM: R$ 4.2 Bilhões\nEstratégia: Licenciamento com exclusividade geográfica.\nRoyalty Sugerido: 3.5% a 5.0% sobre faturamento líquido."
   },
   // COMMUNICATION
   {
-    id: "persuasion",
-    title: "Comunicação Persuasiva",
-    description: "Copywriting de follow-up personalizado para converter qualquer lead.",
-    icon: Mail,
-    badge: "Powered by GPT-4",
-    preview: "Gerando e-mail de follow-up focado em urgência...",
+    id: "lattes-sync",
+    title: "Lattes Sync (Reverse Match)",
+    description: "Identifica o pesquisador ideal para cada demanda de empresa cruzando dados do Currículo Lattes.",
+    icon: Mic,
+    badge: "ÚNICO NO BRASIL",
+    preview: "Match Lattes: Prof. Dr. Carlos (98% aderência).",
     group: "communication",
     color: "text-indigo-600",
-    fullExample: "Comunicação Gerada:\n\nAssunto: [IMPORTANTE] Redução de custos na Empresa ABC\n\nOlá João,\n\nVi que analisou o Business Case que enviei. Com base nos seus dados atuais, cada dia sem automação custa à ABC cerca de €70.\n\nPodemos falar amanhã às 10h sobre como estancar essa perda?\n\nAbs,"
+    fullExample: "Reverse Match Intel:\n\nDemanda Empresa: Desenvolvimento de ligas metálicas leves.\nExpertise Lattes: Encontrado Prof. Dr. Carlos Silva (UFV). Possui 4 publicações e 2 patentes na área exata da demanda."
   },
   {
-    id: "behavioral",
-    title: "Inteligência Comportamental",
-    description: "Analisa o humor, o tom e a real intenção de compra do seu contacto.",
-    icon: Heart,
-    badge: "EXCLUSIVO ⭐",
-    preview: "Tom: Urgente. Humor: Positivo. Intenção: Alta.",
+    id: "outreach",
+    title: "Sugestão de Abordagem IA",
+    description: "Cria o script de abordagem perfeito para cada decisor de empresa baseado no perfil psicológico.",
+    icon: Mail,
+    badge: "HIGH CONVERSION",
+    preview: "Script Gerado: Foco em Inovação Aberta e redução de custos.",
     group: "communication",
     color: "text-rose-600",
-    fullExample: "Análise Comportamental:\n\nÚltimas 3 interações:\n1. E-mail: 'Preciso disso para ontem' (Tom: Urgência)\n2. WhatsApp: 'Gostei do demo' (Humor: Entusiasmo)\n3. Chamada: 'Preço é problema?' (Objeção: Financeiro)\n\nSentimento Geral: Muito Positivo. O lead está 'comprado' mas precisa de uma condição especial de pagamento."
+    fullExample: "Abordagem Gerada:\n\nPara: Diretor de P&D (Indústria Química)\nAssunto: Parceria de PD&I em Polímeros Sustentáveis\nArgumento: 'Identificamos que sua empresa busca reduzir custos em X. A tecnologia Y da UFV resolve exatamente este gargalo com redução de 20% no desperdício...'"
   },
   {
-    id: "whatsapp-agent",
-    title: "Agente IA WhatsApp (Robo)",
-    description: "Atendimento humano e natural com status 'Digitando...', saudações dinâmicas e transbordo para humanos.",
+    id: "whatsapp-screening",
+    title: "Auto-Screening WhatsApp",
+    description: "IA que qualifica o interesse da empresa via WhatsApp antes do contato humano do NIT.",
     icon: MessageCircle,
-    badge: "NOVIDADE 🔥",
-    preview: "Status: Digitando... IA respondendo de forma natural.",
+    badge: "OMNICHANNEL",
+    preview: "IA: 'Olá! Você tem interesse em licenciamento ou pesquisa?'",
     group: "communication",
     color: "text-green-600",
-    fullExample: "Interação Real:\n\nCliente: 'Oi, tudo bem? Quais os preços?'\nRobo (Status: Digitando...): 'Olá! Tudo ótimo por aqui. 😊 No CRMia temos planos a partir de R$ 129. Qual seu objetivo atual para eu te indicar o melhor?'\n\nBenefício: Redução de 40% no abandono de chat por falta de feedback visual."
+    fullExample: "Conversa via Bot:\n\nEmpresa: 'Vi a patente de polímeros no site.'\nBot IA: 'Olá! Perfeito. Você busca uma parceria para co-desenvolvimento ou licenciamento direto para produção?'\nEmpresa: 'Licenciamento.'\nBot IA: 'Entendido. Vou agendar uma call com nosso gestor de inovação.'"
   },
+  // SECURITY & GOVERNANCE
   {
-    id: "framework",
-    title: "Framework de Conversa",
-    description: "Roteiro estratégico de vendas para cada situação e tipo de lead.",
-    icon: Mic,
-    badge: "EXCLUSIVO ⭐",
-    preview: "Roteiro sugerido: Spin Selling para SaaS B2B.",
-    group: "communication",
-    color: "text-slate-700",
-    fullExample: "Roteiro Sugerido:\n\nContexto: Primeira chamada de descoberta.\nPergunta de Situação: 'Como vocês gerenciam leads hoje?'\nPergunta de Problema: 'Qual o custo de perder um lead por demora no follow-up?'\nPergunta de Implicação: 'Se isso continuar, qual o impacto no budget do Q3?'\nPergunta de Necessidade: 'Quanto valor geraria saber exatamente qual lead ligar primeiro?'"
-  },
-  // CLOSING
-  {
-    id: "nba",
-    title: "Next Best Action",
-    description: "Sugere a ação de maior impacto no momento certo do funil.",
-    icon: ArrowRight,
-    badge: "Salesforce cobra $$$",
-    preview: "Ação sugerida: Enviar convite para demo técnica.",
-    group: "closing",
-    color: "text-amber-600",
-    fullExample: "Recomendação Estratégica:\n\nPróximo Passo: Chamada de Vídeo de 15 min.\nPorquê: O lead solicitou detalhes técnicos que só um demo visual resolve.\nScript: 'João, vi sua dúvida sobre a API. Vamos fazer um quick call de 15 min amanhã para eu te mostrar como isso funciona na prática?'"
-  },
-  {
-    id: "negotiation",
-    title: "Consultoria de Negociação",
-    description: "Coach de IA para tratar objeções com argumentos comprovados.",
+    id: "audit-hmac",
+    title: "Auditoria HMAC-SHA256",
+    description: "Garante a imutabilidade absoluta de todos os registros de auditoria para órgãos de controle.",
     icon: ShieldAlert,
-    badge: "EXCLUSIVO ⭐",
-    preview: "Objeção: 'Tá caro'. Resposta: Posicionamento Value-first.",
+    badge: "COMPLIANCE TCU",
+    preview: "Registro Assinado: e3b0c44... (Verificado).",
     group: "closing",
-    color: "text-red-600",
-    fullExample: "Coach de Negociação:\n\nObjeção Detectada: 'Não temos budget este trimestre'.\nArgumento de Retorno: 'Entendo perfeitamente. Contudo, se esperarmos 3 meses, o desperdício acumulado será de €4.400. Se começarmos hoje, o CRMia se paga em 2 meses. Podemos parcelar a primeira etapa?'"
+    color: "text-slate-900",
+    fullExample: "Protocolo de Segurança:\n\nCada ação gera um hash HMAC assinado com chave secreta corporativa. Isso impede qualquer alteração retroativa no banco de dados, garantindo transparência absoluta para o TCU e CGU."
   },
   {
-    id: "dossier",
-    title: "Dossiê Pré-Reunião",
-    description: "Briefing executivo automático com pauta, riscos e objetivos.",
+    id: "iso-compliance",
+    title: "ISO 27001 & LGPD",
+    description: "Controles rígidos de privacidade e segurança da informação integrados nativamente.",
     icon: Briefcase,
-    badge: "EXCLUSIVO ⭐",
-    preview: "Compilando dossiê estratégico para reunião de amanhã...",
+    badge: "SOC 2 READY",
+    preview: "Status: LGPD Mascaramento PII Ativo.",
     group: "closing",
     color: "text-cyan-600",
-    fullExample: "Dossiê Estratégico:\n\nLead: Pedro Costa (CEO)\nEmpresa: StartupXYZ\nDores: Escalabilidade e Gestão de Equipe.\nRiscos: O lead usa um sistema caseiro e teme migração.\nObjetivo Reunião: Mostrar a simplicidade da importação via CSV/API.\nPauta Sugerida: 1. Demo Migração | 2. Dashboard Gestor | 3. IA Scoring."
-  },
-  {
-    id: "deal-coach",
-    title: "AI Deal Coach",
-    description: "Um Diretor de Vendas virtual que lê todo o seu Kanban e aponta gargalos e a próxima melhor ação.",
-    icon: LineChart,
-    badge: "NOVIDADE 🔥",
-    preview: "Alerta: R$ 45.000 parados na etapa de Negociação.",
-    group: "closing",
-    color: "text-violet-600",
-    fullExample: "Insight Estratégico do Deal Coach:\n\n🚨 Gargalo Financeiro:\nSeu maior volume de capital parado (R$ 84.000) está concentrado na etapa de 'Apresentação'.\n\n🎯 Oportunidade FOCO:\nConcentre-se na Proposta 'Enterprise SoftwareXYZ'. O tempo médico deste deal esgota amanhã.\n\n⚡ Ação Sugerida:\nAgende o follow-up dos 4 leads na etapa Base que estão completando 15 dias sem retorno."
-  },
-  {
-    id: "pitch-generator",
-    title: "AI Proposal Writer",
-    description: "Gera o pitch comercial persuasivo perfeito com base nos produtos da proposta em 4 segundos.",
-    icon: Sparkles,
-    badge: "NOVIDADE 🔥",
-    preview: "Pitch gerado com foco em ROI para a Empresa XYZ...",
-    group: "closing",
-    color: "text-fuchsia-600",
-    fullExample: "Proposta: Mentoria de Vendas B2B\n\nPitch Gerado:\n\nOlá Equipe XYZ,\n\nCom a Mentoria focada no pipeline, projetamos destravar os €45.000 que estão parados na etapa de Negociação nos últimos 2 meses. O treinamento atacará diretamente o contorno de objeções de preço e fechamento tático.\n\nO investimento do projeto se paga convertendo apenas 1 dia das vendas perdidas. Vamos avançar e blindar a equipe comercial?"
+    fullExample: "Governança de Dados:\n\nTodos os dados de pesquisadores e contatos são processados sob o framework Privacy by Design, com isolamento multi-tenant e criptografia AES-256."
+  }
+];
+o atacará diretamente o contorno de objeções de preço e fechamento tático.\n\nO investimento do projeto se paga convertendo apenas 1 dia das vendas perdidas. Vamos avançar e blindar a equipe comercial?"
   }
 ];
 
@@ -256,7 +204,7 @@ export function AIToolsShowcase() {
       <div className="text-center max-w-4xl mx-auto mb-20 space-y-6">
         <Badge className="bg-primary text-white font-black px-4 py-1">⚡ ÚNICO NO MERCADO</Badge>
         <h2 className="text-4xl md:text-6xl font-black text-slate-900 leading-[1.1]">
-          13 Ferramentas de IA Que Só o <span className="text-primary italic">CRMia</span> Tem
+          8 Ferramentas de IA Que Só a <span className="text-primary italic">IA4ALL</span> Tem
         </h2>
         <p className="text-xl text-slate-600 max-w-2xl mx-auto">
           Cada ferramenta resolve um problema real de vendas.

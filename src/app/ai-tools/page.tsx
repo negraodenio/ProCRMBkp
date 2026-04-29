@@ -49,7 +49,7 @@ interface AITool {
     icon: React.ElementType;
     color: string;
     borderColor: string;
-    group: "qualification" | "communication" | "closing";
+    group: "qualification" | "communication" | "closing" | "innovation";
 }
 
 const AI_TOOLS: AITool[] = [
@@ -155,6 +155,30 @@ const AI_TOOLS: AITool[] = [
         borderColor: "border-t-cyan-500",
         group: "closing",
     },
+        group: "innovation",
+    },
+    {
+        id: "patent-to-pitch",
+        title: "Pitch de Patente",
+        subtitle: "Comercialização de IP",
+        description: "Estrutura uma proposta de valor comercial a partir de dados de patentes.",
+        buttonText: "Gerar Pitch",
+        icon: Briefcase,
+        color: "text-indigo-700",
+        borderColor: "border-t-indigo-600",
+        group: "innovation",
+    },
+    {
+        id: "market-applications",
+        title: "Novos Mercados",
+        subtitle: "Análise de Verticais",
+        description: "Identifica novas aplicações e mercados potenciais para uma tecnologia.",
+        buttonText: "Descobrir Mercados",
+        icon: TrendingUp,
+        color: "text-orange-600",
+        borderColor: "border-t-orange-500",
+        group: "innovation",
+    },
 ];
 
 function AIToolsContent() {
@@ -164,14 +188,21 @@ function AIToolsContent() {
     const [activeModal, setActiveModal] = useState<string | null>(null);
     const [executingToolId, setExecutingToolId] = useState<string | null>(null);
     const [result, setResult] = useState("");
+    const [researchText, setResearchText] = useState("");
+    const [inputMode, setInputMode] = useState<"lead" | "research">("lead");
     const searchParams = useSearchParams();
     const initialLeadId = searchParams.get("leadId");
 
     const { checkLimit, isUpgradeModalOpen, setIsUpgradeModalOpen, lastCheckMessage } = usePlanLimit();
 
     const executeAI = async (toolId: string) => {
-        if (!selectedLead) {
+        if (inputMode === "lead" && !selectedLead) {
             toast.error("Selecione um lead primeiro");
+            return;
+        }
+
+        if (inputMode === "research" && !researchText) {
+            toast.error("Insira o texto da pesquisa ou patente primeiro");
             return;
         }
 
@@ -180,16 +211,18 @@ function AIToolsContent() {
         setResult("");
 
         try {
-            const response = await generateAIContent(toolId, selectedLead.id);
+            const response = await generateAIContent(
+                toolId, 
+                inputMode === "lead" ? selectedLead.id : undefined,
+                inputMode === "research" ? researchText : undefined
+            );
 
             if (response.success && response.result) {
                 setResult(response.result);
                 toast.success("Análise concluída!");
             } else if (response.upgradeRequired) {
-                setActiveModal(null); // Close the tool modal if it was open
+                setActiveModal(null);
                 setResult("");
-                // usePlanLimit hook will handle opening the UpgradeModal via checkLimit if we call it
-                // But here we got the error from server action. Let's trigger the modal manually or via hook.
                 setIsUpgradeModalOpen(true);
             } else {
                 toast.error("Erro na análise: " + (response.error || "Erro desconhecido"));
@@ -211,7 +244,7 @@ function AIToolsContent() {
 
     const activeTool = AI_TOOLS.find((t) => t.id === activeModal);
 
-    const renderToolGroup = (groupId: "qualification" | "communication" | "closing", title: string, subtitle: string, icon: string, accentColor: string) => {
+    const renderToolGroup = (groupId: "qualification" | "communication" | "closing" | "innovation", title: string, subtitle: string, icon: string, accentColor: string) => {
         const tools = AI_TOOLS.filter(t => t.group === groupId);
         return (
             <AIToolGroup title={title} subtitle={subtitle} icon={icon} accentColor={accentColor}>
@@ -219,7 +252,7 @@ function AIToolsContent() {
                     <AIToolCard
                         key={tool.id}
                         {...tool}
-                        disabled={!selectedLead}
+                        disabled={inputMode === "lead" ? !selectedLead : !researchText}
                         loading={executingToolId === tool.id}
                         onClick={() => executeAI(tool.id)}
                     />
@@ -235,15 +268,64 @@ function AIToolsContent() {
                 <Header />
                 <main className="flex-1 p-6">
                     <div className="max-w-7xl mx-auto space-y-8">
-                        <AIToolsHeader
-                            selectedLeadId={initialLeadId}
-                            orgId={profile?.organization_id || null}
-                            onSelectLead={(lead) => setSelectedLead(lead)}
-                        />
+                        <div className="flex flex-col gap-6">
+                            <div className="flex items-center gap-2 p-1 bg-slate-200/50 rounded-lg w-fit">
+                                <Button 
+                                    variant={inputMode === "lead" ? "default" : "ghost"} 
+                                    size="sm" 
+                                    onClick={() => setInputMode("lead")}
+                                    className="text-xs"
+                                >
+                                    Foco no Lead
+                                </Button>
+                                <Button 
+                                    variant={inputMode === "research" ? "default" : "ghost"} 
+                                    size="sm" 
+                                    onClick={() => setInputMode("research")}
+                                    className="text-xs"
+                                >
+                                    Foco na Pesquisa
+                                </Button>
+                            </div>
+
+                            {inputMode === "lead" ? (
+                                <AIToolsHeader
+                                    selectedLeadId={initialLeadId}
+                                    orgId={profile?.organization_id || null}
+                                    onSelectLead={(lead) => setSelectedLead(lead)}
+                                />
+                            ) : (
+                                <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="p-2 bg-orange-100 rounded-lg text-orange-600">
+                                                <Sparkles className="h-5 w-5" />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-slate-900">Input de Pesquisa / Patente</h3>
+                                                <p className="text-xs text-slate-500">Cole o texto técnico para gerar marketing e análise</p>
+                                            </div>
+                                        </div>
+                                        {researchText && (
+                                            <Button variant="ghost" size="sm" onClick={() => setResearchText("")} className="text-xs text-slate-400">
+                                                Limpar
+                                            </Button>
+                                        )}
+                                    </div>
+                                    <textarea 
+                                        className="w-full h-32 p-4 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all resize-none"
+                                        placeholder="Cole aqui o resumo da patente, artigo científico ou descrição da tecnologia..."
+                                        value={researchText}
+                                        onChange={(e) => setResearchText(e.target.value)}
+                                    />
+                                </div>
+                            )}
+                        </div>
 
                         <AIToolsStats />
 
                         <div className="space-y-12 pb-20">
+                            {renderToolGroup("innovation", "Inovação & Pesquisa", "Transforme ciência em oportunidade", "🔬", "bg-orange-500")}
                             {renderToolGroup("qualification", "Qualificação & Análise", "Entenda o potencial do seu lead", "📥", "bg-blue-500")}
                             {renderToolGroup("communication", "Comunicação & Relacionamento", "Comunique com impacto e inteligência", "💬", "bg-purple-500")}
                             {renderToolGroup("closing", "Negociação & Fechamento", "Feche com estratégia e preparação", "🎯", "bg-emerald-500")}

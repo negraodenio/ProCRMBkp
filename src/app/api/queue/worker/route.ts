@@ -137,10 +137,18 @@ export async function POST(req: NextRequest) {
     } catch (error: any) {
         console.error("❌ [Worker] Job Failed:", error);
 
-        // Mark as failed so it can be retried (or inspected)
-        // Note: supabase var is available here
-        // We need to handle this robustly.
-        // For now, simpler:
+        // Update job status to 'failed' and log the error
+        const supabase = createServiceRoleClient();
+        await supabase
+            .from("queue")
+            .update({ 
+                status: "failed", 
+                error_message: error.message,
+                attempts: (job?.attempts || 0) + 1,
+                updated_at: new Date().toISOString() 
+            })
+            .eq("id", job?.id);
+
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

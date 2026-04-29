@@ -75,13 +75,16 @@
   },
   "devDependencies": {
     "@dyad-sh/nextjs-webpack-component-tagger": "^0.8.0",
+    "@playwright/test": "^1.59.1",
     "@types/node": "^20",
     "@types/pdf-parse": "^1.1.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.5",
     "postcss": "^8",
     "prisma": "6.0.0",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.5"
   }
 }

@@ -8,28 +8,28 @@ import { cn } from "@/lib/utils";
 
 const IA_ACTION_EXAMPLES = [
   {
-    title: "Next Best Action",
+    title: "Market Strategy (GTM)",
     icon: Target,
-    content: "Ligue para João Silva HOJE. Propensão de fecho: 87%. Motivo: Abriu a proposta 3x nas últimas 24h.",
-    color: "text-green-600",
-    bg: "bg-green-50",
-    border: "border-green-100"
+    content: "Estratégia gerada para Patente Bio-Polímero: Foco em Indústria de Embalagens (ROI 280%). Pricing sugerido: Licenciamento com 3% Royalties.",
+    color: "text-emerald-600",
+    bg: "bg-emerald-50",
+    border: "border-emerald-100"
   },
   {
-    title: "Inteligência Comportamental",
-    icon: MessageSquare,
-    content: "O lead Maria Santos mudou para tom 'Urgente'. Intenção de compra detectada no último e-mail.",
+    title: "IA Priority Scoring",
+    icon: Sparkles,
+    content: "Tecnologia 'Sensor IoT' atingiu Score 92/100. Alta aderência com o roadmap da Siemens detected via análise semântica.",
+    color: "text-indigo-600",
+    bg: "bg-indigo-50",
+    border: "border-indigo-100"
+  },
+  {
+    title: "Reverse Lattes Match",
+    icon: Brain,
+    content: "Empresa XPTO busca expertise em Grafeno. Pesquisador ideal identificado: Prof. Dr. Ricardo (Lattes Sync 98%).",
     color: "text-purple-600",
     bg: "bg-purple-50",
     border: "border-purple-100"
-  },
-  {
-    title: "Business Case Estratégico",
-    icon: Brain,
-    content: "Relatório gerado: ROI estimado de 340% para a Empresa ABC com payback em 2.3 meses.",
-    color: "text-blue-600",
-    bg: "bg-blue-50",
-    border: "border-blue-100"
   }
 ];
 
@@ -39,7 +39,7 @@ export function HeroSection() {
   useEffect(() => {
     const interval = setInterval(() => {
       setExampleIndex((prev) => (prev + 1) % IA_ACTION_EXAMPLES.length);
-    }, 4000);
+    }, 4500);
     return () => clearInterval(interval);
   }, []);
 
@@ -49,32 +49,32 @@ export function HeroSection() {
     <section className="container mx-auto px-4 py-20 lg:py-32 overflow-hidden">
       <div className="grid lg:grid-cols-2 gap-16 items-center">
         <div className="space-y-8 animate-in fade-in slide-in-from-left duration-700">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/5 border border-primary/10 rounded-full text-sm font-bold text-primary">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-sm font-bold text-indigo-700">
             <Sparkles className="h-4 w-4 animate-pulse" />
-            <span>11 Ferramentas de IA integradas — Único no mercado</span>
+            <span>Suite IA 5-Tools — Especializada para NITs e Universidades</span>
           </div>
 
           <h1 className="text-5xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight text-slate-900">
-            O CRM Que <br />
-            <span className="bg-gradient-to-r from-primary via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              PENSA Por Si
+            Acelerando a <br />
+            <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              Inovação Acadêmica
             </span>
           </h1>
 
           <p className="text-xl text-slate-600 leading-relaxed max-w-xl">
-            9 ferramentas de IA que dizem exatamente o que fazer, o que dizer e quando fechar.
-            Business cases, análise comportamental, coach de negociação — tudo automático.
+            A plataforma de inteligência artificial pioneira em **University Partner Intelligence**. 
+            Encontre parceiros corporativos, identifique TRL e gere estratégias GTM em segundos.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link href="/register">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-white text-lg h-14 px-10 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95">
-                Começar Grátis
+            <Link href="/login">
+              <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white text-lg h-14 px-10 shadow-xl shadow-indigo-200 transition-all hover:scale-105 active:scale-95 font-bold">
+                Acessar Mission Control
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="text-lg h-14 px-10 border-slate-200 hover:bg-slate-50" asChild>
-              <a href="#tools">Ver os 11 IA Tools ↓</a>
+            <Button size="lg" variant="outline" className="text-lg h-14 px-10 border-slate-200 hover:bg-slate-50 font-medium" asChild>
+              <a href="#compliance">LGPD & NIST Compliant ↓</a>
             </Button>
           </div>
 

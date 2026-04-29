@@ -74,6 +74,14 @@ interface KanbanBoardProps {
     initialProposals: any[];
 }
 
+const UFV_COMPLIANCE_STAGES: Record<number, string> = {
+    0: "Intake / Ingestão",
+    1: "Qualificação (TRL)",
+    2: "NDA / Confidencialidade",
+    3: "Negociação Técnica",
+    4: "Licenciamento / Contrato"
+};
+
 export function KanbanBoard({ initialStages, initialProposals }: KanbanBoardProps) {
     const [proposals, setProposals] = useState<any[]>(initialProposals);
     const [stages, setStages] = useState<Stage[]>(initialStages);
@@ -280,9 +288,10 @@ export function KanbanBoard({ initialStages, initialProposals }: KanbanBoardProp
         <>
             <DragDropContext onDragEnd={onDragEnd}>
                 <div className="flex h-full gap-4 pb-4 overflow-x-auto">
-                    {stages.map((stage) => {
+                    {stages.map((stage, index) => {
                         const stageProposals = proposals.filter((p) => p.stage_id === stage.id);
                         const totalValue = stageProposals.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0);
+                        const displayName = UFV_COMPLIANCE_STAGES[index] || stage.name;
 
                         return (
                             <div key={stage.id} className="flex flex-col w-72 min-w-[288px] bg-muted/30 rounded-xl overflow-hidden shadow-sm border border-border">
@@ -331,7 +340,7 @@ export function KanbanBoard({ initialStages, initialProposals }: KanbanBoardProp
                                         ) : (
                                             <>
                                                 <h3 className="font-semibold text-sm uppercase tracking-wide">
-                                                    {stage.name}
+                                                    {displayName}
                                                 </h3>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>

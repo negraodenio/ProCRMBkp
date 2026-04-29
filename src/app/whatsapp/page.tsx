@@ -279,7 +279,7 @@ export default function WhatsAppPage() {
                                         Controle se o robô deve responder automaticamente.
                                     </CardDescription>
                                 </CardHeader>
-                                <CardContent>
+                                <CardContent className="space-y-4">
                                     <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium ${
                                         botActive
                                             ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
@@ -287,6 +287,19 @@ export default function WhatsAppPage() {
                                     }`}>
                                         <Sparkles className={`h-4 w-4 ${botActive ? 'animate-pulse' : ''}`} />
                                         {botActive ? 'Robô Ativo' : 'Robô Pausado'}
+                                    </div>
+
+                                    {/* Auto-Screening Simulation - NEW COMPLIANCE ITEM */}
+                                    <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">Simulação de Triagem (IA)</p>
+                                        <div className="space-y-2">
+                                            <div className="p-2 bg-white rounded-md text-[11px] border shadow-sm">
+                                                <strong>Lead:</strong> Gostaria de saber mais sobre a patente de polímeros.
+                                            </div>
+                                            <div className="p-2 bg-indigo-50 rounded-md text-[11px] border border-indigo-100 text-indigo-700">
+                                                <strong>IA:</strong> Com certeza! Você tem interesse em licenciamento ou parceria de PD&I?
+                                            </div>
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>

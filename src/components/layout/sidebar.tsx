@@ -20,6 +20,12 @@ import {
   Target,
   LogOut,
   Loader2,
+  Zap,
+  RefreshCw,
+  Shield,
+  Landmark,
+  UserCheck,
+  Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -28,20 +34,18 @@ import { Button } from "@/components/ui/button";
 import { logout } from "@/app/auth/actions";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Empresas", href: "/companies", icon: Building2 },
-  { name: "Contatos", href: "/contacts", icon: Users },
-  { name: "Pipeline", href: "/pipeline", icon: KanbanSquare },
-  { name: "Propostas", href: "/proposals", icon: FileText },
-  // { name: "Templates", href: "/templates", icon: Files },
-  { name: "Conversas", href: "/chat", icon: MessageSquare },
+  { name: "Mission Control", href: "/mission-control", icon: LayoutDashboard },
+  { name: "Autopilot", href: "/autopilot", icon: Zap },
+  { name: "IA Suite", href: "/mission-control#ia-tools", icon: Sparkles },
+  { name: "Estratégias", href: "/autopilot", icon: Rocket },
+  { name: "Matchmaking", href: "/match", icon: Target },
+  { name: "People Search", href: "/people-search", icon: UserCheck },
+  { name: "Email Outreach", href: "/outreach", icon: Mail },
+  { name: "Grant Discovery", href: "/grants", icon: Landmark },
+  { name: "Lattes Sync", href: "/lattes", icon: RefreshCw },
   { name: "WhatsApp", href: "/whatsapp", icon: Smartphone },
-  { name: "Mensagens Automáticas", href: "/automations", icon: Bot },
-  { name: "IA Tools", href: "/ai-tools", icon: Sparkles },
-  { name: "Usuários", href: "/users", icon: UserCog },
-  { name: "Relatórios", href: "/reports", icon: BarChart3 },
-  { name: "Estratégias", href: "/strategies", icon: Target },
-  // { name: "Console", href: "/console", icon: Terminal },
+  { name: "Audit Log", href: "/audit", icon: ShieldCheck },
+  { name: "Pipeline", href: "/pipeline", icon: KanbanSquare },
 ];
 
 import { useProfile } from "@/hooks/use-profile";
@@ -170,6 +174,14 @@ export function Sidebar({ mobile }: SidebarProps) {
               );
             })}
           </nav>
+        </div>
+
+        {/* LGPD & Governance Badge */}
+        <div className="px-4 pb-2">
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-md">
+                <Shield className="h-3 w-3 text-emerald-500" />
+                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-tight">LGPD Compliant</span>
+            </div>
         </div>
 
         {/* User Profile Footer com Glass Effect */}

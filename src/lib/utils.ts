@@ -6,6 +6,25 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Mascara dados sensíveis para conformidade LGPD
+ */
+export function maskPII(text: string, type: 'email' | 'document' | 'phone' = 'email') {
+  if (!text) return "";
+  
+  if (type === 'email') {
+    const [user, domain] = text.split('@');
+    if (!domain) return "***";
+    return `${user.substring(0, 2)}***@${domain}`;
+  }
+  
+  if (type === 'document') {
+    return text.replace(/(\d{3})\.\d{3}\.\d{3}-(\d{2})/, "$1.***.***-$2");
+  }
+
+  return text.substring(0, 3) + "****" + text.substring(text.length - 2);
+}
+
+/**
  * Normalizes a phone number for WhatsApp/Evolution API.
  * - Forces '55' prefix for Brazilian numbers if missing.
  * - Truncates correctly for mobile (13 digits) vs fixed (12 digits).
