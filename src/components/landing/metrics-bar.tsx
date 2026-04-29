@@ -4,28 +4,28 @@ import { cn } from "@/lib/utils";
 
 const METRICS = [
   {
-    label: "IA Tools Integradas",
-    value: "9",
-    description: "Único no mercado",
-    color: "text-primary"
+    label: "Protocolos de IA",
+    value: "13",
+    description: "Soberania Tecnológica",
+    color: "text-indigo-400"
   },
   {
-    label: "Precisão Preditiva",
-    value: "87%",
-    description: "Score de conversão",
-    color: "text-emerald-500"
+    label: "Aderência Industrial",
+    value: "98.2%",
+    description: "Precisão Semântica",
+    color: "text-emerald-400"
   },
   {
-    label: "Tempo Economizado",
-    value: "4h/dia",
-    description: "Foco no que importa",
-    color: "text-blue-500"
+    label: "Ativos Monitorados",
+    value: "R$ 2.4B",
+    description: "Valor do Ecossistema",
+    color: "text-blue-400"
   },
   {
-    label: "Mais barato que Salesforce",
-    value: "90%",
-    description: "ROI imediato",
-    color: "text-purple-500"
+    label: "Efficiency Index",
+    value: "12x",
+    description: "Aceleração de TRL",
+    color: "text-purple-400"
   }
 ];
 

@@ -4,98 +4,104 @@ import { XCircle, CheckCircle2, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PAIN_POINTS = [
-  { text: "Preparar reunião: 45 min", icon: "😤" },
-  { text: "Escrever follow-up: 20 min", icon: "😤" },
-  { text: "Avaliar lead quente: intuição", icon: "😤" },
-  { text: "Criar proposta: 30 min", icon: "😤" },
-  { text: "Decidir próximo passo: achismo", icon: "😤" },
-  { text: "Tratar objeção: improviso", icon: "😤" },
+  { text: "Mapear parceiros: semanas", icon: "⌛" },
+  { text: "Identificar TRL: manual", icon: "📑" },
+  { text: "Tradução Técnica: complexo", icon: "🗣️" },
+  { text: "Lattes Sync: inexistente", icon: "🔍" },
+  { text: "Pitch de Patente: 3 dias", icon: "📄" },
+  { text: "Market Teasers: 4 horas", icon: "📊" },
 ];
 
 const SOLUTIONS = [
-  { text: "Dossiê Pré-Reunião: 3 segundos", icon: "🚀" },
-  { text: "Comunicação Persuasiva: 2 seg", icon: "🚀" },
-  { text: "Scoring Automático: instantâneo", icon: "🚀" },
-  { text: "Propostas Digitais: 5 minutos", icon: "🚀" },
-  { text: "Next Best Action: 1 clique", icon: "🚀" },
-  { text: "Coach de Negociação: tempo real", icon: "🚀" },
+  { text: "Match Semântico: 2 seg", icon: "⚡" },
+  { text: "TRL Predictor: automático", icon: "✅" },
+  { text: "Technical-to-Market: 5 seg", icon: "🎯" },
+  { text: "Lattes Sync: Tempo Real", icon: "🔗" },
+  { text: "Patent-to-Pitch: 1 clique", icon: "🔥" },
+  { text: "Market Teasers: Instantâneo", icon: "💎" },
 ];
 
 export function ProblemSolution() {
   return (
-    <section className="container mx-auto px-4 py-24">
-      <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-        <h2 className="text-3xl md:text-5xl font-black text-slate-900 leading-tight">
-          Seus Vendedores Perdem 67% do Tempo em Tarefas que a IA Pode Fazer
+    <section className="container mx-auto px-4 py-32">
+      <div className="text-center max-w-4xl mx-auto mb-20 space-y-6">
+        <h2 className="text-4xl md:text-6xl font-black text-slate-900 leading-[1.1] tracking-tighter">
+          O "Vale da Morte" da Inovação <br />
+          <span className="text-indigo-600 italic">Termina Aqui.</span>
         </h2>
-        <p className="text-slate-500 font-medium">
-          A diferença entre fechar negócios por sorte ou fechar por inteligência.
+        <p className="text-xl text-slate-500 font-medium max-w-2xl mx-auto">
+          A IA4ALL elimina os gargalos que impedem a ciência de virar riqueza industrial.
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto items-stretch">
-        {/* Without CRMia */}
-        <div className="bg-white border-2 border-red-50 rounded-3xl p-8 md:p-10 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-1 bg-red-100" />
-          <div className="flex items-center gap-3 mb-8">
-            <div className="p-2 bg-red-50 rounded-lg">
-              <XCircle className="h-6 w-6 text-red-500" />
+      <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto items-stretch">
+        {/* Without IA4ALL */}
+        <div className="bg-white border border-slate-200 rounded-[2.5rem] p-10 md:p-14 shadow-sm relative overflow-hidden group">
+          <div className="flex items-center gap-4 mb-10">
+            <div className="p-3 bg-slate-100 rounded-2xl text-slate-400">
+              <XCircle className="h-7 w-7" />
             </div>
-            <h3 className="text-xl font-black text-red-900 uppercase tracking-tight">Sem CRMia</h3>
+            <div>
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Processo Tradicional</div>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">Cenário Arcaico</h3>
+            </div>
           </div>
 
-          <div className="space-y-4 mb-10">
+          <div className="space-y-6 mb-12">
             {PAIN_POINTS.map((item, i) => (
-              <div key={i} className="flex items-center gap-3 text-slate-600 font-medium group-hover:translate-x-1 transition-transform">
-                <span className="text-lg">{item.icon}</span>
-                <span>{item.text}</span>
+              <div key={i} className="flex items-center gap-4 text-slate-500 font-bold group-hover:translate-x-1 transition-transform">
+                <span className="text-xl grayscale opacity-50">{item.icon}</span>
+                <span className="text-lg">{item.text}</span>
               </div>
             ))}
           </div>
 
-          <div className="pt-6 border-t border-red-50">
-            <p className="text-red-700 font-bold flex items-center gap-2">
-              <span className="text-2xl italic">Total:</span> 3h+ por dia desperdiçadas
+          <div className="pt-8 border-t border-slate-100">
+            <p className="text-slate-400 font-bold flex items-center gap-2">
+              <span className="text-3xl italic text-slate-300">Total:</span> Semanas de burocracia técnica
             </p>
           </div>
         </div>
 
-        {/* With CRMia */}
-        <div className="bg-slate-900 rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden group border-2 border-primary/20">
-          <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/20 rounded-lg">
-                <CheckCircle2 className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="text-xl font-black text-white uppercase tracking-tight">Com CRMia</h3>
+        {/* With IA4ALL */}
+        <div className="bg-slate-950 rounded-[2.5rem] p-10 md:p-14 shadow-[0_40px_80px_-20px_rgba(79,70,229,0.3)] relative overflow-hidden group border border-white/10">
+          <div className="absolute top-0 right-0 p-8">
+            <div className="px-3 py-1 bg-indigo-600 text-[10px] font-black text-white rounded-full tracking-widest uppercase">Padrão Funarbe</div>
+          </div>
+          
+          <div className="flex items-center gap-4 mb-10">
+            <div className="p-3 bg-indigo-600/20 rounded-2xl text-indigo-400 border border-indigo-500/20">
+              <CheckCircle2 className="h-7 w-7" />
             </div>
-            <div className="px-2 py-1 bg-primary text-[10px] font-black text-white rounded">RECOMENDADO</div>
+            <div>
+                <div className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Processo Automatizado</div>
+                <h3 className="text-2xl font-black text-white tracking-tight">Intelligence Layer</h3>
+            </div>
           </div>
 
-          <div className="space-y-4 mb-10">
+          <div className="space-y-6 mb-12">
             {SOLUTIONS.map((item, i) => (
-              <div key={i} className="flex items-center gap-3 text-slate-300 font-medium group-hover:translate-x-1 transition-transform">
-                <span className="text-lg">{item.icon}</span>
-                <span>{item.text}</span>
+              <div key={i} className="flex items-center gap-4 text-slate-300 font-bold group-hover:translate-x-1 transition-transform">
+                <span className="text-xl">{item.icon}</span>
+                <span className="text-lg">{item.text}</span>
               </div>
             ))}
           </div>
 
-          <div className="pt-6 border-t border-slate-800">
-            <p className="text-primary font-bold flex items-center gap-2">
-              <span className="text-2xl italic text-white/90">Total:</span> 4h/dia economizadas
+          <div className="pt-8 border-t border-white/5">
+            <p className="text-indigo-400 font-bold flex items-center gap-2">
+              <span className="text-3xl italic text-white/90">Total:</span> Decisões estratégicas em segundos
             </p>
           </div>
 
-          <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl" />
+          <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-indigo-600/10 rounded-full blur-[100px]" />
         </div>
       </div>
 
-      <div className="mt-12 text-center">
-         <p className="text-slate-400 text-sm font-bold flex items-center justify-center gap-2">
-            CRMia automatiza o trabalho braçal para você focar em fechar.
-            <ArrowRight className="h-4 w-4" />
+      <div className="mt-16 text-center">
+         <p className="text-slate-400 text-sm font-bold flex items-center justify-center gap-3">
+            A IA4ALL orquestra o fluxo de inovação, do laboratório ao mercado.
+            <ArrowRight className="h-4 w-4 text-indigo-500" />
          </p>
       </div>
     </section>
