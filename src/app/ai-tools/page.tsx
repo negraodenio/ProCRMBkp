@@ -1,19 +1,17 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
     FileText,
     TrendingUp,
-    Tag,
-    Mail,
-    Heart,
-    ArrowRight,
-    Loader2,
-    Sparkles,
-    ShieldAlert,
-    Mic,
     Briefcase,
+    Lightbulb,
+    Sparkles,
+    Loader2,
+    FlaskConical,
+    Tag,
+    ArrowRight,
 } from "lucide-react";
 import {
     Dialog,
@@ -27,179 +25,88 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
 import { generateAIContent } from "@/app/actions/ai-actions";
 import { usePlanLimit } from "@/hooks/use-plan-limit";
 import { UpgradeModal } from "@/components/billing/upgrade-modal";
 import ReactMarkdown from "react-markdown";
-
-// New Components
 import { AIToolsHeader } from "@/components/ai-tools/ai-tools-header";
-import { AIToolsStats } from "@/components/ai-tools/ai-tools-stats";
-import { AIToolCard } from "@/components/ai-tools/ai-tool-card";
-import { AIToolGroup } from "@/components/ai-tools/ai-tool-group";
 
-interface AITool {
-    id: string;
-    title: string;
-    subtitle: string;
-    description: string;
-    buttonText: string;
-    icon: React.ElementType;
-    color: string;
-    borderColor: string;
-    group: "qualification" | "communication" | "closing" | "innovation";
-}
-
-const AI_TOOLS: AITool[] = [
-    // GROUP 1: QUALIFICAÇÃO
+// ============================================================
+// As 5 ferramentas oficiais do NIT — Processo 56467
+// ============================================================
+const AI_TOOLS = [
     {
-        id: "categorize-lead",
-        title: "Scoring & Qualificação",
-        subtitle: "Segmentação automática",
-        description: "Atribui pontuação e prioridade estratégica ao lead baseado em dados.",
-        buttonText: "Qualificar Lead",
-        icon: Tag,
-        color: "text-purple-600",
-        borderColor: "border-t-purple-500",
-        group: "qualification",
-    },
-    {
-        id: "generate-proposal",
-        title: "Business Case Estratégico",
-        subtitle: "Viabilidade e valor",
-        description: "Estrutura um caso de negócio personalizado para o perfil do lead.",
-        buttonText: "Gerar Business Case",
-        icon: FileText,
-        color: "text-blue-600",
-        borderColor: "border-t-blue-500",
-        group: "qualification",
-    },
-    {
-        id: "predictive-analysis",
-        title: "Propensão de Fechamento",
-        subtitle: "Score preditivo",
-        description: "Calcula a probabilidade real de fechamento com base em dados históricos.",
-        buttonText: "Analisar Probabilidade",
-        icon: TrendingUp,
-        color: "text-emerald-600",
-        borderColor: "border-t-emerald-500",
-        group: "qualification",
-    },
-    // GROUP 2: COMUNICAÇÃO
-    {
-        id: "generate-email",
-        title: "Comunicação Persuasiva",
-        subtitle: "Copywriting de impacto",
-        description: "Gera comunicações de follow-up focadas em conversão e engajamento.",
-        buttonText: "Gerar Comunicação",
-        icon: Mail,
-        color: "text-indigo-600",
-        borderColor: "border-t-indigo-500",
-        group: "communication",
-    },
-    {
-        id: "sentiment-analysis",
-        title: "Inteligência Comportamental",
-        subtitle: "Análise de humor",
-        description: "Decifra o tom, intenção e o engajamento emocional do contato.",
-        buttonText: "Analisar Comportamento",
-        icon: Heart,
-        color: "text-rose-600",
-        borderColor: "border-t-rose-500",
-        group: "communication",
-    },
-    {
-        id: "sales-script",
-        title: "Framework de Conversa",
-        subtitle: "Argumentação dinâmica",
-        description: "Roteiro estratégico para abordagens de alta performance em vendas.",
-        buttonText: "Ver Framework",
-        icon: Mic,
-        color: "text-slate-700",
-        borderColor: "border-t-slate-600",
-        group: "communication",
-    },
-    // GROUP 3: FECHAMENTO
-    {
-        id: "next-action",
-        title: "Next Best Action",
-        subtitle: "Recomendação estratégica",
-        description: "Sugere a ação de maior impacto para o momento atual do funil.",
-        buttonText: "Ver Recomendação",
-        icon: ArrowRight,
-        color: "text-amber-600",
-        borderColor: "border-t-amber-500",
-        group: "closing",
-    },
-    {
-        id: "objection-handler",
-        title: "Consultoria de Negociação",
-        subtitle: "Contorno de objeções",
-        description: "Argumentos baseados em frameworks de negociação de alta complexidade.",
-        buttonText: "Tratar Objeções",
-        icon: ShieldAlert,
-        color: "text-red-600",
-        borderColor: "border-t-red-500",
-        group: "closing",
-    },
-    {
-        id: "meeting-prep",
-        title: "Dossiê Pré-Reunião",
-        subtitle: "Inteligência de fechamento",
-        description: "Briefing executivo com pauta, riscos e objetivos para reuniões.",
-        buttonText: "Gerar Dossiê",
-        icon: Briefcase,
-        color: "text-cyan-600",
-        borderColor: "border-t-cyan-500",
-        group: "closing",
+        id: "science-teaser",
+        title: "Science Teaser",
+        subtitle: "Resumo executivo da tecnologia",
+        description: "Transforma um artigo ou patente em uma proposta de valor de 3 parágrafos que qualquer CEO entende.",
+        buttonText: "Gerar Teaser",
+        icon: Sparkles,
+        color: "from-violet-500 to-indigo-600",
+        badge: "Mais usado",
     },
     {
         id: "patent-to-pitch",
         title: "Pitch de Patente",
         subtitle: "Comercialização de IP",
-        description: "Estrutura uma proposta de valor comercial a partir de dados de patentes.",
+        description: "Estrutura uma proposta de valor comercial completa a partir dos dados técnicos de uma patente.",
         buttonText: "Gerar Pitch",
         icon: Briefcase,
-        color: "text-indigo-700",
-        borderColor: "border-t-indigo-600",
-        group: "innovation",
+        color: "from-orange-500 to-amber-600",
+        badge: "IP & Licenciamento",
     },
     {
         id: "market-applications",
         title: "Novos Mercados",
-        subtitle: "Análise de Verticais",
-        description: "Identifica novas aplicações e mercados potenciais para uma tecnologia.",
+        subtitle: "Análise de verticais",
+        description: "Identifica novos setores e aplicações potenciais para uma tecnologia usando análise vetorial.",
         buttonText: "Descobrir Mercados",
         icon: TrendingUp,
-        color: "text-orange-600",
-        borderColor: "border-t-orange-500",
-        group: "innovation",
+        color: "from-emerald-500 to-teal-600",
+        badge: "Expansão",
+    },
+    {
+        id: "generate-proposal",
+        title: "Business Case",
+        subtitle: "Viabilidade estratégica",
+        description: "Gera um caso de negócio com análise de ROI, público-alvo e proposta de parceria para o parceiro corporativo.",
+        buttonText: "Gerar Business Case",
+        icon: FileText,
+        color: "from-blue-500 to-cyan-600",
+        badge: "Parcerias",
+    },
+    {
+        id: "categorize-lead",
+        title: "Scoring de Lead",
+        subtitle: "Qualificação automatizada",
+        description: "Atribui pontuação estratégica e recomenda a próxima ação com base no perfil do decisor mapeado.",
+        buttonText: "Qualificar Lead",
+        icon: Tag,
+        color: "from-rose-500 to-pink-600",
+        badge: "CRM",
     },
 ];
 
 function AIToolsContent() {
-    const [supabase] = useState(() => createClient());
     const { profile } = useProfile();
     const [selectedLead, setSelectedLead] = useState<any>(null);
     const [activeModal, setActiveModal] = useState<string | null>(null);
     const [executingToolId, setExecutingToolId] = useState<string | null>(null);
     const [result, setResult] = useState("");
     const [researchText, setResearchText] = useState("");
-    const [inputMode, setInputMode] = useState<"lead" | "research">("lead");
+    const [inputMode, setInputMode] = useState<"lead" | "research">("research");
     const searchParams = useSearchParams();
     const initialLeadId = searchParams.get("leadId");
 
-    const { checkLimit, isUpgradeModalOpen, setIsUpgradeModalOpen, lastCheckMessage } = usePlanLimit();
+    const { isUpgradeModalOpen, setIsUpgradeModalOpen, lastCheckMessage } = usePlanLimit();
 
     const executeAI = async (toolId: string) => {
         if (inputMode === "lead" && !selectedLead) {
             toast.error("Selecione um lead primeiro");
             return;
         }
-
-        if (inputMode === "research" && !researchText) {
+        if (inputMode === "research" && !researchText.trim()) {
             toast.error("Insira o texto da pesquisa ou patente primeiro");
             return;
         }
@@ -210,8 +117,8 @@ function AIToolsContent() {
 
         try {
             const response = await generateAIContent(
-                toolId, 
-                inputMode === "lead" ? selectedLead.id : undefined,
+                toolId,
+                inputMode === "lead" ? selectedLead?.id : undefined,
                 inputMode === "research" ? researchText : undefined
             );
 
@@ -220,14 +127,11 @@ function AIToolsContent() {
                 toast.success("Análise concluída!");
             } else if (response.upgradeRequired) {
                 setActiveModal(null);
-                setResult("");
                 setIsUpgradeModalOpen(true);
             } else {
-                toast.error("Erro na análise: " + (response.error || "Erro desconhecido"));
-                setResult("Erro ao processar solicitação. Tente novamente em instantes.");
+                toast.error("Erro: " + (response.error || "Tente novamente."));
             }
-        } catch (error) {
-            console.error("Error executing AI:", error);
+        } catch {
             toast.error("Erro ao comunicar com o servidor");
         } finally {
             setExecutingToolId(null);
@@ -235,99 +139,130 @@ function AIToolsContent() {
     };
 
     const closeModal = () => {
-        if (executingToolId) return; // Prevent close while running
+        if (executingToolId) return;
         setActiveModal(null);
         setResult("");
     };
 
     const activeTool = AI_TOOLS.find((t) => t.id === activeModal);
 
-    const renderToolGroup = (groupId: "qualification" | "communication" | "closing" | "innovation", title: string, subtitle: string, icon: string, accentColor: string) => {
-        const tools = AI_TOOLS.filter(t => t.group === groupId);
-        return (
-            <AIToolGroup title={title} subtitle={subtitle} icon={icon} accentColor={accentColor}>
-                {tools.map(tool => (
-                    <AIToolCard
-                        key={tool.id}
-                        {...tool}
-                        disabled={inputMode === "lead" ? !selectedLead : !researchText}
-                        loading={executingToolId === tool.id}
-                        onClick={() => executeAI(tool.id)}
-                    />
-                ))}
-            </AIToolGroup>
-        );
-    };
-
     return (
-        <div className="flex min-h-screen bg-slate-50/50">
+        <div className="flex min-h-screen bg-slate-50">
             <Sidebar />
             <div className="flex flex-1 flex-col md:ml-64">
                 <Header />
-                <main className="flex-1 p-6">
-                    <div className="max-w-7xl mx-auto space-y-8">
-                        <div className="flex flex-col gap-6">
-                            <div className="flex items-center gap-2 p-1 bg-slate-200/50 rounded-lg w-fit">
-                                <Button 
-                                    variant={inputMode === "lead" ? "default" : "ghost"} 
-                                    size="sm" 
-                                    onClick={() => setInputMode("lead")}
-                                    className="text-xs"
-                                >
-                                    Foco no Lead
-                                </Button>
-                                <Button 
-                                    variant={inputMode === "research" ? "default" : "ghost"} 
-                                    size="sm" 
-                                    onClick={() => setInputMode("research")}
-                                    className="text-xs"
-                                >
-                                    Foco na Pesquisa
-                                </Button>
-                            </div>
+                <main className="flex-1 p-8 max-w-5xl mx-auto w-full space-y-8">
 
-                            {inputMode === "lead" ? (
-                                <AIToolsHeader
-                                    selectedLeadId={initialLeadId}
-                                    orgId={profile?.organization_id || null}
-                                    onSelectLead={(lead) => setSelectedLead(lead)}
+                    {/* Header */}
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-indigo-600 font-bold text-xs uppercase tracking-widest">
+                            <FlaskConical className="h-4 w-4" />
+                            NIT · Neural Engine
+                        </div>
+                        <h1 className="text-3xl font-bold tracking-tight">IA Tools</h1>
+                        <p className="text-muted-foreground">
+                            5 ferramentas de inteligência artificial especializadas em transferência de tecnologia.
+                        </p>
+                    </div>
+
+                    {/* Input Toggle */}
+                    <div className="bg-white border rounded-xl p-6 shadow-sm space-y-4">
+                        <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-lg w-fit">
+                            <Button
+                                variant={inputMode === "research" ? "default" : "ghost"}
+                                size="sm"
+                                onClick={() => setInputMode("research")}
+                                className="text-xs gap-2"
+                            >
+                                <FlaskConical className="h-3 w-3" />
+                                Texto / Patente
+                            </Button>
+                            <Button
+                                variant={inputMode === "lead" ? "default" : "ghost"}
+                                size="sm"
+                                onClick={() => setInputMode("lead")}
+                                className="text-xs gap-2"
+                            >
+                                <Tag className="h-3 w-3" />
+                                Lead do CRM
+                            </Button>
+                        </div>
+
+                        {inputMode === "research" ? (
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700">
+                                    Cole o texto da patente, artigo científico ou descrição da tecnologia:
+                                </label>
+                                <textarea
+                                    className="w-full h-36 p-4 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all resize-none"
+                                    placeholder="Ex: Esta invenção refere-se a um método inovador de síntese de polímeros biodegradáveis utilizando catálise enzimática..."
+                                    value={researchText}
+                                    onChange={(e) => setResearchText(e.target.value)}
                                 />
-                            ) : (
-                                <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
+                                {researchText && (
                                     <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <div className="p-2 bg-orange-100 rounded-lg text-orange-600">
-                                                <Sparkles className="h-5 w-5" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-slate-900">Input de Pesquisa / Patente</h3>
-                                                <p className="text-xs text-slate-500">Cole o texto técnico para gerar marketing e análise</p>
-                                            </div>
-                                        </div>
-                                        {researchText && (
-                                            <Button variant="ghost" size="sm" onClick={() => setResearchText("")} className="text-xs text-slate-400">
-                                                Limpar
-                                            </Button>
-                                        )}
+                                        <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                                            <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" />
+                                            Pronto — selecione uma ferramenta abaixo
+                                        </span>
+                                        <Button variant="ghost" size="sm" className="text-xs text-slate-400" onClick={() => setResearchText("")}>
+                                            Limpar
+                                        </Button>
                                     </div>
-                                    <textarea 
-                                        className="w-full h-32 p-4 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all resize-none"
-                                        placeholder="Cole aqui o resumo da patente, artigo científico ou descrição da tecnologia..."
-                                        value={researchText}
-                                        onChange={(e) => setResearchText(e.target.value)}
-                                    />
+                                )}
+                            </div>
+                        ) : (
+                            <AIToolsHeader
+                                selectedLeadId={initialLeadId}
+                                orgId={profile?.organization_id || null}
+                                onSelectLead={(lead) => setSelectedLead(lead)}
+                            />
+                        )}
+                    </div>
+
+                    {/* The 5 Tools */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {AI_TOOLS.map((tool) => {
+                            const Icon = tool.icon;
+                            const isRunning = executingToolId === tool.id;
+                            const isReady = inputMode === "research" ? !!researchText.trim() : !!selectedLead;
+
+                            return (
+                                <div
+                                    key={tool.id}
+                                    className={`bg-white border rounded-2xl p-6 space-y-4 shadow-sm transition-all duration-200 ${
+                                        isReady ? "hover:shadow-md hover:-translate-y-0.5 cursor-pointer" : "opacity-60"
+                                    }`}
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <div className={`p-3 rounded-xl bg-gradient-to-br ${tool.color} shadow-sm`}>
+                                            <Icon className="h-5 w-5 text-white" />
+                                        </div>
+                                        <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 px-2 py-1 rounded-full">
+                                            {tool.badge}
+                                        </span>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <h3 className="font-bold text-slate-900">{tool.title}</h3>
+                                        <p className="text-xs text-indigo-600 font-medium uppercase tracking-wide">{tool.subtitle}</p>
+                                        <p className="text-sm text-slate-500 leading-relaxed">{tool.description}</p>
+                                    </div>
+
+                                    <Button
+                                        className={`w-full gap-2 bg-gradient-to-r ${tool.color} text-white border-0 hover:opacity-90`}
+                                        disabled={!isReady || isRunning}
+                                        onClick={() => executeAI(tool.id)}
+                                    >
+                                        {isRunning ? (
+                                            <><Loader2 className="h-4 w-4 animate-spin" /> Processando...</>
+                                        ) : (
+                                            <><ArrowRight className="h-4 w-4" /> {tool.buttonText}</>
+                                        )}
+                                    </Button>
                                 </div>
-                            )}
-                        </div>
-
-                        <AIToolsStats />
-
-                        <div className="space-y-12 pb-20">
-                            {renderToolGroup("innovation", "Inovação & Pesquisa", "Transforme ciência em oportunidade", "🔬", "bg-orange-500")}
-                            {renderToolGroup("qualification", "Qualificação & Análise", "Entenda o potencial do seu lead", "📥", "bg-blue-500")}
-                            {renderToolGroup("communication", "Comunicação & Relacionamento", "Comunique com impacto e inteligência", "💬", "bg-purple-500")}
-                            {renderToolGroup("closing", "Negociação & Fechamento", "Feche com estratégia e preparação", "🎯", "bg-emerald-500")}
-                        </div>
+                            );
+                        })}
                     </div>
                 </main>
             </div>
@@ -337,35 +272,39 @@ function AIToolsContent() {
                 <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            {activeTool && <activeTool.icon className={`h-5 w-5 ${activeTool.color}`} />}
+                            {activeTool && (
+                                <div className={`p-1.5 rounded-lg bg-gradient-to-br ${activeTool.color}`}>
+                                    <activeTool.icon className="h-4 w-4 text-white" />
+                                </div>
+                            )}
                             {activeTool?.title}
                         </DialogTitle>
                         <DialogDescription>
-                            Resultado da análise para <span className="font-bold text-slate-900">{selectedLead?.name}</span>
+                            {selectedLead
+                                ? <>Resultado para <span className="font-bold text-slate-900">{selectedLead?.name}</span></>
+                                : "Resultado baseado no texto inserido"
+                            }
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="py-4">
                         {executingToolId ? (
                             <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                                <div className={`p-4 rounded-full bg-gradient-to-br ${activeTool?.color || "from-indigo-500 to-purple-600"}`}>
+                                    <Loader2 className="h-8 w-8 text-white animate-spin" />
+                                </div>
                                 <div className="text-center">
-                                    <p className="font-bold text-slate-900">Analisando com Inteligência Artificial</p>
-                                    <p className="text-sm text-slate-500">Isso pode levar alguns segundos...</p>
+                                    <p className="font-bold text-slate-900">Neural Engine Processando...</p>
+                                    <p className="text-sm text-slate-500">Isso pode levar alguns segundos.</p>
                                 </div>
                             </div>
                         ) : result ? (
-                            <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
-                                <div className="prose prose-slate prose-lg max-w-none
-                                    text-slate-700 leading-relaxed font-sans
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6">
+                                <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed
                                     prose-headings:text-indigo-900 prose-headings:font-bold
-                                    prose-p:mb-4 prose-p:leading-7
                                     prose-strong:text-slate-900 prose-strong:font-bold
-                                    prose-ul:list-disc prose-ul:ml-6 prose-ul:space-y-2
-                                    prose-ol:list-decimal prose-ol:ml-6 prose-ol:space-y-2
-                                    prose-blockquote:italic prose-blockquote:border-l-4 prose-blockquote:border-indigo-500 prose-blockquote:pl-4 prose-blockquote:text-slate-600
-                                    prose-hr:my-8 prose-hr:border-slate-200
-                                    ">
+                                    prose-ul:list-disc prose-ul:ml-6 prose-ul:space-y-1
+                                    prose-ol:list-decimal prose-ol:ml-6">
                                     <ReactMarkdown>{result}</ReactMarkdown>
                                 </div>
                             </div>
@@ -377,9 +316,9 @@ function AIToolsContent() {
                             Fechar
                         </Button>
                         {result && (
-                             <Button onClick={() => toast.info("Funcionalidade de exportação em breve!")}>
+                            <Button onClick={() => { window.print(); toast.success("Exportando para PDF..."); }}>
                                 Exportar PDF
-                             </Button>
+                            </Button>
                         )}
                     </DialogFooter>
                 </DialogContent>
